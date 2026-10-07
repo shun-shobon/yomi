@@ -30,8 +30,3 @@ export interface PendingSignIn {
 export type SignInState = PendingSignIn | { status: "failed"; message: string } | null;
 
 export const signInItem = storage.defineItem<SignInState>("session:signIn", { fallback: null });
-
-/** SIWC ガイドラインにより「You're using your ChatGPT plan」モーダルは初回サインイン時だけ表示する */
-export const welcomeItem = storage.defineItem<"never" | "pending" | "shown">("local:welcome", {
-  fallback: "never",
-});

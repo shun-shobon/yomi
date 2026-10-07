@@ -5,7 +5,7 @@ import "@/components/base.css";
 import { useAuth, useSettings, useShortcuts, useStorageItem } from "@/components/hooks";
 import { PlanStatus, SignInCard } from "@/components/SignInCard";
 import { TranslationSettingsFields } from "@/components/TranslationSettingsFields";
-import { signInItem, welcomeItem } from "@/utils/auth-storage";
+import { signInItem } from "@/utils/auth-storage";
 import type { ModelInfo } from "@/utils/messages";
 import { callBackground } from "@/utils/runtime";
 import { isReasoningEffort, type Settings } from "@/utils/settings";
@@ -15,7 +15,6 @@ import "./style.css";
 function App() {
   const auth = useAuth();
   const [settings, update] = useSettings();
-  const welcome = useStorageItem(welcomeItem);
 
   if (!auth || !settings) return null;
 
@@ -64,26 +63,6 @@ function App() {
       </section>
 
       <UsageSection />
-
-      {welcome === "pending" && auth.signedIn && (
-        <div class="modal-backdrop">
-          <div class="modal" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
-            <h2 id="welcome-title">You're using your ChatGPT plan</h2>
-            <p>
-              Eligible usage in this app uses your ChatGPT plan. Manage usage in your ChatGPT
-              settings.
-            </p>
-            {!settings.model && (
-              <p class="muted small">続けて、翻訳に使うモデルを選択してください。</p>
-            )}
-            <div class="modal-actions">
-              <button class="btn primary" onClick={() => void welcomeItem.setValue("shown")}>
-                Got it
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </main>
   );
 }

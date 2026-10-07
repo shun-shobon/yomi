@@ -2,7 +2,6 @@ import { browser, storage } from "#imports";
 import {
   credentialsItem,
   signInItem,
-  welcomeItem,
   type Credentials,
   type PendingSignIn,
 } from "@/utils/auth-storage";
@@ -153,7 +152,6 @@ async function completeSignIn(pending: PendingSignIn, callback: URL): Promise<vo
     refreshToken: tokens.refreshToken,
     expiresAt: Date.now() + tokens.expiresIn * 1000,
   });
-  if ((await welcomeItem.getValue()) === "never") await welcomeItem.setValue("pending");
 }
 
 /** サインイン・サインアウトのたびに進める。進んでいたら refresh の結果を書き戻さない */

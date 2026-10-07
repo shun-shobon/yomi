@@ -70,30 +70,3 @@ h1 {
 .usage tr + tr {
   border-top: 1px solid var(--border);
 }
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  display: grid;
-  place-items: center;
-  padding: 16px;
-}
-.modal {
-  background: var(--bg);
-  border-radius: 14px;
-  padding: 24px;
-  max-width: 420px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-}
-.modal h2 {
-  margin: 0 0 8px;
-  font-size: 18px;
-}
-.modal p {
-  margin: 0 0 8px;
-}
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 16px;
-}
