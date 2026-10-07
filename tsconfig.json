@@ -1,0 +1,9 @@
+{
+  "extends": ["./.wxt/tsconfig.json", "@tsconfig/strictest/tsconfig.json"],
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "exactOptionalPropertyTypes": false,
+    "verbatimModuleSyntax": true
+  }
+}

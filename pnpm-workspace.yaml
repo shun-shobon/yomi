@@ -1,0 +1,6 @@
+# 社内ポリシーにより公開から 3 日（4320 分）経過した版のみ導入する
+minimumReleaseAge: 4320
+saveExact: true
+strictDepBuilds: true
+trustPolicy: no-downgrade
+trustPolicyIgnoreAfter: 10080
