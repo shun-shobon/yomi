@@ -2,3 +2,4 @@ node_modules
 .output
 .wxt
 *.zip
+!/public/icon/
