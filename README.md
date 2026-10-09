@@ -19,9 +19,26 @@ pnpm install
 pnpm dev        # 拡張を読み込んだ Chrome が起動する
 pnpm build      # .output/chrome-mv3 に出力
 pnpm typecheck
-pnpm lint       # oxlint（type-aware）
+pnpm test       # vitest
+pnpm lint       # oxlint（type-aware）。レイヤーの依存方向も検査する
 pnpm format     # oxfmt。CI 向けの検査は pnpm format:check
 ```
+
+### ディレクトリ構成
+
+`src/` はレイヤーで分ける。各レイヤーは自分より右のレイヤー（間を飛ばしてもよい）にだけ依存でき、逆向きの import は `pnpm lint` がエラーにする。
+
+```
+entrypoints → ui → usecases → infra → domain
+```
+
+| ディレクトリ   | 置くもの                                                                                         |
+| -------------- | ------------------------------------------------------------------------------------------------ |
+| `domain/`      | 翻訳・設定・認証の規則。ブラウザ API・DOM・Solid に依存しない純粋なロジックと型                  |
+| `infra/`       | 外部とのやり取り。storage、拡張内メッセージング、OpenAI API、OAuth エンドポイント、ページ DOM    |
+| `usecases/`    | domain と infra を組み合わせた処理の流れ（サインイン、翻訳リクエスト、ページ翻訳の進行管理）     |
+| `ui/`          | Solid のコンポーネントとフック。content script の表示は `usecases/content/overlay.ts` を実装する |
+| `entrypoints/` | WXT のエントリポイント。リスナー登録と各レイヤーの配線だけを持つ                                 |
 
 ### E2E テスト
 
