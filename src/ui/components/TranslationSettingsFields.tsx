@@ -1,7 +1,7 @@
 import { For } from "solid-js";
 
-import { isLanguageCode, LANGUAGE_CODES, LANGUAGES } from "@/utils/languages";
-import type { Settings } from "@/utils/settings";
+import { isLanguageCode, LANGUAGE_CODES, LANGUAGES } from "@/domain/languages";
+import type { Settings } from "@/domain/settings";
 
 type DisplaySwitch = "showSelectionButton" | "hoverOriginal" | "highlightPending";
 

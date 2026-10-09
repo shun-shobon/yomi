@@ -1,5 +1,3 @@
-import { storage } from "#imports";
-
 import type { LanguageCode } from "./languages";
 
 /** Responses API が受け付ける reasoning.effort。モデルごとに対応する値は /v1/models が返す */
@@ -23,7 +21,7 @@ export interface Settings {
   highlightPending: boolean;
 }
 
-const DEFAULT_SETTINGS: Settings = {
+export const DEFAULT_SETTINGS: Settings = {
   targetLang: "ja",
   model: null,
   reasoningEffort: "low",
@@ -33,22 +31,6 @@ const DEFAULT_SETTINGS: Settings = {
   highlightPending: true,
 };
 
-/** ユーザーが変更した項目だけを保存し、既定値の変更が既存ユーザーにも反映されるようにする */
-const overridesItem = storage.defineItem<Partial<Settings>>("sync:settings", { fallback: {} });
-
-const withDefaults = (overrides: Partial<Settings>): Settings => ({
-  ...DEFAULT_SETTINGS,
-  ...overrides,
-});
-
-export async function getSettings(): Promise<Settings> {
-  return withDefaults(await overridesItem.getValue());
-}
-
-export async function updateSettings(patch: Partial<Settings>): Promise<void> {
-  await overridesItem.setValue({ ...(await overridesItem.getValue()), ...patch });
-}
-
-export function watchSettings(cb: (settings: Settings) => void): () => void {
-  return overridesItem.watch((overrides) => cb(withDefaults(overrides)));
+export function withDefaults(overrides: Partial<Settings>): Settings {
+  return { ...DEFAULT_SETTINGS, ...overrides };
 }

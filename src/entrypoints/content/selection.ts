@@ -1,6 +1,6 @@
-import { LANGUAGES } from "@/utils/languages";
-import { TranslateFailure } from "@/utils/messages";
-import type { Settings } from "@/utils/settings";
+import { TranslateFailure } from "@/domain/failure";
+import { LANGUAGES } from "@/domain/languages";
+import type { Settings } from "@/domain/settings";
 
 import type { Overlay, PagePosition } from "./overlay";
 import { selectionInstructions } from "./prompts";

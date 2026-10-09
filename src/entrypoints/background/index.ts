@@ -1,7 +1,6 @@
 import { browser, defineBackground, type Browser } from "#imports";
+import { TranslateFailure } from "@/domain/failure";
 import {
-  MANAGE_USAGE_URL,
-  TranslateFailure,
   type BackgroundApi,
   type BackgroundRequest,
   type BackgroundResponse,
@@ -9,8 +8,9 @@ import {
   type ContentMessage,
   type TranslateEvent,
   type TranslateRequest,
-} from "@/utils/messages";
-import { getSettings } from "@/utils/settings";
+  TRANSLATE_PORT,
+} from "@/infra/messaging/protocol";
+import { getSettings } from "@/infra/storage/settings";
 
 import {
   getAccessToken,
@@ -22,6 +22,8 @@ import {
 } from "./auth";
 import { toTranslateFailure } from "./errors";
 import { ApiError, listModels, streamResponse } from "./openai";
+
+const MANAGE_USAGE_URL = "https://chatgpt.com/settings/usage";
 
 /** fetch のストリーム受信だけでは service worker の idle タイマーが延長されないため、拡張 API を定期的に呼ぶ */
 const KEEP_ALIVE_INTERVAL_MS = 20_000;
@@ -73,7 +75,7 @@ export default defineBackground(() => {
   });
 
   browser.runtime.onConnect.addListener((port) => {
-    if (port.name === "translate") servePort(port);
+    if (port.name === TRANSLATE_PORT) servePort(port);
   });
 });
 

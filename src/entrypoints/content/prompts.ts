@@ -1,4 +1,4 @@
-import { LANGUAGES, type LanguageCode } from "@/utils/languages";
+import { LANGUAGES, type LanguageCode } from "@/domain/languages";
 
 export function pageInstructions(targetLang: LanguageCode, pageTitle: string): string {
   const lang = LANGUAGES[targetLang].englishName;

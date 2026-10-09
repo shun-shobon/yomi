@@ -1,9 +1,9 @@
-import type { LanguageCode } from "@/utils/languages";
-import { TranslateFailure, type PageState } from "@/utils/messages";
-import type { Settings } from "@/utils/settings";
+import { FAILURE_POLICY, TranslateFailure } from "@/domain/failure";
+import type { LanguageCode } from "@/domain/languages";
+import type { PageState } from "@/domain/page";
+import type { Settings } from "@/domain/settings";
 
 import { DomWatcher } from "./dom-watcher";
-import { FAILURE_POLICY } from "./failure-policy";
 import pendingCss from "./page-translator.css?inline";
 import { pageInstructions } from "./prompts";
 import { Segment, type SegmentState, type Showing } from "./segment";

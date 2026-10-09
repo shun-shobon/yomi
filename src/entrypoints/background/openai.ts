@@ -1,7 +1,7 @@
 import OpenAI, { APIError } from "openai";
 
-import type { ModelInfo } from "@/utils/messages";
-import { isReasoningEffort, type ReasoningEffort } from "@/utils/settings";
+import type { ModelInfo } from "@/domain/models";
+import { isReasoningEffort, type ReasoningEffort } from "@/domain/settings";
 
 /** API の失敗。HTTP 応答前やストリーム途中の失敗は status を持たない */
 export class ApiError extends Error {

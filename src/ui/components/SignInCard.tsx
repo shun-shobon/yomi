@@ -1,4 +1,4 @@
-import { callBackground } from "@/utils/runtime";
+import { callBackground } from "@/infra/messaging/background-client";
 
 export function SignInCard() {
   return (
@@ -9,17 +9,5 @@ export function SignInCard() {
         ChatGPT でサインイン
       </button>
     </div>
-  );
-}
-
-export function PlanStatus() {
-  return (
-    <span class="plan-status-row">
-      <span class="plan-status">ChatGPT プランを利用中</span>
-      <span class="muted">·</span>
-      <button class="btn link" onClick={() => void callBackground("open:usage")}>
-        使用状況を管理
-      </button>
-    </span>
   );
 }

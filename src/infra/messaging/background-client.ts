@@ -1,11 +1,7 @@
 import { browser } from "#imports";
+import { TranslateFailure } from "@/domain/failure";
 
-import {
-  TranslateFailure,
-  type BackgroundApi,
-  type BackgroundRequest,
-  type BackgroundResponse,
-} from "./messages";
+import type { BackgroundApi, BackgroundRequest, BackgroundResponse } from "./protocol";
 
 export async function callBackground<K extends keyof BackgroundApi>(
   type: K,

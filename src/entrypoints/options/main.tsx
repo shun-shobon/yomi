@@ -1,14 +1,18 @@
 import { createSignal, For, Match, Show, Switch } from "solid-js";
 import { render } from "solid-js/web";
 
-import "@/components/base.css";
-import { createAuth, createSettings, createShortcuts, createStorageItem } from "@/components/hooks";
-import { PlanStatus, SignInCard } from "@/components/SignInCard";
-import { TranslationSettingsFields } from "@/components/TranslationSettingsFields";
-import { signInItem } from "@/utils/auth-storage";
-import type { ModelInfo } from "@/utils/messages";
-import { callBackground } from "@/utils/runtime";
-import { isReasoningEffort, type Settings } from "@/utils/settings";
+import { settingsForModel, supportsEffort, type ModelInfo } from "@/domain/models";
+import { isReasoningEffort, type Settings } from "@/domain/settings";
+import { callBackground } from "@/infra/messaging/background-client";
+import { signInItem } from "@/infra/storage/auth";
+import "@/ui/base.css";
+import { PlanStatus } from "@/ui/components/PlanStatus";
+import { SignInCard } from "@/ui/components/SignInCard";
+import { TranslationSettingsFields } from "@/ui/components/TranslationSettingsFields";
+import { createAuth } from "@/ui/hooks/auth";
+import { createSettings } from "@/ui/hooks/settings";
+import { createShortcuts } from "@/ui/hooks/shortcuts";
+import { createStorageItem } from "@/ui/hooks/storage-item";
 
 import "./style.css";
 
@@ -111,16 +115,7 @@ function ModelSection(props: { settings: Settings; update: (patch: Partial<Setti
     return v.status === "failed" ? v.message : undefined;
   };
   const selected = () => models()?.find((m) => m.slug === props.settings.model);
-  const selectModel = (model: ModelInfo) => {
-    const effortSupported = model.reasoningEfforts.includes(props.settings.reasoningEffort);
-    props.update({
-      model: model.slug,
-      reasoningEffort: effortSupported
-        ? props.settings.reasoningEffort
-        : model.defaultReasoningEffort,
-      fastMode: props.settings.fastMode && model.supportsFast,
-    });
-  };
+  const selectModel = (model: ModelInfo) => props.update(settingsForModel(props.settings, model));
 
   return (
     <Switch>
@@ -183,8 +178,7 @@ function ModelOptions(props: {
   settings: Settings;
   update: (patch: Partial<Settings>) => void;
 }) {
-  const effortSupported = () =>
-    props.model.reasoningEfforts.includes(props.settings.reasoningEffort);
+  const effortSupported = () => supportsEffort(props.model, props.settings.reasoningEffort);
   return (
     <>
       <label class="field">

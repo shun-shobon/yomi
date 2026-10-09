@@ -1,8 +1,10 @@
 import { browser, defineContentScript } from "#imports";
-import type { ContentMessage, PageState } from "@/utils/messages";
-import { getSettings, watchSettings } from "@/utils/settings";
+import { FAILURE_POLICY } from "@/domain/failure";
+import type { PageState } from "@/domain/page";
+import type { ContentMessage } from "@/infra/messaging/protocol";
+import { getSettings, watchSettings } from "@/infra/storage/settings";
 
-import { FAILURE_POLICY, notifyFailure } from "./failure-policy";
+import { notifyFailure } from "./failure-policy";
 import { watchHoverOriginal } from "./hover";
 import { Overlay } from "./overlay";
 import { PageTranslator } from "./page-translator";
@@ -30,7 +32,7 @@ export default defineContentScript({
       getSettings: () => settings,
       onFailure: (failure) => {
         // 解消方法のない失敗はパネル内の表示だけで十分
-        if (FAILURE_POLICY[failure.kind].action) notifyFailure(overlay, failure);
+        if (FAILURE_POLICY[failure.kind].remedy) notifyFailure(overlay, failure);
       },
     });
     watchHoverOriginal(overlay, page, () => settings.hoverOriginal);

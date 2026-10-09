@@ -2,12 +2,16 @@ import { createSignal, Match, onCleanup, Show, Switch, type Accessor } from "sol
 import { render } from "solid-js/web";
 
 import { browser } from "#imports";
-import "@/components/base.css";
-import { createAuth, createSettings, createShortcuts } from "@/components/hooks";
-import { PlanStatus, SignInCard } from "@/components/SignInCard";
-import { TranslationSettingsFields } from "@/components/TranslationSettingsFields";
-import type { ContentMessage, PageState } from "@/utils/messages";
-import { callBackground } from "@/utils/runtime";
+import type { PageState } from "@/domain/page";
+import { callBackground } from "@/infra/messaging/background-client";
+import type { ContentMessage } from "@/infra/messaging/protocol";
+import "@/ui/base.css";
+import { PlanStatus } from "@/ui/components/PlanStatus";
+import { SignInCard } from "@/ui/components/SignInCard";
+import { TranslationSettingsFields } from "@/ui/components/TranslationSettingsFields";
+import { createAuth } from "@/ui/hooks/auth";
+import { createSettings } from "@/ui/hooks/settings";
+import { createShortcuts } from "@/ui/hooks/shortcuts";
 
 import "./style.css";
 

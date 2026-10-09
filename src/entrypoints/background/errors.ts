@@ -1,4 +1,4 @@
-import { TranslateFailure } from "@/utils/messages";
+import { TranslateFailure } from "@/domain/failure";
 
 import { ApiError } from "./openai";
 

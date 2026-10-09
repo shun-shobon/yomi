@@ -1,11 +1,12 @@
 import { browser, storage } from "#imports";
+import { TranslateFailure } from "@/domain/failure";
+import type { AuthState } from "@/infra/messaging/protocol";
 import {
   credentialsItem,
   signInItem,
   type Credentials,
   type PendingSignIn,
-} from "@/utils/auth-storage";
-import { TranslateFailure, type AuthState } from "@/utils/messages";
+} from "@/infra/storage/auth";
 
 const AUTHORIZE_URL = "https://auth.openai.com/api/accounts/authorize";
 const TOKEN_URL = "https://auth.openai.com/api/accounts/oauth/token";

@@ -1,5 +1,10 @@
 import { browser, type Browser } from "#imports";
-import { TranslateFailure, type TranslateEvent, type TranslateRequest } from "@/utils/messages";
+import { TranslateFailure } from "@/domain/failure";
+import {
+  TRANSLATE_PORT,
+  type TranslateEvent,
+  type TranslateRequest,
+} from "@/infra/messaging/protocol";
 
 export interface StreamHandle {
   /** 成功で resolve、失敗で TranslateFailure、cancel() で StreamCancelled を reject する */
@@ -17,7 +22,7 @@ export function requestTranslation(
   const { promise: done, resolve, reject } = Promise.withResolvers<void>();
   let port: Browser.runtime.Port;
   try {
-    port = browser.runtime.connect({ name: "translate" });
+    port = browser.runtime.connect({ name: TRANSLATE_PORT });
   } catch {
     // 拡張の更新・再読み込み後に残った content script では connect が例外を投げる
     reject(
