@@ -4,6 +4,7 @@ import type { Settings } from "@/utils/settings";
 
 import { DomWatcher } from "./dom-watcher";
 import { FAILURE_POLICY } from "./failure-policy";
+import pendingCss from "./page-translator.css?inline";
 import { pageInstructions } from "./prompts";
 import { Segment, type SegmentState, type Showing } from "./segment";
 import { collectRuns } from "./segmenter";
@@ -325,12 +326,7 @@ export class PageTranslator {
   private ensureStyle() {
     if (this.style?.isConnected) return;
     this.style = document.createElement("style");
-    // box-shadow の inset はレイアウトに影響しない。属性を外せばページ本来の box-shadow に戻る
-    this.style.textContent = `
-      [data-gt-pending] {
-        box-shadow: inset 0 0 0 9999px rgba(99, 102, 241, 0.10) !important;
-      }
-    `;
+    this.style.textContent = pendingCss;
     document.head.append(this.style);
   }
 }
