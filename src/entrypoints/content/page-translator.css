@@ -1,4 +1,4 @@
 /* box-shadow の inset はレイアウトに影響しない。属性を外せばページ本来の box-shadow に戻る */
 [data-gt-pending] {
-  box-shadow: inset 0 0 0 9999px rgba(99, 102, 241, 0.1) !important;
+  box-shadow: inset 0 0 0 9999px rgba(200, 167, 100, 0.14) !important;
 }

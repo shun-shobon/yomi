@@ -18,28 +18,16 @@
     "Noto Sans JP",
     sans-serif;
   color: var(--fg);
-  --bg: #ffffff;
-  --fg: #1f2328;
-  --muted: #656d76;
-  --border: #d0d7de;
-  --accent: #4f46e5;
-  --accent-fg: #ffffff;
-  --danger: #cf222e;
-  --ok: #1a7f37;
-  --shadow: 0 8px 24px rgba(31, 35, 40, 0.18), 0 1px 3px rgba(31, 35, 40, 0.12);
-}
-@media (prefers-color-scheme: dark) {
-  .layer {
-    --bg: #1f2430;
-    --fg: #e6edf3;
-    --muted: #9198a1;
-    --border: #3d4450;
-    --accent: #818cf8;
-    --accent-fg: #11131a;
-    --danger: #ff7b72;
-    --ok: #3fb950;
-    --shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.4);
-  }
+  --bg: #1c1b20;
+  --fg: #e4e0d8;
+  --muted: #99948b;
+  --border: #2c2b31;
+  --accent: #c8a764;
+  --accent-fg: #1a1814;
+  --danger: #d98a7f;
+  --ok: #8dbf9f;
+  --shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
 }
 button {
   font: inherit;
@@ -64,7 +52,7 @@ button {
   gap: 12px;
   max-width: min(420px, calc(100vw - 32px));
   padding: 10px 12px 10px 14px;
-  border-radius: 10px;
+  border-radius: 6px;
   background: var(--bg);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
@@ -78,7 +66,7 @@ button {
 }
 .toast .action {
   border: 0;
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 4px 10px;
   background: var(--accent);
   color: var(--accent-fg);
@@ -90,7 +78,7 @@ button {
   background: transparent;
   color: var(--muted);
   padding: 2px 6px;
-  border-radius: 6px;
+  border-radius: 4px;
   line-height: 1;
 }
 .icon-btn:hover {
@@ -102,9 +90,10 @@ button {
   width: max-content;
   max-width: min(480px, calc(100vw - 16px));
   padding: 8px 12px;
-  border-radius: 8px;
-  background: #1e293b;
-  color: #f1f5f9;
+  border-radius: 4px;
+  background: #161519;
+  color: var(--fg);
+  border: 1px solid var(--border);
   box-shadow: var(--shadow);
   font-size: 13px;
   line-height: 1.55;
@@ -116,7 +105,7 @@ button {
 .tooltip .label {
   display: block;
   font-size: 11px;
-  color: #94a3b8;
+  color: var(--muted);
   margin-bottom: 2px;
 }
 
@@ -146,7 +135,7 @@ button {
 .panel {
   position: absolute;
   width: min(440px, calc(100vw - 24px));
-  border-radius: 12px;
+  border-radius: 6px;
   background: var(--bg);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
@@ -191,7 +180,7 @@ button {
 .panel footer button {
   border: 1px solid var(--border);
   background: transparent;
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 3px 10px;
 }
 .panel footer button:hover {

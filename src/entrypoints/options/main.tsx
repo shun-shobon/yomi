@@ -20,9 +20,6 @@ function App() {
     <Show when={auth() && settings()}>
       <main class="page">
         <h1>Yomi</h1>
-        <p class="muted lead">
-          ChatGPT プランを使って、Web ページ全体や選択したテキストを翻訳します。
-        </p>
 
         <section class="section">
           <h2>アカウント</h2>

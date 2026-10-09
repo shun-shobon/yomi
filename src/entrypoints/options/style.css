@@ -1,6 +1,6 @@
 html,
 body {
-  background: var(--surface);
+  background: var(--bg);
 }
 .page {
   max-width: 680px;
@@ -8,14 +8,13 @@ body {
   padding: 40px 20px 64px;
 }
 h1 {
-  margin: 0;
-  font-size: 24px;
-}
-.lead {
-  margin: 4px 0 24px;
+  margin: 0 0 24px;
+  font-size: 26px;
+  letter-spacing: 0.02em;
+  color: var(--accent);
 }
 .section {
-  background: var(--bg);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 18px 20px;
@@ -23,7 +22,10 @@ h1 {
 }
 .section h2 {
   margin: 0 0 12px;
-  font-size: 15px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--muted);
 }
 .section p {
   margin: 0;
