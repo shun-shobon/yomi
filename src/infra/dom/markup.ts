@@ -1,8 +1,9 @@
+import { atomic, escapeText, groupClose, groupOpen, tagSignature, tokenize } from "@/domain/markup";
+
 import { isAtomic, type Run } from "./segmenter";
 
 /**
  * ノード列 ⇄ 翻訳用マークアップの相互変換。
- * インライン要素は属性を落とした <gN>…</gN>、訳さない要素は <xN/> に置き換えてモデルに渡す。
  * モデル出力は HTML として解釈せず、テキストノードの生成と既存要素の複製だけで組み立てるので XSS にならない。
  */
 
@@ -17,7 +18,7 @@ export interface Slot {
 export interface Serialized {
   markup: string;
   placeholders: Element[];
-  /** タグ列（例: "g0 /g0 x1"）。訳文のタグ列が一致すれば要素を動かさずにテキストだけ書き換えられる */
+  /** タグ列。domain/markup の parse が返す structure と比較する */
   structure: string;
   slots: Slot[];
 }
@@ -37,13 +38,13 @@ export function serialize({ parent, nodes }: Run): Serialized {
       } else if (node instanceof Element) {
         const id = placeholders.push(node) - 1;
         if (isAtomic(node)) {
-          out += `<x${id}/>`;
-          tags.push(`x${id}`);
+          out += atomic(id);
+          tags.push(tagSignature({ type: "tag", kind: "atomic", id }));
         } else {
-          tags.push(`g${id}`);
+          tags.push(tagSignature({ type: "tag", kind: "open", id }));
           openSlot(node, node.firstChild);
-          out += `<g${id}>${walk(node.childNodes)}</g${id}>`;
-          tags.push(`/g${id}`);
+          out += groupOpen(id) + walk(node.childNodes) + groupClose(id);
+          tags.push(tagSignature({ type: "tag", kind: "close", id }));
         }
         openSlot(node.parentNode!, node.nextSibling);
       }
@@ -52,41 +53,6 @@ export function serialize({ parent, nodes }: Run): Serialized {
   };
   const markup = walk(nodes).trim();
   return { markup, placeholders, structure: tags.join(" "), slots };
-}
-
-type Token =
-  | { type: "text"; text: string }
-  | { type: "tag"; kind: "open" | "close" | "atomic"; id: number };
-
-const TAG = /<(\/?)([gx])(\d+)\s*\/?>/g;
-
-function* tokenize(markup: string): Generator<Token> {
-  let last = 0;
-  for (const match of markup.matchAll(TAG)) {
-    yield { type: "text", text: decodeEntities(markup.slice(last, match.index)) };
-    last = match.index + match[0].length;
-    const [, slash, letter, id] = match;
-    yield {
-      type: "tag",
-      kind: letter === "x" ? "atomic" : slash ? "close" : "open",
-      id: Number(id),
-    };
-  }
-  yield { type: "text", text: decodeEntities(markup.slice(last)) };
-}
-
-const tagName = (token: Extract<Token, { type: "tag" }>) =>
-  `${token.kind === "close" ? "/" : ""}${token.kind === "atomic" ? "x" : "g"}${token.id}`;
-
-/** 訳文をタグ列と、タグの間のテキスト列に分ける。テキスト列の長さは常にタグ数 + 1 */
-export function parse(markup: string): { structure: string; texts: string[] } {
-  const tags: string[] = [];
-  const texts: string[] = [];
-  for (const token of tokenize(markup)) {
-    if (token.type === "text") texts.push(token.text);
-    else tags.push(tagName(token));
-  }
-  return { structure: tags.join(" "), texts };
 }
 
 /** タグ構造が変わった訳文を、元要素の複製で組み立てる */
@@ -126,27 +92,4 @@ export function build(markup: string, placeholders: Element[]): DocumentFragment
     }
   });
   return fragment;
-}
-
-function escapeText(text: string): string {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
-const NAMED_ENTITIES: Record<string, string> = {
-  amp: "&",
-  lt: "<",
-  gt: ">",
-  quot: '"',
-  apos: "'",
-  nbsp: " ",
-};
-
-function decodeEntities(text: string): string {
-  return text.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (whole, body: string) => {
-    if (body.startsWith("#")) {
-      const code = /^#x/i.test(body) ? parseInt(body.slice(2), 16) : parseInt(body.slice(1), 10);
-      return code <= 0x10ffff ? String.fromCodePoint(code) : whole;
-    }
-    return NAMED_ENTITIES[body.toLowerCase()] ?? whole;
-  });
 }

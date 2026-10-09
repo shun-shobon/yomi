@@ -1,0 +1,123 @@
+import { createSignal, Show } from "solid-js";
+import { delegateEvents, render } from "solid-js/web";
+
+import type { Overlay, PanelState, ToastOptions } from "@/usecases/content/overlay";
+
+import overlayCss from "./overlay.css?inline";
+import { currentViewport, placeBelow } from "./position";
+import {
+  SELECTION_BUTTON_SIZE,
+  SelectionButton,
+  type SelectionButtonItem,
+} from "./SelectionButton";
+import { Toasts, type ToastItem } from "./Toasts";
+import { Tooltip, type TooltipItem } from "./Tooltip";
+import {
+  PANEL_ESTIMATED_HEIGHT,
+  PANEL_MAX_WIDTH,
+  TranslationPanel,
+  type PanelItem,
+} from "./TranslationPanel";
+
+const TOAST_DURATION_MS = 3500;
+/** パネルの左右に確保する余白の合計 */
+const PANEL_SIDE_MARGIN = 24;
+
+/** ページの CSS から隔離した closed shadow DOM に、Solid で描画する */
+export function createOverlay(): Overlay {
+  const [toasts, setToasts] = createSignal<ToastItem[]>([]);
+  const [tooltip, setTooltip] = createSignal<TooltipItem | null>(null);
+  const [button, setButton] = createSignal<SelectionButtonItem | null>(null);
+  const [panel, setPanel] = createSignal<PanelItem | null>(null);
+  let nextId = 0;
+
+  const dismissToast = (id: number) => setToasts((items) => items.filter((t) => t.id !== id));
+
+  let host: HTMLElement | null = null;
+  const mount = () => {
+    if (host?.isConnected) return;
+    if (!host) {
+      host = document.createElement("yomi-ui");
+      host.setAttribute("data-gt-ui", "");
+      host.style.cssText =
+        "position:absolute!important;top:0!important;left:0!important;width:0!important;height:0!important;z-index:2147483647!important;";
+      const shadow = host.attachShadow({ mode: "closed" });
+      const style = document.createElement("style");
+      style.textContent = overlayCss;
+      const layer = document.createElement("div");
+      layer.className = "layer";
+      shadow.append(style, layer);
+      // Solid は onClick などを document で委譲して受けるが、closed shadow DOM 内のノードは document 側の composedPath に現れず届かない
+      delegateEvents(["click", "mousedown"], shadow as unknown as Document);
+      render(
+        () => (
+          <>
+            <Show when={tooltip()} keyed>
+              {(item) => <Tooltip {...item} />}
+            </Show>
+            <Show when={button()}>{(item) => <SelectionButton {...item()} />}</Show>
+            <Show when={panel()}>{(item) => <TranslationPanel {...item()} />}</Show>
+            <Toasts items={toasts()} onDismiss={dismissToast} />
+          </>
+        ),
+        layer,
+      );
+    }
+    // ページが documentElement の子を差し替えても、描画済みの UI ごと付け直す
+    document.documentElement.append(host);
+  };
+
+  return {
+    isOwnTarget: (target) => target !== null && target === host,
+
+    toast(message: string, opts: ToastOptions = {}) {
+      mount();
+      const id = nextId++;
+      setToasts((items) => [...items, { id, message, ...opts }]);
+      if (!opts.error && !opts.action) setTimeout(() => dismissToast(id), TOAST_DURATION_MS);
+    },
+
+    showTooltip(anchor, label, text) {
+      mount();
+      setTooltip({ anchor, label, text });
+    },
+    hideTooltip: () => setTooltip(null),
+
+    showSelectionButton(anchor, label, onClick) {
+      mount();
+      const size = { width: SELECTION_BUTTON_SIZE, height: SELECTION_BUTTON_SIZE };
+      setButton({ position: placeBelow(anchor, size, currentViewport()), label, onClick });
+    },
+    hideSelectionButton: () => setButton(null),
+    get selectionButtonShown() {
+      return button() !== null;
+    },
+
+    openPanel(anchor, title, onClose) {
+      mount();
+      const id = nextId++;
+      const viewport = currentViewport();
+      const size = {
+        width: Math.min(PANEL_MAX_WIDTH, viewport.width - PANEL_SIDE_MARGIN),
+        height: PANEL_ESTIMATED_HEIGHT,
+      };
+      const initial: PanelState = { status: "translating", text: "" };
+      setPanel({
+        id,
+        position: placeBelow(anchor, size, viewport),
+        title,
+        state: initial,
+        onClose,
+      });
+      const isCurrent = () => panel()?.id === id;
+      return {
+        update(state) {
+          if (isCurrent()) setPanel((p) => p && { ...p, state });
+        },
+        remove() {
+          if (isCurrent()) setPanel(null);
+        },
+      };
+    },
+  };
+}

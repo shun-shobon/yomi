@@ -1,7 +1,9 @@
-import { build, parse, serialize, type Serialized } from "./markup";
-import type { Run } from "./segmenter";
+import { parse } from "@/domain/markup";
+import type { SegmentState, Showing } from "@/domain/page";
 
-export type SegmentState = "idle" | "queued" | "pending" | "done" | "failed";
+import { markTranslated } from "./markers";
+import { build, serialize, type Serialized } from "./markup";
+import type { Run } from "./segmenter";
 
 /** 既存のテキストノードへの書き込み。要素を差し替えないのでフレームワーク管理下の DOM を壊さない */
 interface TextWrite {
@@ -11,8 +13,6 @@ interface TextWrite {
 }
 
 type Applied = { mode: "inplace"; writes: TextWrite[] } | { mode: "replace"; nodes: Node[] };
-
-export type Showing = "translation" | "original";
 
 export class Segment {
   readonly parent: Element;
@@ -51,7 +51,7 @@ export class Segment {
       parsed.structure === this.serialized.structure
         ? { mode: "inplace", writes: this.planWrites(parsed.texts) }
         : { mode: "replace", nodes: this.buildReplacement(markup.trim()) };
-    this.parent.setAttribute("data-gt-tr", "");
+    markTranslated(this.parent);
   }
 
   /** 表示を切り替える。前回の表示からページ側が書き換えていた場合は false を返す */

@@ -3,12 +3,12 @@ import { FAILURE_POLICY } from "@/domain/failure";
 import type { PageState } from "@/domain/page";
 import type { ContentMessage } from "@/infra/messaging/protocol";
 import { getSettings, watchSettings } from "@/infra/storage/settings";
-
-import { notifyFailure } from "./failure-policy";
-import { watchHoverOriginal } from "./hover";
-import { Overlay } from "./overlay";
-import { PageTranslator } from "./page-translator";
-import { SelectionTranslator } from "./selection";
+import { createOverlay } from "@/ui/content/Overlay";
+import { watchHoverOriginal } from "@/usecases/content/hover-original";
+import { notifyFailure } from "@/usecases/content/notify-failure";
+import { createPageCommands } from "@/usecases/content/page-commands";
+import { PageTranslator } from "@/usecases/content/page-translator";
+import { SelectionTranslator } from "@/usecases/content/selection-translator";
 
 export default defineContentScript({
   matches: ["<all_urls>"],
@@ -18,7 +18,7 @@ export default defineContentScript({
     watchSettings((next) => {
       settings = next;
     });
-    const overlay = new Overlay();
+    const overlay = createOverlay();
 
     const page = new PageTranslator({
       getSettings: () => settings,
@@ -39,41 +39,10 @@ export default defineContentScript({
     // 拡張の更新・再読み込み後は古い content script が残るので、DOM の監視を止める
     ctx.onInvalidated(() => page.stop());
 
-    const startPage = () => {
-      const wasActive = page.isActive;
-      page.start();
-      if (!wasActive) overlay.toast("ページの翻訳を開始しました");
-    };
-
-    const handle = (message: ContentMessage) => {
-      switch (message.type) {
-        case "page:getState":
-          return;
-        case "page:translate":
-          return startPage();
-        case "page:stop":
-          return page.stop();
-        case "page:showOriginal":
-          return page.showOriginal();
-        case "page:showTranslation":
-          return page.start();
-        case "command:translate":
-          if (selection.translateCurrent()) return;
-          if (!page.isActive) return startPage();
-          page.stop();
-          return overlay.toast("翻訳を停止しました");
-        case "command:toggleOriginal":
-          if (page.hasTranslations()) page.toggleOriginal();
-          return;
-        case "selection:translate":
-          return selection.translateText(message.text);
-      }
-    };
-
+    const runCommand = createPageCommands({ overlay, page, selection });
     browser.runtime.onMessage.addListener(
       (message: ContentMessage, _sender, sendResponse: (state: PageState) => void) => {
-        handle(message);
-        sendResponse(page.getState());
+        sendResponse(runCommand(message));
       },
     );
   },

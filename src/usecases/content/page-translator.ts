@@ -1,20 +1,27 @@
+import { createBatchDecoder, encodeBatch } from "@/domain/batch-protocol";
+import { packBatch, priorityScore } from "@/domain/batch-scheduler";
 import { FAILURE_POLICY, TranslateFailure } from "@/domain/failure";
 import type { LanguageCode } from "@/domain/languages";
-import type { PageState } from "@/domain/page";
+import { summarizePage, type PageState, type SegmentState, type Showing } from "@/domain/page";
+import { pageInstructions } from "@/domain/prompts";
 import type { Settings } from "@/domain/settings";
-
-import { DomWatcher } from "./dom-watcher";
-import pendingCss from "./page-translator.css?inline";
-import { pageInstructions } from "./prompts";
-import { Segment, type SegmentState, type Showing } from "./segment";
-import { collectRuns } from "./segmenter";
-import { requestTranslation, StreamCancelled, type StreamHandle } from "./stream";
+import { DomWatcher } from "@/infra/dom/dom-watcher";
+import {
+  ensurePendingStyle,
+  isInMainContent,
+  setPending,
+  translatedAncestor,
+  unmarkTranslated,
+} from "@/infra/dom/markers";
+import { Segment } from "@/infra/dom/segment";
+import { collectRuns } from "@/infra/dom/segmenter";
+import {
+  requestTranslation,
+  StreamCancelled,
+  type StreamHandle,
+} from "@/infra/messaging/translation-stream";
 
 const MAX_CONCURRENCY = 4;
-const BATCH_MAX_CHARS = 2000;
-const BATCH_MAX_SEGMENTS = 25;
-/** 閉じタグが欠けた seg が次の seg を飲み込まないよう、内容に <seg を含ませない */
-const SEG_PATTERN = /<seg id="?(\d+)"?>((?:(?!<seg[\s>])[\s\S])*?)<\/seg>/g;
 
 export interface PageTranslatorHooks {
   getSettings: () => Settings;
@@ -35,7 +42,6 @@ export class PageTranslator {
   private batchCounter = 0;
   private pumpScheduled = false;
   private partialFailureNotified = false;
-  private style: HTMLStyleElement | null = null;
   private readonly watcher: DomWatcher;
 
   constructor(private readonly hooks: PageTranslatorHooks) {
@@ -57,23 +63,13 @@ export class PageTranslator {
   }
 
   getState(): PageState {
-    const counts: Record<SegmentState, number> = {
-      idle: 0,
-      queued: 0,
-      pending: 0,
-      done: 0,
-      failed: 0,
-    };
+    return summarizePage(this.active, this.showing, this.connectedStates());
+  }
+
+  private *connectedStates(): Generator<SegmentState> {
     for (const [parent, segs] of this.byParent) {
-      if (parent.isConnected) for (const seg of segs) counts[seg.state]++;
+      if (parent.isConnected) for (const seg of segs) yield seg.state;
     }
-    return {
-      active: this.active,
-      showing: this.showing,
-      busy: counts.queued + counts.pending,
-      done: counts.done,
-      failed: counts.failed,
-    };
   }
 
   /** 翻訳を開始する。原文表示中なら訳文に戻して再開し、翻訳先の言語が変わっていれば最初から訳し直す */
@@ -85,7 +81,7 @@ export class PageTranslator {
     if (this.active) return;
     this.active = true;
     this.partialFailureNotified = false;
-    this.ensureStyle();
+    ensurePendingStyle();
     this.scan(document.body);
     for (const seg of this.segments()) if (seg.state === "failed") this.transition(seg, "idle");
     this.watcher.start(this.byParent.keys());
@@ -119,7 +115,7 @@ export class PageTranslator {
 
   originalTextAt(target: Element): { anchor: Element; text: string } | null {
     if (this.showing !== "translation") return null;
-    const anchor = target.closest("[data-gt-tr]");
+    const anchor = translatedAncestor(target);
     if (!anchor) return null;
     const texts = [...(this.byParent.get(anchor) ?? [])]
       .filter((s) => s.state === "done")
@@ -148,7 +144,7 @@ export class PageTranslator {
   private reset() {
     this.stop();
     this.renderAll("original");
-    for (const parent of this.byParent.keys()) parent.removeAttribute("data-gt-tr");
+    for (const parent of this.byParent.keys()) unmarkTranslated(parent);
     this.byParent = new Map();
     this.owner = new WeakMap();
     this.watcher.forgetHidden();
@@ -232,29 +228,17 @@ export class PageTranslator {
     }
   }
 
-  /** ビューポート上部 30% 付近に近いものから順に、文字数上限までまとめる */
   private takeBatch(): Segment[] {
-    const anchorY = innerHeight * 0.3;
     const scored = [...this.queue].map((seg) => {
-      const rect = seg.parent.getBoundingClientRect();
-      const inView = rect.bottom > 0 && rect.top < innerHeight;
-      let score = inView
-        ? Math.abs(Math.min(Math.max(anchorY, rect.top), rect.bottom) - anchorY)
-        : 100_000 + Math.min(Math.abs(rect.top - innerHeight), Math.abs(rect.bottom));
-      if (seg.parent.closest("main, [role=main], article")) score -= 300;
-      return { seg, score };
+      const { top, bottom } = seg.parent.getBoundingClientRect();
+      const inMainContent = isInMainContent(seg.parent);
+      return { seg, score: priorityScore({ top, bottom, inMainContent }, innerHeight) };
     });
     scored.sort((a, b) => a.score - b.score);
-
-    const batch: Segment[] = [];
-    let chars = 0;
-    for (const { seg } of scored) {
-      if (batch.length >= BATCH_MAX_SEGMENTS) break;
-      const size = seg.serialized.markup.length;
-      if (batch.length > 0 && chars + size > BATCH_MAX_CHARS) continue;
-      batch.push(seg);
-      chars += size;
-    }
+    const batch = packBatch(
+      scored.map(({ seg }) => seg),
+      (seg) => seg.serialized.markup.length,
+    );
     for (const seg of batch) this.transition(seg, "pending");
     return batch;
   }
@@ -263,22 +247,15 @@ export class PageTranslator {
     const token = ++this.batchCounter;
     for (const seg of batch) seg.batch = token;
     const mine = (seg: Segment) => seg.batch === token && seg.state === "pending";
-    const input = batch
-      .map((seg, i) => `<seg id="${i + 1}">${seg.serialized.markup}</seg>`)
-      .join("\n");
-    let buffer = "";
-    let cursor = 0;
     const handle = requestTranslation(
-      { instructions: pageInstructions(lang, document.title), input },
-      (delta) => {
-        buffer += delta;
-        SEG_PATTERN.lastIndex = cursor;
-        for (let m = SEG_PATTERN.exec(buffer); m; m = SEG_PATTERN.exec(buffer)) {
-          cursor = SEG_PATTERN.lastIndex;
-          const seg = batch[Number(m[1]) - 1];
-          if (seg && mine(seg)) this.applyResult(seg, m[2]!);
-        }
+      {
+        instructions: pageInstructions(lang, document.title),
+        input: encodeBatch(batch.map((seg) => seg.serialized.markup)),
       },
+      createBatchDecoder((index, markup) => {
+        const seg = batch[index];
+        if (seg && mine(seg)) this.applyResult(seg, markup);
+      }),
     );
     this.inflight.add(handle);
     try {
@@ -316,17 +293,10 @@ export class PageTranslator {
     const count = (this.pendingCount.get(el) ?? 0) + delta;
     if (count > 0) {
       this.pendingCount.set(el, count);
-      if (this.hooks.getSettings().highlightPending) el.setAttribute("data-gt-pending", "");
+      if (this.hooks.getSettings().highlightPending) setPending(el, true);
     } else {
       this.pendingCount.delete(el);
-      el.removeAttribute("data-gt-pending");
+      setPending(el, false);
     }
-  }
-
-  private ensureStyle() {
-    if (this.style?.isConnected) return;
-    this.style = document.createElement("style");
-    this.style.textContent = pendingCss;
-    document.head.append(this.style);
   }
 }
