@@ -1,16 +1,12 @@
 import { callBackground } from "@/utils/runtime";
 
-/** SIWC ガイドラインの文言をそのまま使うサインイン導線 */
 export function SignInCard() {
   return (
     <div class="sign-in-card">
-      <strong>Use your ChatGPT plan</strong>
-      <p class="muted small">
-        Complete eligible AI requests in this app with usage included in your ChatGPT plan or
-        credits balance.
-      </p>
+      <strong>ChatGPT プランで翻訳</strong>
+      <p class="muted small">翻訳には ChatGPT プランの使用量またはクレジットが使われます。</p>
       <button class="btn chatgpt-btn" onClick={() => void callBackground("auth:signIn")}>
-        Continue with ChatGPT
+        ChatGPT でサインイン
       </button>
     </div>
   );
@@ -19,10 +15,10 @@ export function SignInCard() {
 export function PlanStatus() {
   return (
     <span class="plan-status-row">
-      <span class="plan-status">Using ChatGPT plan</span>
+      <span class="plan-status">ChatGPT プランを利用中</span>
       <span class="muted">·</span>
       <button class="btn link" onClick={() => void callBackground("open:usage")}>
-        Manage usage
+        使用状況を管理
       </button>
     </span>
   );

@@ -13,10 +13,10 @@ interface FailurePolicy {
 export const FAILURE_POLICY: Record<TranslateErrorKind, FailurePolicy> = {
   signed_out: {
     fatal: true,
-    action: { label: "Continue with ChatGPT", request: "auth:signIn" },
+    action: { label: "ChatGPT でサインイン", request: "auth:signIn" },
   },
   no_model: { fatal: true, action: { label: "設定を開く", request: "open:options" } },
-  usage_limit: { fatal: true, action: { label: "Manage usage", request: "open:usage" } },
+  usage_limit: { fatal: true, action: { label: "使用状況を管理", request: "open:usage" } },
   not_eligible: { fatal: true, action: null },
   extension_reloaded: { fatal: true, action: null },
   unavailable: { fatal: false, action: null },

@@ -135,7 +135,7 @@ export class SelectionTranslator {
         const translation = result.trim();
         body.classList.remove("cursor");
         body.textContent = translation;
-        status.textContent = "Using ChatGPT plan";
+        status.textContent = "";
         copy.hidden = false;
         copy.addEventListener("click", () => {
           void navigator.clipboard.writeText(translation).then(() => {

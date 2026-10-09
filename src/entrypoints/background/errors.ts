@@ -14,7 +14,7 @@ function fromApiError(e: ApiError): TranslateFailure {
     case "subscription_sharing_usage_limit_exceeded":
       return new TranslateFailure(
         "usage_limit",
-        "Usage limit reached. Review your plan or this app's limit in ChatGPT settings.",
+        "使用量の上限に達しました。ChatGPT の設定でプランまたはこのアプリの上限を確認してください。",
       );
     case "subscription_sharing_invalid_user":
       return new TranslateFailure("signed_out", e.message);
