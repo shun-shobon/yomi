@@ -1,179 +1,78 @@
-import { browser, defineBackground, type Browser } from "#imports";
-import { TranslateFailure } from "@/domain/failure";
+import { browser, defineBackground } from "#imports";
+import { toTranslateFailure } from "@/domain/api-error";
+import { setUpContextMenus, type ContextMenuId } from "@/infra/browser/context-menus";
 import {
-  type BackgroundApi,
-  type BackgroundRequest,
-  type BackgroundResponse,
-  type CommandName,
-  type ContentMessage,
-  type TranslateEvent,
-  type TranslateRequest,
-  TRANSLATE_PORT,
-} from "@/infra/messaging/protocol";
-import { getSettings } from "@/infra/storage/settings";
-
+  activeTabId,
+  openOptionsPage,
+  openShortcutsPage,
+  openUsagePage,
+} from "@/infra/browser/tabs";
+import { serveBackgroundApi, serveTranslatePort } from "@/infra/messaging/background-server";
+import { sendToContent } from "@/infra/messaging/content-client";
+import type { CommandName, ContentMessage } from "@/infra/messaging/protocol";
 import {
-  getAccessToken,
   getAuthState,
   handleTabRemoved,
   handleTabUpdated,
   signOut,
   startSignIn,
-} from "./auth";
-import { toTranslateFailure } from "./errors";
-import { ApiError, listModels, streamResponse } from "./openai";
-
-const MANAGE_USAGE_URL = "https://chatgpt.com/settings/usage";
-
-/** fetch のストリーム受信だけでは service worker の idle タイマーが延長されないため、拡張 API を定期的に呼ぶ */
-const KEEP_ALIVE_INTERVAL_MS = 20_000;
+} from "@/usecases/background/auth";
+import { listModels, translate } from "@/usecases/background/translate";
 
 const COMMAND_MESSAGES: Record<CommandName, ContentMessage> = {
   "translate-page": { type: "command:translate" },
   "toggle-original": { type: "command:toggleOriginal" },
 };
 
+const serializeFailure = (e: unknown) => toTranslateFailure(e).serialize();
+
 export default defineBackground(() => {
   // service worker 再起動後もサインインを完了できるよう、リスナーはトップレベルで同期的に登録する
   browser.tabs.onUpdated.addListener((tabId, info) => {
     void handleTabUpdated(tabId, info.url).then(async (signedIn) => {
-      if (signedIn) await browser.runtime.openOptionsPage();
+      if (signedIn) await openOptionsPage();
     });
   });
   browser.tabs.onRemoved.addListener((tabId) => void handleTabRemoved(tabId));
 
   browser.runtime.onInstalled.addListener(({ reason }) => {
     void setUpContextMenus();
-    if (reason === "install") void browser.runtime.openOptionsPage();
+    if (reason === "install") void openOptionsPage();
   });
 
   browser.contextMenus.onClicked.addListener((info, tab) => {
     if (tab?.id === undefined) return;
-    if (info.menuItemId === "translate-page") {
-      sendToTab(tab.id, { type: "page:translate" });
-    } else if (info.menuItemId === "translate-selection" && info.selectionText) {
-      sendToTab(tab.id, { type: "selection:translate", text: info.selectionText });
+    const id = info.menuItemId as ContextMenuId;
+    if (id === "translate-page") {
+      notifyTab(tab.id, { type: "page:translate" });
+    } else if (id === "translate-selection" && info.selectionText) {
+      notifyTab(tab.id, { type: "selection:translate", text: info.selectionText });
     }
   });
 
   browser.commands.onCommand.addListener((command) => {
-    void browser.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
-      if (tab?.id !== undefined) sendToTab(tab.id, COMMAND_MESSAGES[command as CommandName]);
+    void activeTabId().then((tabId) => {
+      if (tabId !== undefined) notifyTab(tabId, COMMAND_MESSAGES[command as CommandName]);
     });
   });
 
-  browser.runtime.onMessage.addListener((request: BackgroundRequest, _sender, sendResponse) => {
-    handlers[request.type]().then(
-      (value) => sendResponse({ ok: true, value }),
-      (e: unknown) =>
-        sendResponse({
-          ok: false,
-          failure: toTranslateFailure(e).serialize(),
-        } satisfies BackgroundResponse<keyof BackgroundApi>),
-    );
-    return true;
-  });
-
-  browser.runtime.onConnect.addListener((port) => {
-    if (port.name === TRANSLATE_PORT) servePort(port);
-  });
+  serveBackgroundApi(
+    {
+      "auth:getState": getAuthState,
+      "auth:signIn": startSignIn,
+      "auth:signOut": signOut,
+      "models:list": listModels,
+      "open:options": openOptionsPage,
+      "open:usage": openUsagePage,
+      "open:shortcuts": openShortcutsPage,
+    },
+    serializeFailure,
+  );
+  serveTranslatePort(translate, serializeFailure);
 });
 
-async function setUpContextMenus() {
-  await browser.contextMenus.removeAll();
-  browser.contextMenus.create({
-    id: "translate-page",
-    title: "このページを翻訳",
-    contexts: ["page"],
-  });
-  browser.contextMenus.create({
-    id: "translate-selection",
-    title: "選択テキストを翻訳",
-    contexts: ["selection"],
-  });
-}
-
-const handlers: { [K in keyof BackgroundApi]: () => Promise<BackgroundApi[K]> } = {
-  "auth:getState": getAuthState,
-  "auth:signIn": startSignIn,
-  "auth:signOut": signOut,
-  "models:list": () => withAuthRetry(listModels),
-  "open:options": () => browser.runtime.openOptionsPage(),
-  "open:usage": async () => {
-    await browser.tabs.create({ url: MANAGE_USAGE_URL });
-  },
-  "open:shortcuts": async () => {
-    await browser.tabs.create({ url: "chrome://extensions/shortcuts" });
-  },
-};
-
-function servePort(port: Browser.runtime.Port) {
-  const controller = new AbortController();
-  port.onDisconnect.addListener(() => controller.abort());
-  port.onMessage.addListener((req: TranslateRequest) => {
-    const post = (event: TranslateEvent) => {
-      if (!controller.signal.aborted) port.postMessage(event);
-    };
-    const keepAlive = setInterval(
-      () => void browser.runtime.getPlatformInfo(),
-      KEEP_ALIVE_INTERVAL_MS,
-    );
-    void translate(req, controller.signal, (text) => post({ type: "delta", text }))
-      .then(
-        () => post({ type: "done" }),
-        (e: unknown) => post({ type: "error", failure: toTranslateFailure(e).serialize() }),
-      )
-      .finally(() => clearInterval(keepAlive));
-  });
-}
-
-async function translate(
-  req: TranslateRequest,
-  signal: AbortSignal,
-  onDelta: (text: string) => void,
-): Promise<void> {
-  const { model, reasoningEffort, fastMode } = await getSettings();
-  if (!model) throw new TranslateFailure("no_model", "翻訳に使うモデルを選択してください。");
-  let received = false;
-  await withAuthRetry(
-    (token) =>
-      streamResponse({
-        token,
-        model,
-        reasoningEffort,
-        fast: fastMode,
-        instructions: req.instructions,
-        input: req.input,
-        signal,
-        onDelta: (text) => {
-          received = true;
-          onDelta(text);
-        },
-      }),
-    () => !received,
-  );
-}
-
-/** access token が期限前に失効していた場合に備え、401 は一度だけ refresh して再試行する */
-async function withAuthRetry<T>(
-  fn: (token: string) => Promise<T>,
-  canRetry: () => boolean = () => true,
-): Promise<T> {
-  try {
-    return await fn(await getAccessToken());
-  } catch (e) {
-    const retryable =
-      e instanceof ApiError &&
-      e.status === 401 &&
-      e.code !== "subscription_sharing_invalid_user" &&
-      canRetry();
-    if (!retryable) throw e;
-    return fn(await getAccessToken(true));
-  }
-}
-
-function sendToTab(tabId: number, message: ContentMessage) {
-  browser.tabs.sendMessage(tabId, message).catch(() => {
+function notifyTab(tabId: number, message: ContentMessage) {
+  sendToContent(tabId, message).catch(() => {
     // content script を注入できないページ（chrome:// など）では何もしない
   });
 }

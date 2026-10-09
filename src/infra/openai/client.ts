@@ -1,39 +1,19 @@
 import OpenAI, { APIError } from "openai";
 
+import { ApiError } from "@/domain/api-error";
 import type { ModelInfo } from "@/domain/models";
-import { isReasoningEffort, type ReasoningEffort } from "@/domain/settings";
+import type { ReasoningEffort } from "@/domain/settings";
 
-/** API の失敗。HTTP 応答前やストリーム途中の失敗は status を持たない */
-export class ApiError extends Error {
-  constructor(
-    readonly status: number | null,
-    readonly code: string | null,
-    message: string,
-  ) {
-    super(message);
-  }
-}
+import { FAST_SERVICE_TIER, toModelInfos, type SiwcModel } from "./models";
 
 function createClient(token: string): OpenAI {
   return new OpenAI({
     apiKey: token,
     // 拡張の service worker はブラウザ環境と判定される。キーはユーザー本人の OAuth トークンで、第三者には渡らない
     dangerouslyAllowBrowser: true,
-    // 再試行は refresh を挟む withAuthRetry 側で制御する
+    // 再試行は refresh を挟む呼び出し側で制御する
     maxRetries: 0,
   });
-}
-
-/** Codex の Fast モードと同じく、この service tier をモデルが提供していれば優先処理を使える */
-const FAST_SERVICE_TIER = "priority";
-
-interface SiwcModel {
-  slug: string;
-  display_name: string;
-  visibility: string;
-  default_reasoning_level: string;
-  supported_reasoning_levels: { effort: string }[];
-  service_tiers: { id: string }[];
 }
 
 export async function listModels(token: string): Promise<ModelInfo[]> {
@@ -41,25 +21,7 @@ export async function listModels(token: string): Promise<ModelInfo[]> {
   const { models } = await withApiErrors(() =>
     createClient(token).get<{ models: SiwcModel[] }>("/models"),
   );
-  return models.filter((m) => m.visibility === "list").map(toModelInfo);
-}
-
-function toModelInfo(m: SiwcModel): ModelInfo {
-  if (!isReasoningEffort(m.default_reasoning_level)) {
-    throw new Error(
-      `${m.slug} の既定の reasoning effort が未知の値です: ${m.default_reasoning_level}`,
-    );
-  }
-  return {
-    slug: m.slug,
-    displayName: m.display_name,
-    // SDK が知らない新しい effort は送れないので選択肢に出さない
-    reasoningEfforts: m.supported_reasoning_levels
-      .map(({ effort }) => effort)
-      .filter(isReasoningEffort),
-    defaultReasoningEffort: m.default_reasoning_level,
-    supportsFast: m.service_tiers.some((tier) => tier.id === FAST_SERVICE_TIER),
-  };
+  return toModelInfos(models);
 }
 
 export interface StreamOptions {

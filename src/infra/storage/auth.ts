@@ -30,3 +30,10 @@ export interface PendingSignIn {
 export type SignInState = PendingSignIn | { status: "failed"; message: string } | null;
 
 export const signInItem = storage.defineItem<SignInState>("session:signIn", { fallback: null });
+
+/** 発行済み client_id はサインアウト後の再サインインでも使い回す */
+export const clientIdItem = storage.defineItem<string | null>("local:clientId", { fallback: null });
+
+export const hostIdItem = storage.defineItem<string | null>("local:extAgentHostId", {
+  fallback: null,
+});
