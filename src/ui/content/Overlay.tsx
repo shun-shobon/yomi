@@ -52,12 +52,16 @@ export function createOverlay(): Overlay {
       render(
         () => (
           <>
+            {/* z-index を使わず、後に書いたものほど上に重ねる */}
+            <Toasts items={toasts()} onDismiss={dismissToast} />
+            <Show when={panel()}>{(item) => <TranslationPanel {...item()} />}</Show>
+            {/* 選び直すたびに作り直し、出現アニメーションを再生する */}
+            <Show when={button()} keyed>
+              {(item) => <SelectionButton {...item} />}
+            </Show>
             <Show when={tooltip()} keyed>
               {(item) => <Tooltip {...item} />}
             </Show>
-            <Show when={button()}>{(item) => <SelectionButton {...item()} />}</Show>
-            <Show when={panel()}>{(item) => <TranslationPanel {...item()} />}</Show>
-            <Toasts items={toasts()} onDismiss={dismissToast} />
           </>
         ),
         layer,
@@ -98,7 +102,8 @@ export function createOverlay(): Overlay {
       const id = nextId++;
       const viewport = currentViewport();
       const size = {
-        width: Math.min(PANEL_MAX_WIDTH, viewport.width - PANEL_SIDE_MARGIN),
+        // CSS 側の幅 min(440px, 100vw - 24px) と揃えるため、スクロールバーを含む innerWidth を使う
+        width: Math.min(PANEL_MAX_WIDTH, innerWidth - PANEL_SIDE_MARGIN),
         height: PANEL_ESTIMATED_HEIGHT,
       };
       const initial: PanelState = { status: "translating", text: "" };
