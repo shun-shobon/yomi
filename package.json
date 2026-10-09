@@ -12,6 +12,7 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "postinstall": "wxt prepare",
+    "test": "vitest run",
     "test:e2e": "node scripts/e2e.mjs",
     "typecheck": "tsc --noEmit",
     "zip": "wxt zip"
@@ -22,12 +23,14 @@
   },
   "devDependencies": {
     "@tsconfig/strictest": "2.0.8",
+    "happy-dom": "20.14.5",
     "oxfmt": "0.71.0",
     "oxlint": "1.86.0",
     "oxlint-tsgolint": "7.0.2003",
     "playwright-core": "1.63.0",
     "typescript": "6.0.3",
     "vite-plugin-solid": "2.11.14",
+    "vitest": "5.0.3",
     "wxt": "0.21.4"
   },
   "packageManager": "pnpm@12.9.1"
