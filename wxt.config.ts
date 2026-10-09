@@ -1,7 +1,9 @@
+import solid from "vite-plugin-solid";
 import { defineConfig } from "wxt";
 
 export default defineConfig({
   srcDir: "src",
+  vite: () => ({ plugins: [solid()] }),
   manifest: {
     name: "Yomi",
     description: "ChatGPT プランで Web ページ全体や選択テキストを翻訳します。",

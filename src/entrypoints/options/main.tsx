@@ -1,8 +1,8 @@
-import { render } from "preact";
-import { useEffect, useState } from "preact/hooks";
+import { createSignal, For, Match, Show, Switch } from "solid-js";
+import { render } from "solid-js/web";
 
 import "@/components/base.css";
-import { useAuth, useSettings, useShortcuts, useStorageItem } from "@/components/hooks";
+import { createAuth, createSettings, createShortcuts, createStorageItem } from "@/components/hooks";
 import { PlanStatus, SignInCard } from "@/components/SignInCard";
 import { TranslationSettingsFields } from "@/components/TranslationSettingsFields";
 import { signInItem } from "@/utils/auth-storage";
@@ -13,69 +13,76 @@ import { isReasoningEffort, type Settings } from "@/utils/settings";
 import "./style.css";
 
 function App() {
-  const auth = useAuth();
-  const [settings, update] = useSettings();
-
-  if (!auth || !settings) return null;
+  const auth = createAuth();
+  const [settings, update] = createSettings();
 
   return (
-    <main class="page">
-      <h1>Yomi</h1>
-      <p class="muted lead">
-        ChatGPT プランを使って、Web ページ全体や選択したテキストを翻訳します。
-      </p>
+    <Show when={auth() && settings()}>
+      <main class="page">
+        <h1>Yomi</h1>
+        <p class="muted lead">
+          ChatGPT プランを使って、Web ページ全体や選択したテキストを翻訳します。
+        </p>
 
-      <section class="section">
-        <h2>アカウント</h2>
-        {auth.signedIn ? (
-          <div class="row">
-            <div class="grow">
-              <PlanStatus />
-              <div class="muted small">{auth.email ?? "ChatGPT アカウント"}</div>
+        <section class="section">
+          <h2>アカウント</h2>
+          <Show when={auth()!.signedIn} fallback={<SignInSection />}>
+            <div class="row">
+              <div class="grow">
+                <PlanStatus />
+                <div class="muted small">{auth()!.email ?? "ChatGPT アカウント"}</div>
+              </div>
+              <button class="btn" onClick={() => void callBackground("auth:signOut")}>
+                サインアウト
+              </button>
             </div>
-            <button class="btn" onClick={() => void callBackground("auth:signOut")}>
-              サインアウト
-            </button>
+          </Show>
+        </section>
+
+        <section class="section">
+          <h2>モデル</h2>
+          <Show
+            when={auth()!.signedIn}
+            fallback={
+              <p class="muted small">
+                サインインすると、アカウントで利用できるモデルが表示されます。
+              </p>
+            }
+          >
+            <ModelSection settings={settings()!} update={update} />
+          </Show>
+        </section>
+
+        <section class="section">
+          <h2>翻訳</h2>
+          <div class="stack">
+            <TranslationSettingsFields
+              settings={settings()!}
+              update={update}
+              switches={["showSelectionButton", "hoverOriginal", "highlightPending"]}
+            />
           </div>
-        ) : (
-          <SignInSection />
-        )}
-      </section>
+        </section>
 
-      <section class="section">
-        <h2>モデル</h2>
-        {auth.signedIn ? (
-          <ModelSection settings={settings} update={update} />
-        ) : (
-          <p class="muted small">サインインすると、アカウントで利用できるモデルが表示されます。</p>
-        )}
-      </section>
-
-      <section class="section">
-        <h2>翻訳</h2>
-        <div class="stack">
-          <TranslationSettingsFields
-            settings={settings}
-            update={update}
-            switches={["showSelectionButton", "hoverOriginal", "highlightPending"]}
-          />
-        </div>
-      </section>
-
-      <UsageSection />
-    </main>
+        <UsageSection />
+      </main>
+    </Show>
   );
 }
 
 function SignInSection() {
-  const signIn = useStorageItem(signInItem);
+  const signIn = createStorageItem(signInItem);
+  const failure = () => {
+    const s = signIn();
+    return s?.status === "failed" ? s.message : undefined;
+  };
   return (
     <div class="stack">
       <SignInCard />
-      {signIn?.status === "pending" && (
+      <Show when={signIn()?.status === "pending"}>
         <p class="muted small">開いたタブで ChatGPT にサインインし、アクセスを許可してください。</p>
-      )}
-      {signIn?.status === "failed" && <p class="error-text">{signIn.message}</p>}
+      </Show>
+      <Show when={failure()}>{(message) => <p class="error-text">{message()}</p>}</Show>
       <p class="muted small">ChatGPT Plus / Pro プランが必要です。</p>
     </div>
   );
@@ -86,14 +93,8 @@ type ModelsView =
   | { status: "failed"; message: string }
   | { status: "ready"; models: ModelInfo[] };
 
-function ModelSection({
-  settings,
-  update,
-}: {
-  settings: Settings;
-  update: (patch: Partial<Settings>) => void;
-}) {
-  const [view, setView] = useState<ModelsView>({ status: "loading" });
+function ModelSection(props: { settings: Settings; update: (patch: Partial<Settings>) => void }) {
+  const [view, setView] = createSignal<ModelsView>({ status: "loading" });
   const load = () => {
     setView({ status: "loading" });
     callBackground("models:list").then(
@@ -102,98 +103,117 @@ function ModelSection({
         setView({ status: "failed", message: e instanceof Error ? e.message : String(e) }),
     );
   };
-  useEffect(load, []);
+  load();
 
-  if (view.status === "loading") {
-    return <p class="muted small">モデル一覧を取得しています…</p>;
-  }
-  if (view.status === "failed") {
-    return (
-      <div class="stack">
-        <p class="error-text">モデル一覧を取得できませんでした: {view.message}</p>
-        <div>
-          <button class="btn" onClick={load}>
-            再試行
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const selected = view.models.find((m) => m.slug === settings.model);
+  const models = () => {
+    const v = view();
+    return v.status === "ready" ? v.models : undefined;
+  };
+  const failure = () => {
+    const v = view();
+    return v.status === "failed" ? v.message : undefined;
+  };
+  const selected = () => models()?.find((m) => m.slug === props.settings.model);
   const selectModel = (model: ModelInfo) => {
-    const effortSupported = model.reasoningEfforts.includes(settings.reasoningEffort);
-    update({
+    const effortSupported = model.reasoningEfforts.includes(props.settings.reasoningEffort);
+    props.update({
       model: model.slug,
-      reasoningEffort: effortSupported ? settings.reasoningEffort : model.defaultReasoningEffort,
-      fastMode: settings.fastMode && model.supportsFast,
+      reasoningEffort: effortSupported
+        ? props.settings.reasoningEffort
+        : model.defaultReasoningEffort,
+      fastMode: props.settings.fastMode && model.supportsFast,
     });
   };
 
   return (
-    <div class="stack">
-      <label class="field">
-        <span>翻訳に使うモデル</span>
-        <select
-          value={settings.model ?? ""}
-          onChange={(e) => {
-            const { value } = e.currentTarget;
-            const model = view.models.find((m) => m.slug === value);
-            if (model) selectModel(model);
-          }}
-        >
-          <option value="" disabled>
-            選択してください
-          </option>
-          {view.models.map((m) => (
-            <option value={m.slug}>{m.displayName}</option>
-          ))}
-        </select>
-      </label>
-      {!settings.model && <p class="notice">翻訳を始める前にモデルを選択してください。</p>}
-      {settings.model && !selected && (
-        <p class="notice">選択中のモデル（{settings.model}）はこのアカウントでは利用できません。</p>
-      )}
-      {selected && <ModelOptions model={selected} settings={settings} update={update} />}
-    </div>
+    <Switch>
+      <Match when={view().status === "loading"}>
+        <p class="muted small">モデル一覧を取得しています…</p>
+      </Match>
+      <Match when={failure()}>
+        {(message) => (
+          <div class="stack">
+            <p class="error-text">モデル一覧を取得できませんでした: {message()}</p>
+            <div>
+              <button class="btn" onClick={load}>
+                再試行
+              </button>
+            </div>
+          </div>
+        )}
+      </Match>
+      <Match when={models()}>
+        {(models) => (
+          <div class="stack">
+            <label class="field">
+              <span>翻訳に使うモデル</span>
+              <select
+                value={props.settings.model ?? ""}
+                onChange={(e) => {
+                  const { value } = e.currentTarget;
+                  const model = models().find((m) => m.slug === value);
+                  if (model) selectModel(model);
+                }}
+              >
+                <option value="" disabled>
+                  選択してください
+                </option>
+                <For each={models()}>{(m) => <option value={m.slug}>{m.displayName}</option>}</For>
+              </select>
+            </label>
+            <Show when={!props.settings.model}>
+              <p class="notice">翻訳を始める前にモデルを選択してください。</p>
+            </Show>
+            <Show when={props.settings.model && !selected()}>
+              <p class="notice">
+                選択中のモデル（{props.settings.model}）はこのアカウントでは利用できません。
+              </p>
+            </Show>
+            <Show when={selected()}>
+              {(model) => (
+                <ModelOptions model={model()} settings={props.settings} update={props.update} />
+              )}
+            </Show>
+          </div>
+        )}
+      </Match>
+    </Switch>
   );
 }
 
-function ModelOptions({
-  model,
-  settings,
-  update,
-}: {
+function ModelOptions(props: {
   model: ModelInfo;
   settings: Settings;
   update: (patch: Partial<Settings>) => void;
 }) {
-  const effortSupported = model.reasoningEfforts.includes(settings.reasoningEffort);
+  const effortSupported = () =>
+    props.model.reasoningEfforts.includes(props.settings.reasoningEffort);
   return (
     <>
       <label class="field">
         <span>推論の強さ</span>
         <select
-          value={settings.reasoningEffort}
+          value={props.settings.reasoningEffort}
           onChange={(e) => {
             const { value } = e.currentTarget;
-            if (isReasoningEffort(value)) update({ reasoningEffort: value });
+            if (isReasoningEffort(value)) props.update({ reasoningEffort: value });
           }}
         >
-          {model.reasoningEfforts.map((effort) => (
-            <option value={effort}>{effort}</option>
-          ))}
+          <For each={props.model.reasoningEfforts}>
+            {(effort) => <option value={effort}>{effort}</option>}
+          </For>
         </select>
         <span class="muted small">
           低いほど速く、使用量の消費も少なくなります。翻訳には low 程度で十分です。
         </span>
       </label>
-      {!effortSupported && (
+      <Show when={!effortSupported()}>
         <p class="notice">
-          推論の強さ「{settings.reasoningEffort}」はこのモデルでは使えません。選び直してください。
+          推論の強さ「{props.settings.reasoningEffort}
+          」はこのモデルでは使えません。選び直してください。
         </p>
-      )}
-      {model.supportsFast && (
+      </Show>
+      <Show when={props.model.supportsFast}>
         <label class="switch">
           <span>
             高速モード
@@ -203,18 +223,19 @@ function ModelOptions({
           </span>
           <input
             type="checkbox"
-            checked={settings.fastMode}
-            onChange={(e) => update({ fastMode: e.currentTarget.checked })}
+            checked={props.settings.fastMode}
+            onChange={(e) => props.update({ fastMode: e.currentTarget.checked })}
           />
         </label>
-      )}
+      </Show>
     </>
   );
 }
 
 function UsageSection() {
-  const shortcuts = useShortcuts();
-  const translateKey = <kbd>{shortcuts["translate-page"] ?? "未設定"}</kbd>;
+  const shortcuts = createShortcuts();
+  // Solid の JSX は実 DOM ノードなので、同じ要素を 2 か所に置くと後から置いた方へ移動してしまう
+  const translateKey = () => <kbd>{shortcuts()["translate-page"] ?? "未設定"}</kbd>;
   return (
     <section class="section">
       <h2>使い方とショートカット</h2>
@@ -222,18 +243,21 @@ function UsageSection() {
         <tbody>
           <tr>
             <th>ページ全体を翻訳</th>
-            <td>ツールバーのポップアップ、右クリック「このページを翻訳」、または {translateKey}</td>
+            <td>
+              ツールバーのポップアップ、右クリック「このページを翻訳」、または {translateKey()}
+            </td>
           </tr>
           <tr>
             <th>選択テキストを翻訳</th>
             <td>
-              選択すると出るボタン、右クリック「選択テキストを翻訳」、または選択中に {translateKey}
+              選択すると出るボタン、右クリック「選択テキストを翻訳」、または選択中に{" "}
+              {translateKey()}
             </td>
           </tr>
           <tr>
             <th>原文 / 訳文の切り替え</th>
             <td>
-              ポップアップのボタン、または <kbd>{shortcuts["toggle-original"] ?? "未設定"}</kbd>
+              ポップアップのボタン、または <kbd>{shortcuts()["toggle-original"] ?? "未設定"}</kbd>
             </td>
           </tr>
         </tbody>
@@ -245,4 +269,4 @@ function UsageSection() {
   );
 }
 
-render(<App />, document.getElementById("app")!);
+render(() => <App />, document.getElementById("app")!);

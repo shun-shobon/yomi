@@ -1,3 +1,5 @@
+import { For } from "solid-js";
+
 import { isLanguageCode, LANGUAGE_CODES, LANGUAGES } from "@/utils/languages";
 import type { Settings } from "@/utils/settings";
 
@@ -16,33 +18,35 @@ interface Props {
 }
 
 /** 翻訳先の言語と、指定した表示設定のスイッチ */
-export function TranslationSettingsFields({ settings, update, switches }: Props) {
+export function TranslationSettingsFields(props: Props) {
   return (
     <>
       <label class="field">
         <span>翻訳先の言語</span>
         <select
-          value={settings.targetLang}
+          value={props.settings.targetLang}
           onChange={(e) => {
             const { value } = e.currentTarget;
-            if (isLanguageCode(value)) update({ targetLang: value });
+            if (isLanguageCode(value)) props.update({ targetLang: value });
           }}
         >
-          {LANGUAGE_CODES.map((code) => (
-            <option value={code}>{LANGUAGES[code].label}</option>
-          ))}
+          <For each={LANGUAGE_CODES}>
+            {(code) => <option value={code}>{LANGUAGES[code].label}</option>}
+          </For>
         </select>
       </label>
-      {switches.map((key) => (
-        <label class="switch">
-          <span>{SWITCH_LABELS[key]}</span>
-          <input
-            type="checkbox"
-            checked={settings[key]}
-            onChange={(e) => update({ [key]: e.currentTarget.checked })}
-          />
-        </label>
-      ))}
+      <For each={props.switches}>
+        {(key) => (
+          <label class="switch">
+            <span>{SWITCH_LABELS[key]}</span>
+            <input
+              type="checkbox"
+              checked={props.settings[key]}
+              onChange={(e) => props.update({ [key]: e.currentTarget.checked })}
+            />
+          </label>
+        )}
+      </For>
     </>
   );
 }

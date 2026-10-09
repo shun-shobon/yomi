@@ -1,9 +1,9 @@
-import { render } from "preact";
-import { useEffect, useState } from "preact/hooks";
+import { createSignal, Match, onCleanup, Show, Switch, type Accessor } from "solid-js";
+import { render } from "solid-js/web";
 
 import { browser } from "#imports";
 import "@/components/base.css";
-import { useAuth, useSettings, useShortcuts } from "@/components/hooks";
+import { createAuth, createSettings, createShortcuts } from "@/components/hooks";
 import { PlanStatus, SignInCard } from "@/components/SignInCard";
 import { TranslationSettingsFields } from "@/components/TranslationSettingsFields";
 import type { ContentMessage, PageState } from "@/utils/messages";
@@ -19,154 +19,162 @@ type PageView =
   | { status: "unavailable" }
   | { status: "ready"; state: PageState };
 
-function usePage(): [PageView, (message: ContentMessage) => void] {
-  const [view, setView] = useState<PageView>({ status: "loading" });
-  const [tabId, setTabId] = useState<number | null>(null);
-
-  useEffect(() => {
-    void browser.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
-      if (tab?.id === undefined) setView({ status: "unavailable" });
-      else setTabId(tab.id);
-    });
-  }, []);
+function createPage(): [Accessor<PageView>, (message: ContentMessage) => void] {
+  const [view, setView] = createSignal<PageView>({ status: "loading" });
+  let tabId: number | undefined;
 
   const send = (message: ContentMessage) => {
-    if (tabId === null) return;
+    if (tabId === undefined) return;
     browser.tabs.sendMessage(tabId, message).then(
       (state: PageState) => setView({ status: "ready", state }),
       () => setView({ status: "unavailable" }),
     );
   };
 
-  useEffect(() => {
-    if (tabId === null) return;
+  let timer: ReturnType<typeof setInterval> | undefined;
+  onCleanup(() => clearInterval(timer));
+  void browser.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
+    if (tab?.id === undefined) {
+      setView({ status: "unavailable" });
+      return;
+    }
+    tabId = tab.id;
     send({ type: "page:getState" });
-    const timer = setInterval(() => send({ type: "page:getState" }), POLL_MS);
-    return () => clearInterval(timer);
-  }, [tabId]);
+    timer = setInterval(() => send({ type: "page:getState" }), POLL_MS);
+  });
 
   return [view, send];
 }
 
 function App() {
-  const auth = useAuth();
-  const [settings, update] = useSettings();
-  const [page, sendToPage] = usePage();
-  const shortcuts = useShortcuts();
-
-  if (!auth || !settings) return <div class="popup" />;
+  const auth = createAuth();
+  const [settings, update] = createSettings();
+  const [page, sendToPage] = createPage();
+  const shortcuts = createShortcuts();
 
   return (
-    <div class="popup">
-      <header class="top">
-        <span class="brand">Yomi</span>
-        <button class="btn link small" onClick={() => void callBackground("open:options")}>
-          設定
-        </button>
-      </header>
-
-      {auth.signedIn ? (
-        <section class="account">
-          <PlanStatus />
-        </section>
-      ) : (
-        <SignInCard />
-      )}
-
-      {auth.signedIn && !settings.model && (
-        <div class="notice">
-          翻訳に使うモデルが未選択です。
-          <button class="btn link" onClick={() => void callBackground("open:options")}>
-            設定で選択
+    <Show when={auth() && settings()} fallback={<div class="popup" />}>
+      <div class="popup">
+        <header class="top">
+          <span class="brand">Yomi</span>
+          <button class="btn link small" onClick={() => void callBackground("open:options")}>
+            設定
           </button>
-        </div>
-      )}
+        </header>
 
-      <PageControls page={page} send={sendToPage} disabled={!auth.signedIn || !settings.model} />
+        <Show when={auth()!.signedIn} fallback={<SignInCard />}>
+          <section class="account">
+            <PlanStatus />
+          </section>
+        </Show>
 
-      <section class="settings">
-        <TranslationSettingsFields
-          settings={settings}
-          update={update}
-          switches={["showSelectionButton", "hoverOriginal"]}
+        <Show when={auth()!.signedIn && !settings()!.model}>
+          <div class="notice">
+            翻訳に使うモデルが未選択です。
+            <button class="btn link" onClick={() => void callBackground("open:options")}>
+              設定で選択
+            </button>
+          </div>
+        </Show>
+
+        <PageControls
+          page={page()}
+          send={sendToPage}
+          disabled={!auth()!.signedIn || !settings()!.model}
         />
-      </section>
 
-      <footer class="shortcuts small muted">
-        <span>
-          <kbd>{shortcuts["translate-page"] ?? "未設定"}</kbd> 翻訳 / 停止
-        </span>
-        <span>
-          <kbd>{shortcuts["toggle-original"] ?? "未設定"}</kbd> 原文切替
-        </span>
-        <button class="btn link small" onClick={() => void callBackground("open:shortcuts")}>
-          変更
-        </button>
-      </footer>
-    </div>
+        <section class="settings">
+          <TranslationSettingsFields
+            settings={settings()!}
+            update={update}
+            switches={["showSelectionButton", "hoverOriginal"]}
+          />
+        </section>
+
+        <footer class="shortcuts small muted">
+          <span>
+            <kbd>{shortcuts()["translate-page"] ?? "未設定"}</kbd> 翻訳 / 停止
+          </span>
+          <span>
+            <kbd>{shortcuts()["toggle-original"] ?? "未設定"}</kbd> 原文切替
+          </span>
+          <button class="btn link small" onClick={() => void callBackground("open:shortcuts")}>
+            変更
+          </button>
+        </footer>
+      </div>
+    </Show>
   );
 }
 
-function PageControls({
-  page,
-  send,
-  disabled,
-}: {
+function PageControls(props: {
   page: PageView;
   send: (message: ContentMessage) => void;
   disabled: boolean;
 }) {
-  if (page.status === "loading") return <section class="page" />;
-  if (page.status === "unavailable") {
-    return (
-      <section class="page">
-        <p class="muted small center">このページは翻訳できません</p>
-      </section>
-    );
-  }
-
-  const { state } = page;
-  const hasTranslations = state.done > 0;
+  const state = () => (props.page.status === "ready" ? props.page.state : undefined);
+  const hasTranslations = () => (state()?.done ?? 0) > 0;
   return (
     <section class="page">
-      {state.active ? (
-        <button class="btn block" onClick={() => send({ type: "page:stop" })}>
-          翻訳を停止
-        </button>
-      ) : (
-        <button
-          class="btn block primary"
-          disabled={disabled}
-          onClick={() => {
-            send({ type: "page:translate" });
-            window.close();
-          }}
-        >
-          このページを翻訳
-        </button>
-      )}
-      {hasTranslations && (
-        <button
-          class="btn block"
-          onClick={() =>
-            send({
-              type: state.showing === "translation" ? "page:showOriginal" : "page:showTranslation",
-            })
-          }
-        >
-          {state.showing === "translation" ? "原文を表示" : "訳文を表示"}
-        </button>
-      )}
-      {(state.active || hasTranslations) && (
-        <p class="progress small muted">
-          {state.busy > 0 && <span class="spinner" />}
-          翻訳済み {state.done}
-          {state.busy > 0 && ` · 処理中 ${state.busy}`}
-          {state.failed > 0 && <span class="error-text"> · 失敗 {state.failed}</span>}
-        </p>
-      )}
+      <Switch>
+        <Match when={props.page.status === "unavailable"}>
+          <p class="muted small center">このページは翻訳できません</p>
+        </Match>
+        <Match when={state()}>
+          {(state) => (
+            <>
+              <Show
+                when={state().active}
+                fallback={
+                  <button
+                    class="btn block primary"
+                    disabled={props.disabled}
+                    onClick={() => {
+                      props.send({ type: "page:translate" });
+                      window.close();
+                    }}
+                  >
+                    このページを翻訳
+                  </button>
+                }
+              >
+                <button class="btn block" onClick={() => props.send({ type: "page:stop" })}>
+                  翻訳を停止
+                </button>
+              </Show>
+              <Show when={hasTranslations()}>
+                <button
+                  class="btn block"
+                  onClick={() =>
+                    props.send({
+                      type:
+                        state().showing === "translation"
+                          ? "page:showOriginal"
+                          : "page:showTranslation",
+                    })
+                  }
+                >
+                  {state().showing === "translation" ? "原文を表示" : "訳文を表示"}
+                </button>
+              </Show>
+              <Show when={state().active || hasTranslations()}>
+                <p class="progress small muted">
+                  <Show when={state().busy > 0}>
+                    <span class="spinner" />
+                  </Show>
+                  翻訳済み {state().done}
+                  {state().busy > 0 && ` · 処理中 ${state().busy}`}
+                  <Show when={state().failed > 0}>
+                    <span class="error-text"> · 失敗 {state().failed}</span>
+                  </Show>
+                </p>
+              </Show>
+            </>
+          )}
+        </Match>
+      </Switch>
     </section>
   );
 }
 
-render(<App />, document.getElementById("app")!);
+render(() => <App />, document.getElementById("app")!);
