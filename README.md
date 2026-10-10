@@ -6,59 +6,18 @@ ChatGPT サブスクリプション（[Sign in with ChatGPT](https://developers.
 
 ## 機能
 
-- **ページ全体の翻訳**: 原文を訳文に置き換える。ビューポート付近から優先して翻訳し、スクロールや DOM の変化に追従する。リンク・太字などのインライン要素は保ち、`code` / `pre` / `.notranslate` は訳さない。
-- **原文表示**: 訳文にホバーすると原文をツールチップで表示する。ページ全体の原文 / 訳文も切り替えられる。
-- **選択テキストの翻訳**: 選択すると出るボタン、右クリックメニュー、ショートカットで翻訳し、結果をストリーミング表示する。
-- **キャッシュ**: 訳文をページ（クエリとハッシュを除いた URL）ごとにブラウザ内へ保存し、再訪問やリロードでは訳し直さない。設定画面から消去できる。
-- ショートカット: `Alt+T` 翻訳 / 停止（選択中は選択範囲を翻訳）、`Alt+O` 原文 / 訳文の切り替え
+- **ページ全体の翻訳**: スクロールやページの変化に合わせて、見えている部分から順に訳す。
+- **原文表示**: 訳文にホバーすると原文を表示する。ページ全体の原文 / 訳文も切り替えられる。
+- **選択テキストの翻訳**: 選択したテキストをその場で訳す。
+- **キャッシュ**: 一度訳したページは再訪問やリロードで訳し直さない。
 
-## 開発
+ショートカット: `Alt+T` 翻訳 / 停止（選択中は選択範囲を翻訳）、`Alt+O` 原文 / 訳文の切り替え
 
-Node.js と pnpm のバージョンは `mise.toml` で固定している。
+## 導入
 
-```sh
-mise install
-pnpm install
-pnpm dev        # 拡張を読み込んだ Chrome が起動する
-pnpm build      # .output/chrome-mv3 に出力
-pnpm typecheck
-pnpm test       # vitest
-pnpm lint       # oxlint（type-aware）。レイヤーの依存方向も検査する
-pnpm format     # oxfmt。CI 向けの検査は pnpm format:check
-```
+1. [Releases](https://github.com/shun-shobon/yomi/releases) から最新の `*-chrome.zip` をダウンロードして展開する。
+2. Chrome で `chrome://extensions` を開き、右上の「デベロッパー モード」をオンにする。
+3. 「パッケージ化されていない拡張機能を読み込む」から展開したフォルダを選ぶ。
+4. 拡張のポップアップから「ChatGPT でサインイン」を押し、開いたタブでアクセスを許可する。
 
-アイコンは `src/assets/icon.svg` を編集し、`public/icon/` の PNG を書き出し直す（Chromium は E2E と同じく `CHROMIUM_PATH` で指定する）。
-
-```sh
-CHROMIUM_PATH="$(node -p "require('playwright-core').chromium.executablePath()")" pnpm icons
-```
-
-README の画像は `docs/hero/` の HTML を編集し、同じく `pnpm hero` で `docs/hero.png` を書き出し直す。
-
-### ディレクトリ構成
-
-`src/` はレイヤーで分ける。各レイヤーは自分より右のレイヤー（間を飛ばしてもよい）にだけ依存でき、逆向きの import は `pnpm lint` がエラーにする。
-
-```
-entrypoints → ui → usecases → infra → domain
-```
-
-| ディレクトリ   | 置くもの                                                                                         |
-| -------------- | ------------------------------------------------------------------------------------------------ |
-| `domain/`      | 翻訳・設定・認証の規則。ブラウザ API・DOM・Solid に依存しない純粋なロジックと型                  |
-| `infra/`       | 外部とのやり取り。storage、拡張内メッセージング、OpenAI API、OAuth エンドポイント、ページ DOM    |
-| `usecases/`    | domain と infra を組み合わせた処理の流れ（サインイン、翻訳リクエスト、ページ翻訳の進行管理）     |
-| `ui/`          | Solid のコンポーネントとフック。content script の表示は `usecases/content/overlay.ts` を実装する |
-| `entrypoints/` | WXT のエントリポイント。リスナー登録と各レイヤーの配線だけを持つ                                 |
-
-### E2E テスト
-
-OpenAI API を service worker 内でモックし、ビルド済み拡張を Chromium で動かして翻訳パイプラインを検証する。Chrome 137 以降の正式版は `--load-extension` を無視するので、Chrome for Testing を使う。
-
-```sh
-pnpm exec playwright-core install --no-shell chromium
-pnpm build
-CHROMIUM_PATH="$(node -p "require('playwright-core').chromium.executablePath()")" pnpm test:e2e
-```
-
-`E2E_SCREENSHOT_DIR` に出力先を指定すると、選択テキスト翻訳やポップアップなど目視で確認する画面のスクリーンショットを保存する。
+更新するときは新しい zip を同じフォルダに展開し直し、`chrome://extensions` で再読み込みする。
