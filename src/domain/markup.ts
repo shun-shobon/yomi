@@ -1,8 +1,3 @@
-/**
- * 翻訳用マークアップの構文。
- * インライン要素は <gN>…</gN>、訳さない要素は <xN/> で表し、N は原文側の要素の番号。
- */
-
 export const groupOpen = (id: number) => `<g${id}>`;
 export const groupClose = (id: number) => `</g${id}>`;
 export const atomic = (id: number) => `<x${id}/>`;
@@ -13,7 +8,6 @@ export type Token =
 
 const TAG = /<(\/?)([gx])(\d+)\s*\/?>/g;
 
-/** テキストとタグを交互に返す。テキストは常にタグ数 + 1 個で、エンティティはデコード済み */
 export function* tokenize(markup: string): Generator<Token> {
   let last = 0;
   for (const match of markup.matchAll(TAG)) {
@@ -29,12 +23,10 @@ export function* tokenize(markup: string): Generator<Token> {
   yield { type: "text", text: decodeEntities(markup.slice(last)) };
 }
 
-/** タグ列の表現（例: "g0 /g0 x1"）。原文と訳文で一致すれば要素を動かさずにテキストだけ書き換えられる */
 export function tagSignature(token: Extract<Token, { type: "tag" }>): string {
   return `${token.kind === "close" ? "/" : ""}${token.kind === "atomic" ? "x" : "g"}${token.id}`;
 }
 
-/** 訳文をタグ列と、タグの間のテキスト列に分ける。テキスト列の長さは常にタグ数 + 1 */
 export function parse(markup: string): { structure: string; texts: string[] } {
   const tags: string[] = [];
   const texts: string[] = [];

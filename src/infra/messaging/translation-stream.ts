@@ -7,14 +7,12 @@ import {
 } from "@/infra/messaging/protocol";
 
 export interface StreamHandle {
-  /** 成功で resolve、失敗で TranslateFailure、cancel() で StreamCancelled を reject する */
   done: Promise<void>;
   cancel: () => void;
 }
 
 export class StreamCancelled extends Error {}
 
-/** background に翻訳を依頼する。port を切断すると background 側の fetch も中断される */
 export function requestTranslation(
   req: TranslateRequest,
   onDelta: (text: string) => void,

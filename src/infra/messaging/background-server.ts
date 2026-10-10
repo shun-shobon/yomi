@@ -39,7 +39,6 @@ export type TranslateHandler = (
   onDelta: (text: string) => void,
 ) => Promise<void>;
 
-/** port の切断で翻訳を中断する */
 export function serveTranslatePort(translate: TranslateHandler, toFailure: ToFailure) {
   browser.runtime.onConnect.addListener((port) => {
     if (port.name !== TRANSLATE_PORT) return;

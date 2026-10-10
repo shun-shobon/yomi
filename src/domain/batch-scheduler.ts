@@ -1,20 +1,15 @@
 const BATCH_MAX_CHARS = 2000;
 const BATCH_MAX_SEGMENTS = 25;
-/** ビューポート内では、この高さ（ビューポートに対する比率）に近いものから訳す */
 const READING_LINE = 0.3;
-/** 本文らしい領域を優先するため、スコアから差し引く量 */
 const MAIN_CONTENT_BONUS = 300;
-/** ビューポート外のものは、ビューポート内のどれよりも後にする */
 const OFFSCREEN_PENALTY = 100_000;
 
 export interface Placement {
   top: number;
   bottom: number;
-  /** main / article など本文と思われる領域の中にある */
   inMainContent: boolean;
 }
 
-/** 小さいほど先に訳す */
 export function priorityScore(p: Placement, viewportHeight: number): number {
   const line = viewportHeight * READING_LINE;
   const inView = p.bottom > 0 && p.top < viewportHeight;
@@ -24,10 +19,6 @@ export function priorityScore(p: Placement, viewportHeight: number): number {
   return p.inMainContent ? score - MAIN_CONTENT_BONUS : score;
 }
 
-/**
- * 優先度順に並んだ候補から、件数と文字数の上限まで詰める。
- * 上限を超える候補は飛ばして後続を試し、先頭の 1 件は大きくても必ず含める。
- */
 export function packBatch<T>(sorted: readonly T[], sizeOf: (item: T) => number): T[] {
   const batch: T[] = [];
   let chars = 0;

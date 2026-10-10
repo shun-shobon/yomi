@@ -8,7 +8,6 @@ export type ModelsView =
   | { status: "failed"; message: string }
   | { status: "ready"; models: ModelInfo[] };
 
-/** アカウントで利用できるモデル一覧。reload で取得し直す */
 export function createModels(): [Accessor<ModelsView>, () => void] {
   const [view, setView] = createSignal<ModelsView>({ status: "loading" });
   const load = () => {

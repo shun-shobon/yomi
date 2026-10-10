@@ -20,10 +20,8 @@ import {
 } from "./TranslationPanel";
 
 const TOAST_DURATION_MS = 3500;
-/** パネルの左右に確保する余白の合計 */
 const PANEL_SIDE_MARGIN = 24;
 
-/** ページの CSS から隔離した closed shadow DOM に、Solid で描画する */
 export function createOverlay(): Overlay {
   const [toasts, setToasts] = createSignal<ToastItem[]>([]);
   const [tooltip, setTooltip] = createSignal<TooltipItem | null>(null);

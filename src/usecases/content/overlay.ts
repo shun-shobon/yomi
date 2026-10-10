@@ -1,8 +1,5 @@
-/** ページ上に重ねる UI。usecases はこのインターフェース越しに表示を指示し、描画方法には関知しない */
 export interface Overlay {
-  /** イベントの発生元がこの UI か。ページ側の操作と区別するのに使う */
   isOwnTarget(target: EventTarget | null): boolean;
-  /** エラーや操作ボタン付きのトーストはユーザーが閉じるまで残す */
   toast(message: string, opts?: ToastOptions): void;
   showTooltip(anchor: DOMRect, label: string, text: string): void;
   hideTooltip(): void;

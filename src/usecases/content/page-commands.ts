@@ -5,7 +5,6 @@ import type { Overlay } from "./overlay";
 import type { PageTranslator } from "./page-translator";
 import type { SelectionTranslator } from "./selection-translator";
 
-/** popup・ショートカット・右クリックメニューからの指示を実行し、実行後のページ状態を返す */
 export function createPageCommands(deps: {
   overlay: Overlay;
   page: PageTranslator;

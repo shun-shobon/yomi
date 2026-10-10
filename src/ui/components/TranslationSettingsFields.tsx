@@ -17,7 +17,6 @@ interface Props {
   switches: DisplaySwitch[];
 }
 
-/** 翻訳先の言語と、指定した表示設定のスイッチ */
 export function TranslationSettingsFields(props: Props) {
   return (
     <>

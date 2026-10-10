@@ -26,7 +26,6 @@ const MAX_CONCURRENCY = 4;
 export interface PageTranslatorHooks {
   getSettings: () => Settings;
   onFatalFailure: (failure: TranslateFailure) => void;
-  /** 翻訳できなかった部分がある。翻訳セッションごとに 1 回だけ呼ぶ */
   onPartialFailure: () => void;
 }
 
@@ -72,7 +71,6 @@ export class PageTranslator {
     }
   }
 
-  /** 翻訳を開始する。原文表示中なら訳文に戻して再開し、翻訳先の言語が変わっていれば最初から訳し直す */
   start() {
     const { targetLang } = this.hooks.getSettings();
     if (this.lang !== null && this.lang !== targetLang) this.reset();
@@ -182,7 +180,6 @@ export class PageTranslator {
     if (this.watcher.isVisible(seg.parent)) this.enqueue(seg);
   }
 
-  /** ページ側が内容を書き換えたセグメントを破棄し、次の再スキャンで新しいセグメントとして拾い直す */
   private discard(seg: Segment) {
     seg.revert();
     this.transition(seg, "idle");
@@ -191,7 +188,7 @@ export class PageTranslator {
     this.watcher.markDirty(seg.parent);
   }
 
-  /** DOM から外れたセグメントを捨てる。SPA や無限スクロールでのメモリ増加を防ぐ */
+  /** SPA や無限スクロールでのメモリ増加を防ぐ */
   private prune() {
     for (const [parent, segs] of this.byParent) {
       if (parent.isConnected) continue;

@@ -74,7 +74,6 @@ export async function startSignIn(): Promise<void> {
   });
 }
 
-/** defineBackground 直下で同期登録した tabs.onUpdated から呼ぶ。loopback への遷移を捕まえて認可を完了する */
 export async function handleTabUpdated(tabId: number, url: string | undefined): Promise<boolean> {
   if (!url || !isRedirectUrl(url)) return false;
   const pending = await signInItem.getValue();
@@ -128,7 +127,7 @@ async function completeSignIn(pending: PendingSignIn, callback: URL): Promise<vo
   });
 }
 
-/** サインイン・サインアウトのたびに進める。進んでいたら refresh の結果を書き戻さない */
+/** 進んでいたら refresh の結果を書き戻さない */
 let credentialsGeneration = 0;
 let refreshPromise: Promise<Credentials> | null = null;
 

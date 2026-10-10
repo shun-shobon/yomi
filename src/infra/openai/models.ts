@@ -4,7 +4,6 @@ import { isReasoningEffort } from "@/domain/settings";
 /** Codex の Fast モードと同じく、この service tier をモデルが提供していれば優先処理を使える */
 export const FAST_SERVICE_TIER = "priority";
 
-/** SIWC の /models が返すモデル */
 export interface SiwcModel {
   slug: string;
   display_name: string;

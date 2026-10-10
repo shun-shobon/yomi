@@ -1,6 +1,5 @@
 import { TranslateFailure } from "./failure";
 
-/** API の失敗。HTTP 応答前やストリーム途中の失敗は status を持たない */
 export class ApiError extends Error {
   constructor(
     readonly status: number | null,
@@ -10,13 +9,11 @@ export class ApiError extends Error {
     super(message);
   }
 
-  /** access token が期限前に失効していた可能性があり、refresh すれば成功しうる */
   get isAuthExpired(): boolean {
     return this.status === 401 && this.code !== "subscription_sharing_invalid_user";
   }
 }
 
-/** background で起きたあらゆる失敗を、呼び出し側が行動を決められる TranslateFailure に変換する */
 export function toTranslateFailure(e: unknown): TranslateFailure {
   if (e instanceof TranslateFailure) return e;
   if (e instanceof ApiError) return fromApiError(e);

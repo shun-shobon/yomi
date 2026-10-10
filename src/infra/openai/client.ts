@@ -35,7 +35,7 @@ export interface StreamOptions {
   onDelta: (text: string) => void;
 }
 
-/** SIWC は stream: true / store: false が必須。response.completed を受け取った場合だけ成功とみなす */
+/** SIWC は stream: true / store: false が必須 */
 export async function streamResponse(opts: StreamOptions): Promise<void> {
   const stream = await withApiErrors(() =>
     createClient(opts.token).responses.create(

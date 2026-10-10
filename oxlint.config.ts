@@ -2,7 +2,6 @@ import { defineConfig, type OxlintOverride } from "oxlint";
 
 const layer = (name: string) => [`@/${name}`, `@/${name}/**`];
 
-/** 各レイヤーが依存してはいけない import 先。依存方向は README の「ディレクトリ構成」を参照 */
 const restrict = (files: string, forbidden: string[]): OxlintOverride => ({
   files: [files],
   rules: {

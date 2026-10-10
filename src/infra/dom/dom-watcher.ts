@@ -1,27 +1,21 @@
 import { blockAncestor, isHidden } from "./segmenter";
 
-/** ビューポートの上下この範囲に入った要素を先読みで翻訳する */
 const PREFETCH_MARGIN = "800px 0px";
 const RESCAN_THROTTLE_MS = 400;
-/** 表示状態の変化で隠れていた要素が現れたことを検知するための属性 */
 const VISIBILITY_ATTRIBUTES = ["class", "style", "hidden", "open", "aria-hidden"];
 
 export interface DomWatcherHandlers {
-  /** 自分（翻訳処理）が書き込んだノードか */
   isOwn: (node: Node) => boolean;
   onEnterView: (el: Element) => void;
   onTextChanged: (node: Text) => void;
-  /** 新しく現れた・表示されたノードを含む部分木。重複しない最上位の要素だけを渡す */
   rescan: (roots: Element[]) => void;
 }
 
-/** 翻訳対象の要素がビューポートに入ったことと、ページによる DOM の変化を検知する */
 export class DomWatcher {
   private io: IntersectionObserver | null = null;
   private mo: MutationObserver | null = null;
   private readonly visible = new Set<Element>();
   private readonly dirty = new Set<Element>();
-  /** 非表示のため走査しなかった要素。属性変化のたびに表示されたか確認する */
   private readonly hidden = new Set<Element>();
   private visibilityChanged = false;
   private timer: ReturnType<typeof setTimeout> | null = null;

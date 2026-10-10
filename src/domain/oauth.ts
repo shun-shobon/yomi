@@ -1,8 +1,3 @@
-/**
- * Sign in with ChatGPT（OAuth 2.0 + PKCE）のプロトコル上の規則。
- * 通信と保存は行わず、リクエストの組み立てと応答の検証だけを扱う。
- */
-
 const AUTHORIZE_URL = "https://auth.openai.com/api/accounts/authorize";
 export const RESOURCE = "https://api.openai.com/v1";
 const SCOPE = "openid profile email offline_access resource.invoke chatgpt.tokens.use.direct";
@@ -22,13 +17,11 @@ const REAUTH_ERRORS = new Set([
 ]);
 
 export interface AuthorizeRequest {
-  /** 発行済みの client_id。初回は dynamic registration で発行させるため null */
   clientId: string | null;
   hostId: string;
   state: string;
   nonce: string;
   codeChallenge: string;
-  /** 再サインイン時に前回の ID トークンを渡す */
   idTokenHint: string | null;
 }
 
@@ -54,7 +47,6 @@ export function isRedirectUrl(url: string): boolean {
   return url.startsWith(REDIRECT_URI);
 }
 
-/** 認可サーバーからのリダイレクトを検証し、トークン交換に必要な値を取り出す */
 export function parseAuthorizationCallback(
   callback: URL,
   expected: { state: string; clientId: string | null },
@@ -81,7 +73,6 @@ export class TokenEndpointError extends Error {
     super(message);
   }
 
-  /** refresh token が失効しており、サインインし直すしかない */
   get requiresReauth(): boolean {
     return REAUTH_ERRORS.has(this.code);
   }

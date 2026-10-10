@@ -21,7 +21,6 @@ export function currentViewport(): Viewport {
   };
 }
 
-/** anchor の直下に置く。下に収まらなければ上に反転する。anchor はビューポート座標 */
 export function placeBelow(
   anchor: DOMRect,
   size: { width: number; height: number },
@@ -39,7 +38,6 @@ export function placeBelow(
   return { left: left + viewport.scrollX, top: top + viewport.scrollY };
 }
 
-/** anchor の直上に置く。上に収まらなければ下に反転する。anchor はビューポート座標 */
 export function placeAbove(
   anchor: DOMRect,
   size: { width: number; height: number },

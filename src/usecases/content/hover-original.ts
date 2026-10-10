@@ -3,7 +3,6 @@ import type { PageTranslator } from "./page-translator";
 
 const HOVER_DELAY_MS = 300;
 
-/** 訳文にホバーしたとき、少し待ってから原文をツールチップで表示する */
 export function watchHoverOriginal(
   overlay: Overlay,
   page: PageTranslator,

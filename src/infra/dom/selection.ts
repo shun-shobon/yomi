@@ -1,6 +1,5 @@
 export interface TextSelection {
   text: string;
-  /** 選択範囲の最終行の矩形。ボタンやパネルをその近くに出す */
   rect: DOMRect;
 }
 

@@ -5,7 +5,6 @@ import type { PanelState } from "@/usecases/content/overlay";
 import type { PagePosition } from "./position";
 
 export const PANEL_MAX_WIDTH = 440;
-/** パネルを選択範囲の上下どちらに出すかの判定に使う見込みの高さ */
 export const PANEL_ESTIMATED_HEIGHT = 160;
 const COPIED_FEEDBACK_MS = 1500;
 

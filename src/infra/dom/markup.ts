@@ -2,15 +2,10 @@ import { atomic, escapeText, groupClose, groupOpen, tagSignature, tokenize } fro
 
 import { isAtomic, type Run } from "./segmenter";
 
-/**
- * ノード列 ⇄ 翻訳用マークアップの相互変換。
- * モデル出力は HTML として解釈せず、テキストノードの生成と既存要素の複製だけで組み立てるので XSS にならない。
- */
+/** モデル出力は HTML として解釈せず、テキストノードの生成と既存要素の複製だけで組み立てるので XSS にならない */
 
-/** タグとタグの間のテキスト領域。訳文を書き込む単位 */
 export interface Slot {
   texts: Text[];
-  /** 元のテキストノードが無い位置に訳文を入れる場合の挿入先 */
   parent: Node;
   before: Node | null;
 }
@@ -18,7 +13,6 @@ export interface Slot {
 export interface Serialized {
   markup: string;
   placeholders: Element[];
-  /** タグ列。domain/markup の parse が返す structure と比較する */
   structure: string;
   slots: Slot[];
 }
@@ -55,12 +49,10 @@ export function serialize({ parent, nodes }: Run): Serialized {
   return { markup, placeholders, structure: tags.join(" "), slots };
 }
 
-/** タグ構造が変わった訳文を、元要素の複製で組み立てる */
 export function build(markup: string, placeholders: Element[]): DocumentFragment {
   const fragment = document.createDocumentFragment();
   const stack: { node: Node; id: number }[] = [{ node: fragment, id: -1 }];
   const used = new Set<number>();
-  /** 元の要素 → 訳文に置いた複製。落ちた要素を元の親の複製に戻すのに使う */
   const clones = new Map<Node, Node>();
   const top = () => stack.at(-1)!.node;
 

@@ -1,14 +1,13 @@
-/** 呼び出し側が取るべき行動で分類した失敗の種別 */
 export type TranslateErrorKind =
-  | "signed_out" // サインインが必要
-  | "no_model" // モデル未選択
-  | "usage_limit" // ChatGPT プランの使用量上限
-  | "not_eligible" // プラン対象外・地域制限など
-  | "extension_reloaded" // 拡張の更新で content script と background の接続が切れた
-  | "unavailable" // 一時的な障害
+  | "signed_out"
+  | "no_model"
+  | "usage_limit"
+  | "not_eligible"
+  | "extension_reloaded"
+  | "unavailable"
   | "other";
 
-/** プロセス間で受け渡す失敗の表現。runtime messaging を通すため plain object */
+/** runtime messaging を通すため plain object */
 export interface SerializedFailure {
   kind: TranslateErrorKind;
   message: string;
@@ -31,11 +30,9 @@ export class TranslateFailure extends Error {
   }
 }
 
-/** ユーザーが失敗を解消するための操作 */
 export type FailureRemedy = "sign_in" | "open_options" | "open_usage";
 
 interface FailurePolicy {
-  /** ページ翻訳を続けても同じ失敗を繰り返すだけなので、セッションを止める */
   fatal: boolean;
   remedy: FailureRemedy | null;
 }

@@ -1,5 +1,3 @@
-// ビルド済み拡張を Chromium に読み込み、OpenAI API を service worker 内でモックして翻訳パイプラインを検証する。
-// 実行: pnpm build && CHROMIUM_PATH=<Chrome for Testing の実行ファイル> node scripts/e2e.mjs [スクリーンショット出力先]
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -56,7 +54,6 @@ try {
     });
     await chrome.storage.sync.set({ settings: { model: "gpt-6-luna", targetLang: "ja" } });
 
-    // 訳文の代わりにテキスト部分を大文字化し「JA:」を付けて返す。タグはそのまま保つ
     const fakeTranslate = (markup) =>
       markup.startsWith("Click ")
         ? // 語順が変わりタグ構造が原文と一致しないケース
@@ -305,7 +302,6 @@ try {
     requests.every((r) => r.input.every((m) => m.role !== "system")),
   );
 
-  // ホバーで原文
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.hover("#li1");
   await page.waitForTimeout(500);

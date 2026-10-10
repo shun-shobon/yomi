@@ -5,7 +5,7 @@ import { markTranslated } from "./markers";
 import { build, serialize, type Serialized } from "./markup";
 import type { Run } from "./segmenter";
 
-/** 既存のテキストノードへの書き込み。要素を差し替えないのでフレームワーク管理下の DOM を壊さない */
+/** 要素を差し替えないのでフレームワーク管理下の DOM を壊さない */
 interface TextWrite {
   node: Text;
   original: string;
@@ -20,7 +20,6 @@ export class Segment {
   readonly originalText: string;
   readonly serialized: Serialized;
   state: SegmentState = "idle";
-  /** 担当中のバッチ。古いバッチの結果で上書きしないための照合に使う */
   batch = 0;
   private applied: Applied | null = null;
 
@@ -31,7 +30,6 @@ export class Segment {
     this.serialized = serialize(run);
   }
 
-  /** このセグメントが所有するノード。MutationObserver で自分の書き込みを見分けるのに使う */
   ownedNodes(): Node[] {
     return [
       ...this.original,
@@ -41,10 +39,6 @@ export class Segment {
     ];
   }
 
-  /**
-   * 訳文を反映する。タグ構造が原文と同じなら既存のテキストノードを書き換え、
-   * 語順の変化などで構造が変わった場合だけ元要素の複製に置き換える。
-   */
   applyTranslation(markup: string) {
     const parsed = parse(markup.trim());
     this.applied =
@@ -54,7 +48,6 @@ export class Segment {
     markTranslated(this.parent);
   }
 
-  /** 表示を切り替える。前回の表示からページ側が書き換えていた場合は false を返す */
   render(showing: Showing): boolean {
     const applied = this.applied;
     if (!applied) return true;
@@ -75,16 +68,11 @@ export class Segment {
     return true;
   }
 
-  /** 書き込んだ訳文を原文に戻す。ページ側が書き換えた箇所はそのまま残す */
   revert() {
     if (this.applied?.mode !== "inplace") return;
     for (const w of this.applied.writes) if (w.node.data === w.translated) w.node.data = w.original;
   }
 
-  /**
-   * ページ側によるテキストノードの書き換えを判定する。
-   * 自分の書き込みなら "own"、原文への書き戻しなら訳文を当て直して "own"、それ以外は "changed"。
-   */
   classifyTextChange(node: Text, showing: Showing): "own" | "changed" {
     if (this.state !== "done") return "changed";
     // 複製に置き換えた場合、元のテキストノードは DOM から外れているので監視対象外
@@ -98,7 +86,6 @@ export class Segment {
     return "changed";
   }
 
-  /** スロットごとに先頭のテキストノードへ訳文を入れ、残りは空にする。テキストノードが無いスロットには新規に挿入する */
   private planWrites(texts: string[]): TextWrite[] {
     const { slots } = this.serialized;
     const writes: TextWrite[] = [];

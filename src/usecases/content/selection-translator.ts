@@ -12,7 +12,6 @@ import {
 import type { Overlay, TranslationPanel } from "./overlay";
 
 const MAX_SELECTION_CHARS = 8000;
-/** 右クリックメニュー経由で選択範囲の位置が取れない場合の、パネルの基準位置 */
 const FALLBACK_TOP = 16;
 
 export interface SelectionHooks {
@@ -39,7 +38,6 @@ export class SelectionTranslator {
     });
   }
 
-  /** 現在の選択範囲を翻訳する。選択がなければ false */
   translateCurrent(): boolean {
     const sel = currentSelection();
     if (!sel) return false;
@@ -47,7 +45,6 @@ export class SelectionTranslator {
     return true;
   }
 
-  /** 右クリックメニュー経由。選択範囲の位置が取れない場合は画面上部中央に出す */
   translateText(text: string) {
     this.open(text, currentSelection()?.rect ?? new DOMRect(innerWidth / 2, FALLBACK_TOP, 0, 0));
   }

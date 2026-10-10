@@ -9,11 +9,9 @@ const POLL_MS = 500;
 
 export type PageView =
   | { status: "loading" }
-  /** content script を注入できないページ（chrome:// など） */
   | { status: "unavailable" }
   | { status: "ready"; state: PageState };
 
-/** アクティブなタブの翻訳状態を追従し、そのタブに指示を送る */
 export function createActivePage(): [Accessor<PageView>, (message: ContentMessage) => void] {
   const [view, setView] = createSignal<PageView>({ status: "loading" });
   let tabId: number | undefined;
