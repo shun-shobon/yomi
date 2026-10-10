@@ -60,6 +60,8 @@ export function build(markup: string, placeholders: Element[]): DocumentFragment
   const fragment = document.createDocumentFragment();
   const stack: { node: Node; id: number }[] = [{ node: fragment, id: -1 }];
   const used = new Set<number>();
+  /** 元の要素 → 訳文に置いた複製。落ちた要素を元の親の複製に戻すのに使う */
+  const clones = new Map<Node, Node>();
   const top = () => stack.at(-1)!.node;
 
   for (const token of tokenize(markup)) {
@@ -80,16 +82,25 @@ export function build(markup: string, placeholders: Element[]): DocumentFragment
       top().appendChild(original.cloneNode(true));
     } else {
       const el = original.cloneNode(false);
+      clones.set(original, el);
       top().appendChild(el);
       stack.push({ node: el, id: token.id });
     }
   }
 
-  // モデルが落とした画像やコード片を消さないよう、末尾に補う
+  // モデルが落とした画像やコード片を消さないよう、訳文に残った最も近い親の末尾（なければ全体の末尾）に補う。
+  // 親の複製は浅いコピーなので、ここで補わないと親の中にあった要素は残らない
   placeholders.forEach((el, id) => {
-    if (!used.has(id) && isAtomic(el) && !placeholders.some((p) => p !== el && p.contains(el))) {
-      fragment.appendChild(el.cloneNode(true));
+    if (used.has(id) || !isAtomic(el)) return;
+    let parent: Node = fragment;
+    for (let p = el.parentNode; p; p = p.parentNode) {
+      const clone = clones.get(p);
+      if (clone) {
+        parent = clone;
+        break;
+      }
     }
+    parent.appendChild(el.cloneNode(true));
   });
   return fragment;
 }

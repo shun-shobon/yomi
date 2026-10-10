@@ -87,6 +87,18 @@ describe("build", () => {
     expect(html(build("<x1/> を参照", placeholders))).toBe("<code>x</code> を参照<img>");
   });
 
+  it("インライン要素の中から落ちた atomic 要素は、その要素の複製の末尾に補う", () => {
+    const { placeholders } = serializeChildren('see <a href="/x">this <img></a>');
+    expect(html(build("<g0>これ</g0>を参照", placeholders))).toBe(
+      '<a href="/x">これ<img></a>を参照',
+    );
+  });
+
+  it("親のインライン要素ごと落ちた atomic 要素は、全体の末尾に補う", () => {
+    const { placeholders } = serializeChildren('see <a href="/x">this <img></a>');
+    expect(html(build("これを参照", placeholders))).toBe("これを参照<img>");
+  });
+
   it("落ちたのがインライン要素なら補わない", () => {
     const { placeholders } = serializeChildren("<b>x</b>");
     expect(html(build("太字なし", placeholders))).toBe("太字なし");
