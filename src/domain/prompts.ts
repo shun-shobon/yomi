@@ -1,7 +1,14 @@
 import { LANGUAGES, type LanguageCode } from "@/domain/languages";
 
-export function pageInstructions(targetLang: LanguageCode, pageTitle: string): string {
+export interface PageContext {
+  title: string;
+  description: string;
+}
+
+export function pageInstructions(targetLang: LanguageCode, page: PageContext): string {
   const lang = LANGUAGES[targetLang].englishName;
+  const title = page.title.trim().slice(0, 200);
+  const description = page.description.trim().slice(0, 300);
   return [
     `You are a professional translator embedded in a web browser. Translate web page text into natural, fluent ${lang}.`,
     "",
@@ -15,7 +22,9 @@ export function pageInstructions(targetLang: LanguageCode, pageTitle: string): s
     `- If a segment is already in ${lang} or contains nothing to translate, output it unchanged.`,
     "- Segments come from the same page, so keep terminology consistent across them.",
     "",
-    `Page title (context only, do not output it): ${pageTitle.slice(0, 200)}`,
+    "Page context (for reference only, do not output it):",
+    `- Title: ${title}`,
+    ...(description ? [`- Description: ${description}`] : []),
   ].join("\n");
 }
 

@@ -24,6 +24,13 @@ import {
 
 const MAX_CONCURRENCY = 4;
 
+function pageContext() {
+  const description = document.querySelector<HTMLMetaElement>(
+    'meta[name="description"], meta[property="og:description"]',
+  );
+  return { title: document.title, description: description?.content ?? "" };
+}
+
 export interface PageTranslatorHooks {
   getSettings: () => Settings;
   onFatalFailure: (failure: TranslateFailure) => void;
@@ -249,7 +256,7 @@ export class PageTranslator {
     const mine = (seg: Segment) => seg.batch === token && seg.state === "pending";
     const handle = requestTranslation(
       {
-        instructions: pageInstructions(lang, document.title),
+        instructions: pageInstructions(lang, pageContext()),
         input: encodeBatch(batch.map((seg) => seg.serialized.markup)),
       },
       createBatchDecoder((index, markup) => {
