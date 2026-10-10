@@ -110,7 +110,9 @@ async function completeSignIn(pending: PendingSignIn, callback: URL): Promise<vo
     resource: RESOURCE,
   });
   if (!hasRequiredScope(tokens.scope)) {
-    throw new Error("このアカウントでは ChatGPT プランを利用できません（Plus / Pro が必要です）");
+    throw new Error(
+      "このアカウントでは ChatGPT サブスクリプションを利用できません（Plus / Pro が必要です）",
+    );
   }
   if (tokens.idToken == null) throw new Error("ID トークンが発行されませんでした");
   const claims = decodeIdToken(tokens.idToken);

@@ -332,7 +332,7 @@ describe("handleTabUpdated", () => {
 
   it.each([
     [
-      "ChatGPT プランのスコープがない",
+      "ChatGPT サブスクリプションのスコープがない",
       tokens({ scope: "openid email", idToken: idToken({ nonce: "nonce-1" }) }),
     ],
     ["ID トークンの nonce が一致しない", tokens({ idToken: idToken({ nonce: "other" }) })],

@@ -25,7 +25,7 @@ jobs:
         run: pnpm run format:check
 
   lint:
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Setup | Checkout
@@ -51,7 +51,7 @@ jobs:
         run: pnpm run typecheck
 
   test:
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Setup | Checkout

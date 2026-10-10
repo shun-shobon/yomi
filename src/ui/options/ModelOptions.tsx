@@ -39,7 +39,7 @@ export function ModelOptions(props: {
           <span>
             高速モード
             <span class="muted small block">
-              応答が速くなる代わりに、ChatGPT プランの使用量を多く消費します。
+              応答が速くなる代わりに、ChatGPT サブスクリプションの使用量を多く消費します。
             </span>
           </span>
           <input

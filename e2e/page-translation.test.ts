@@ -31,7 +31,7 @@ beforeAll(async () => {
 
 describe("ページ翻訳", () => {
   test("見出しが翻訳される", async () => {
-    expect(await text("#h1")).toMatch(/^JA:GETTING/);
+    expect(await text("#h1")).toMatch(/^JA:GETTING/u);
   });
 
   test("リンクの href が保たれる", async () => {
@@ -57,7 +57,7 @@ describe("ページ翻訳", () => {
   });
 
   test("語順が変わってもリンクを保つ", async () => {
-    expect((await page.innerHTML("#p2")).replace(/ id="link2"/, "")).toBe(
+    expect((await page.innerHTML("#p2")).replace(/ id="link2"/u, "")).toBe(
       '<a href="/x">HERE</a> CLICK NOW',
     );
   });
@@ -169,7 +169,7 @@ describe("キャッシュ", () => {
     await cachedPage.bringToFront();
     await ext.sendToTab({ type: "page:translate" });
     await expect.poll(() => cachedPage.textContent("#far")).toContain("JA:");
-    expect(await cachedPage.textContent("#h1")).toMatch(/^JA:GETTING/);
+    expect(await cachedPage.textContent("#h1")).toMatch(/^JA:GETTING/u);
     expect((await ext.requests()).length).toBe(before);
     await cachedPage.close();
   });
@@ -187,8 +187,8 @@ describe("キャッシュ", () => {
   test("設定画面で保存済みの訳文の件数を表示し、消去できる", async () => {
     const options = await ext.context.newPage();
     await options.goto(`chrome-extension://${ext.extensionId}/options.html`);
-    const label = options.getByText(/保存済みの訳文/);
-    await expect.poll(() => label.textContent()).toMatch(/保存済みの訳文 [1-9]\d* 件/);
+    const label = options.getByText(/保存済みの訳文/u);
+    await expect.poll(() => label.textContent()).toMatch(/保存済みの訳文 [1-9]\d* 件/u);
     await options.getByRole("button", { name: "キャッシュを消去" }).click();
     await expect.poll(() => label.textContent()).toContain(" 0 件");
     await options.close();

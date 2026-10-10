@@ -17,7 +17,7 @@ function serializeChildren(html: string) {
   return serialize({ parent: p, nodes: [first!, ...rest] });
 }
 
-function html(fragment: DocumentFragment): string {
+function toHtml(fragment: DocumentFragment): string {
   const div = document.createElement("div");
   div.append(fragment);
   return div.innerHTML;
@@ -68,7 +68,7 @@ describe("build", () => {
   it("訳文の語順に合わせて要素の複製を並べ替える", () => {
     const { placeholders } = serializeChildren('Read <a href="/x">the docs</a> <b>now</b>');
     const fragment = build("<g1>今すぐ</g1><g0>ドキュメント</g0>を読む", placeholders);
-    expect(html(fragment)).toBe('<b>今すぐ</b><a href="/x">ドキュメント</a>を読む');
+    expect(toHtml(fragment)).toBe('<b>今すぐ</b><a href="/x">ドキュメント</a>を読む');
   });
 
   it("元の要素は動かさず複製する", () => {
@@ -80,39 +80,41 @@ describe("build", () => {
 
   it("存在しない id のタグは捨てて中身のテキストを残す", () => {
     const { placeholders } = serializeChildren("<b>x</b>");
-    expect(html(build("<g0>太字</g0><g7>余分</g7>", placeholders))).toBe("<b>太字</b>余分");
+    expect(toHtml(build("<g0>太字</g0><g7>余分</g7>", placeholders))).toBe("<b>太字</b>余分");
   });
 
   it("重複した id は最初の 1 つだけ要素にし、2 つ目は中身のテキストだけ残す", () => {
     const { placeholders } = serializeChildren("<b>x</b> <img>");
-    expect(html(build("<g0>一</g0><g0>二</g0><x1/><x1/>", placeholders))).toBe("<b>一</b>二<img>");
+    expect(toHtml(build("<g0>一</g0><g0>二</g0><x1/><x1/>", placeholders))).toBe(
+      "<b>一</b>二<img>",
+    );
   });
 
   it("閉じ忘れた入れ子のタグは外側の閉じタグでまとめて閉じる", () => {
     const { placeholders } = serializeChildren("<a><b>x</b></a>");
-    expect(html(build("<g0><g1>中</g0>外", placeholders))).toBe("<a><b>中</b></a>外");
+    expect(toHtml(build("<g0><g1>中</g0>外", placeholders))).toBe("<a><b>中</b></a>外");
   });
 
   it("訳文から落ちた atomic 要素を末尾に補う", () => {
     const { placeholders } = serializeChildren("see <img> and <code>x</code>");
-    expect(html(build("<x1/> を参照", placeholders))).toBe("<code>x</code> を参照<img>");
+    expect(toHtml(build("<x1/> を参照", placeholders))).toBe("<code>x</code> を参照<img>");
   });
 
   it("インライン要素の中から落ちた atomic 要素は、その要素の複製の末尾に補う", () => {
     const { placeholders } = serializeChildren('see <a href="/x">this <img></a>');
-    expect(html(build("<g0>これ</g0>を参照", placeholders))).toBe(
+    expect(toHtml(build("<g0>これ</g0>を参照", placeholders))).toBe(
       '<a href="/x">これ<img></a>を参照',
     );
   });
 
   it("親のインライン要素ごと落ちた atomic 要素は、全体の末尾に補う", () => {
     const { placeholders } = serializeChildren('see <a href="/x">this <img></a>');
-    expect(html(build("これを参照", placeholders))).toBe("これを参照<img>");
+    expect(toHtml(build("これを参照", placeholders))).toBe("これを参照<img>");
   });
 
   it("落ちたのがインライン要素なら補わない", () => {
     const { placeholders } = serializeChildren("<b>x</b>");
-    expect(html(build("太字なし", placeholders))).toBe("太字なし");
+    expect(toHtml(build("太字なし", placeholders))).toBe("太字なし");
   });
 
   it("エンティティはテキストとしてデコードし、HTML として解釈しない", () => {

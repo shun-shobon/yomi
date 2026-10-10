@@ -193,7 +193,7 @@ describe("decodeIdToken", () => {
   it("base64url の - と _ を含むペイロードを UTF-8 として読む", () => {
     // "?>" と "?" の並びは base64 で "+" や "/" になり、base64url では "-" と "_" に置き換わる
     const token = jwt({ nonce: "??>>", email: "山田@例え.jp" });
-    expect(token.split(".")[1]).toMatch(/[-_]/);
+    expect(token.split(".")[1]).toMatch(/[-_]/u);
     expect(decodeIdToken(token)).toEqual({ nonce: "??>>", email: "山田@例え.jp" });
   });
 
@@ -216,6 +216,6 @@ describe("createPkce", () => {
     const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier));
     const expected = Buffer.from(digest).toString("base64url");
     expect(challenge).toBe(expected);
-    expect(verifier).toMatch(/^[A-Za-z0-9_-]{43,128}$/);
+    expect(verifier).toMatch(/^[A-Za-z0-9_-]{43,128}$/u);
   });
 });

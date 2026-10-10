@@ -48,6 +48,6 @@ async function withAuthRetry<T>(
     return await fn(await getAccessToken());
   } catch (e) {
     if (!(e instanceof ApiError && e.isAuthExpired && canRetry())) throw e;
-    return fn(await getAccessToken(true));
+    return await fn(await getAccessToken(true));
   }
 }

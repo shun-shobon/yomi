@@ -1,0 +1,119 @@
+# This workflow is managed by gh actions-lock.
+
+name: release
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: Version to bump
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: easy-release
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Setup | Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Setup | Development environment
+        uses: $/.github/actions/setup
+
+      - name: Run | Create Release Pull Request
+        uses: shun-shobon/easy-release@v0.2.0
+        with:
+          mode: prepare
+          release-type: ${{ inputs.release_type }}
+
+  draft:
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    outputs:
+      ready: ${{ steps.draft.outputs.ready }}
+      tag: ${{ steps.draft.outputs.tag }}
+      commit: ${{ steps.draft.outputs.commit }}
+      release-id: ${{ steps.draft.outputs.release-id }}
+    steps:
+      - name: Setup | Checkout Merged Commit
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+
+      - name: Run | Create Draft Release
+        id: draft
+        uses: shun-shobon/easy-release@v0.2.0
+        with:
+          mode: draft
+
+  extension:
+    needs: draft
+    if: needs.draft.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Setup | Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ needs.draft.outputs.commit }}
+
+      - name: Setup | Development environment
+        uses: $/.github/actions/setup
+
+      - name: Build | Extension Zip
+        run: pnpm run zip
+
+      - name: Run | Upload Extension Zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ needs.draft.outputs.tag }}
+        run: gh release upload "$RELEASE_TAG" .output/*-chrome.zip --clobber
+
+  release:
+    needs: [draft, extension]
+    if: needs.draft.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Setup | Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ needs.draft.outputs.commit }}
+
+      - name: Run | Publish Release
+        uses: shun-shobon/easy-release@v0.2.0
+        with:
+          mode: publish
+          release-id: ${{ needs.draft.outputs.release-id }}
+          tag: ${{ needs.draft.outputs.tag }}
+          commit: ${{ needs.draft.outputs.commit }}

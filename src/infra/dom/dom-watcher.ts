@@ -56,7 +56,7 @@ export class DomWatcher {
     for (const record of records) {
       switch (record.type) {
         case "attributes":
-          if (this.hidden.size) {
+          if (this.hidden.size > 0) {
             this.visibilityChanged = true;
             this.scheduleRescan();
           }

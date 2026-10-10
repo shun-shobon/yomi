@@ -35,7 +35,7 @@ export function createOverlay(): Overlay {
   const mount = () => {
     if (host == null) {
       host = document.createElement("yomi-ui");
-      host.setAttribute("data-gt-ui", "");
+      host.dataset["gtUi"] = "";
       host.style.cssText =
         "position:absolute!important;top:0!important;left:0!important;width:0!important;height:0!important;z-index:2147483647!important;";
       const shadow = host.attachShadow({ mode: "closed" });

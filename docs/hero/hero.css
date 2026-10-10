@@ -1,0 +1,105 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  width: 1280px;
+  height: 640px;
+  background: #ffffff;
+  color: #26252a;
+  font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
+}
+.hero {
+  display: grid;
+  grid-template-columns: 470px 1fr;
+  align-items: center;
+  gap: 56px;
+  height: 100%;
+  padding: 0 72px 0 88px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.brand img {
+  width: 84px;
+  height: 84px;
+}
+h1 {
+  font-size: 64px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.tagline {
+  margin-top: 28px;
+  font-size: 27px;
+  line-height: 1.55;
+  font-weight: 600;
+}
+
+.page {
+  height: 470px;
+  border-radius: 8px;
+  background: #f7f6f2;
+  overflow: hidden;
+}
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 40px;
+  padding: 0 16px;
+  background: #ebe9e3;
+}
+.bar i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d3d0c8;
+}
+.bar span {
+  margin-left: 14px;
+  color: #77736b;
+  font-size: 13px;
+}
+article {
+  position: relative;
+  padding: 34px 40px;
+  font-size: 17px;
+  line-height: 1.8;
+}
+h2 {
+  font-size: 26px;
+  margin-bottom: 16px;
+}
+.tooltip + p {
+  margin-top: 18px;
+}
+.hovered {
+  background: rgba(200, 167, 100, 0.22);
+  border-bottom: 2px solid #c8a764;
+}
+/* 拡張のツールチップはページの配色に関係なく暗いので、白背景でも実物の色に合わせる */
+.tooltip {
+  position: absolute;
+  top: 206px;
+  left: 96px;
+  width: 470px;
+  padding: 10px 14px;
+  border-radius: 4px;
+  background: #161519;
+  color: #e4e0d8;
+  border: 1px solid #2c2b31;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  font-size: 15px;
+  line-height: 1.55;
+}
+.tooltip .label {
+  display: block;
+  font-size: 12px;
+  color: #99948b;
+  margin-bottom: 2px;
+}
