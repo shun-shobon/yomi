@@ -9,6 +9,7 @@
     "dev": "wxt",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
+    "icons": "node scripts/icons.ts",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "postinstall": "wxt prepare",

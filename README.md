@@ -25,6 +25,12 @@ pnpm lint       # oxlint（type-aware）。レイヤーの依存方向も検査�
 pnpm format     # oxfmt。CI 向けの検査は pnpm format:check
 ```
 
+アイコンは `src/assets/icon.svg` を編集し、`public/icon/` の PNG を書き出し直す（Chromium は E2E と同じく `CHROMIUM_PATH` で指定する）。
+
+```sh
+CHROMIUM_PATH="$(node -p "require('playwright-core').chromium.executablePath()")" pnpm icons
+```
+
 ### ディレクトリ構成
 
 `src/` はレイヤーで分ける。各レイヤーは自分より右のレイヤー（間を飛ばしてもよい）にだけ依存でき、逆向きの import は `pnpm lint` がエラーにする。
