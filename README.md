@@ -1,5 +1,7 @@
 # Yomi
 
+![Yomi](docs/hero.png)
+
 ChatGPT サブスクリプション（[Sign in with ChatGPT](https://developers.openai.com/siwc/token-sharing-open-source)）で Web ページを翻訳する Chrome 拡張。
 
 ## 機能
@@ -30,6 +32,8 @@ pnpm format     # oxfmt。CI 向けの検査は pnpm format:check
 ```sh
 CHROMIUM_PATH="$(node -p "require('playwright-core').chromium.executablePath()")" pnpm icons
 ```
+
+README の画像は `docs/hero/` の HTML を編集し、同じく `pnpm hero` で `docs/hero.png` を書き出し直す。
 
 ### ディレクトリ構成
 
