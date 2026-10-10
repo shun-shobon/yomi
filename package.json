@@ -27,8 +27,8 @@
     "valibot": "1.5.0"
   },
   "devDependencies": {
-    "@shun-shobon/oxfmt-config": "6.0.0",
-    "@shun-shobon/oxlint-config": "6.0.0",
+    "@shun-shobon/oxfmt-config": "6.0.1",
+    "@shun-shobon/oxlint-config": "6.0.1",
     "@tsconfig/strictest": "2.0.8",
     "happy-dom": "20.14.5",
     "oxfmt": "0.72.0",
