@@ -108,6 +108,13 @@ export function isHidden(el: Element): boolean {
   return !el.checkVisibility() && getComputedStyle(el).display !== "contents";
 }
 
+// white-space-collapse と text-wrap-mode の組み合わせによっては "preserve-breaks nowrap" のような値になる
+const KEEPS_NEWLINES = /^(pre|pre-wrap|pre-line|break-spaces|preserve|preserve-breaks)(?![\w-])/;
+
+export function keepsNewlines(el: Element): boolean {
+  return KEEPS_NEWLINES.test(getComputedStyle(el).whiteSpace);
+}
+
 const LETTER = /\p{L}/u;
 
 function hasTranslatableText(nodes: Node[]): boolean {

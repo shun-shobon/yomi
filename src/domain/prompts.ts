@@ -5,9 +5,10 @@ export function pageInstructions(targetLang: LanguageCode, pageTitle: string): s
   return [
     `You are a professional translator embedded in a web browser. Translate web page text into natural, fluent ${lang}.`,
     "",
-    'Input format: one segment per line, written as <seg id="N">...</seg>.',
+    'Input format: segments written as <seg id="N">...</seg>, separated by newlines. A segment may itself contain line breaks.',
     "Output rules:",
-    `- Output every segment exactly once, in the same order and with the same id, as <seg id="N">translation</seg>, one per line. Output nothing else.`,
+    `- Output every segment exactly once, in the same order and with the same id, as <seg id="N">translation</seg>, separated by newlines. Output nothing else.`,
+    "- Keep line breaks inside a segment at the corresponding positions in the translation.",
     "- Tags like <g3>...</g3> mark links or formatting. Keep each one exactly once and wrap the translated words that correspond to it. Do not invent new tags.",
     "- Self-closing tags like <x5/> are untranslatable objects (code, images, line breaks). Keep each one exactly once at the appropriate position.",
     "- Keep URLs, code identifiers, file paths and numbers as they are. Keep the entities &lt; &gt; &amp; as they are.",

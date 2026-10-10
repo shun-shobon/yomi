@@ -1,6 +1,14 @@
-import { atomic, escapeText, groupClose, groupOpen, tagSignature, tokenize } from "@/domain/markup";
+import {
+  atomic,
+  collapseWhitespace,
+  escapeText,
+  groupClose,
+  groupOpen,
+  tagSignature,
+  tokenize,
+} from "@/domain/markup";
 
-import { isAtomic, type Run } from "./segmenter";
+import { isAtomic, keepsNewlines, type Run } from "./segmenter";
 
 /** モデル出力は HTML として解釈せず、テキストノードの生成と既存要素の複製だけで組み立てるので XSS にならない */
 
@@ -8,6 +16,7 @@ export interface Slot {
   texts: Text[];
   parent: Node;
   before: Node | null;
+  keepNewlines: boolean;
 }
 
 export interface Serialized {
@@ -20,15 +29,25 @@ export interface Serialized {
 export function serialize({ parent, nodes }: Run): Serialized {
   const placeholders: Element[] = [];
   const tags: string[] = [];
-  const slots: Slot[] = [{ texts: [], parent, before: nodes[0] }];
-  const openSlot = (p: Node, before: Node | null) => slots.push({ texts: [], parent: p, before });
+  const keepsNewlinesCache = new Map<Node, boolean>();
+  const slotOf = (p: Node, before: Node | null): Slot => {
+    let keepNewlines = keepsNewlinesCache.get(p);
+    if (keepNewlines === undefined) {
+      keepNewlines = p instanceof Element && keepsNewlines(p);
+      keepsNewlinesCache.set(p, keepNewlines);
+    }
+    return { texts: [], parent: p, before, keepNewlines };
+  };
+  const slots: Slot[] = [slotOf(parent, nodes[0])];
+  const openSlot = (p: Node, before: Node | null) => slots.push(slotOf(p, before));
 
   const walk = (list: Iterable<Node>): string => {
     let out = "";
     for (const node of list) {
       if (node instanceof Text) {
-        out += escapeText(node.data.replace(/\s+/g, " "));
-        slots.at(-1)!.texts.push(node);
+        const slot = slots.at(-1)!;
+        out += escapeText(collapseWhitespace(node.data, slot.keepNewlines));
+        slot.texts.push(node);
       } else if (node instanceof Element) {
         const id = placeholders.push(node) - 1;
         if (isAtomic(node)) {

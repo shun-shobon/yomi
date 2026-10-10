@@ -37,6 +37,11 @@ export function parse(markup: string): { structure: string; texts: string[] } {
   return { structure: tags.join(" "), texts };
 }
 
+export function collapseWhitespace(text: string, keepNewlines: boolean): string {
+  if (!keepNewlines) return text.replace(/\s+/g, " ");
+  return text.replace(/[^\S\n]*\n[^\S\n]*/g, "\n").replace(/[^\S\n]+/g, " ");
+}
+
 export function escapeText(text: string): string {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }

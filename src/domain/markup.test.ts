@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { escapeText, parse } from "./markup";
+import { collapseWhitespace, escapeText, parse } from "./markup";
 
 describe("parse", () => {
   it("タグ列とタグ間のテキストに分ける", () => {
@@ -52,5 +52,15 @@ describe("escapeText", () => {
 
   it("既にエンティティの形をした文字列も二重にデコードされない", () => {
     expect(parse(escapeText("&lt;")).texts).toEqual(["&lt;"]);
+  });
+});
+
+describe("collapseWhitespace", () => {
+  it("改行を保たない場合は改行も含めて 1 つの空白にまとめる", () => {
+    expect(collapseWhitespace("a \n\t b", false)).toBe("a b");
+  });
+
+  it("改行を保つ場合は改行を残し、その前後と連続する空白だけまとめる", () => {
+    expect(collapseWhitespace("a  b \n\n  c\r\nd", true)).toBe("a b\n\nc\nd");
   });
 });

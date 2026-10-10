@@ -42,6 +42,17 @@ describe("serialize", () => {
     expect(serializeChildren("\n  a  <  b\n &amp; c  ").markup).toBe("a &lt; b &amp; c");
   });
 
+  it("white-space で改行を保つ要素では改行を残す", () => {
+    const p = paragraph("first line\n  second <b>bold\nline</b>");
+    p.style.whiteSpace = "pre-wrap";
+    document.body.append(p);
+    const [first, ...rest] = Array.from(p.childNodes);
+    const { markup, slots } = serialize({ parent: p, nodes: [first!, ...rest] });
+    expect(markup).toBe("first line\nsecond <g0>bold\nline</g0>");
+    expect(slots.every((slot) => slot.keepNewlines)).toBe(true);
+    p.remove();
+  });
+
   it("notranslate などの除外指定は、インライン要素でも中身ごと x にする", () => {
     const { markup } = serializeChildren('Use <span class="notranslate">Yomi <b>app</b></span>');
     expect(markup).toBe("Use <x0/>");

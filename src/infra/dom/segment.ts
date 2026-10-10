@@ -1,4 +1,4 @@
-import { parse } from "@/domain/markup";
+import { collapseWhitespace, parse } from "@/domain/markup";
 import type { SegmentState, Showing } from "@/domain/page";
 
 import { markTranslated } from "./markers";
@@ -91,7 +91,7 @@ export class Segment {
     const writes: TextWrite[] = [];
     slots.forEach((slot, i) => {
       // parse はタグ数 + 1 個のテキストを返し、structure が一致しているのでスロット数と等しい
-      let text = texts[i]!.replace(/\s+/g, " ");
+      let text = collapseWhitespace(texts[i]!, slot.keepNewlines);
       const [head, ...rest] = slot.texts;
       if (head) {
         // 外側の空白は前後の要素との区切りなので原文のまま残す
