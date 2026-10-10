@@ -1,7 +1,8 @@
+import type { LanguageCode } from "@/domain/languages";
 import { collapseWhitespace, parse } from "@/domain/markup";
 import type { SegmentState, Showing } from "@/domain/page";
 
-import { markTranslated } from "./markers";
+import { markTranslated, restoreContentLang, setContentLang } from "./markers";
 import { build, serialize, type Serialized } from "./markup";
 import type { Run } from "./segmenter";
 
@@ -12,7 +13,9 @@ interface TextWrite {
   translated: string;
 }
 
-type Applied = { mode: "inplace"; writes: TextWrite[] } | { mode: "replace"; nodes: Node[] };
+type Applied = ({ mode: "inplace"; writes: TextWrite[] } | { mode: "replace"; nodes: Node[] }) & {
+  lang: LanguageCode;
+};
 
 export class Segment {
   readonly parent: Element;
@@ -39,12 +42,12 @@ export class Segment {
     ];
   }
 
-  applyTranslation(markup: string) {
+  applyTranslation(markup: string, lang: LanguageCode) {
     const parsed = parse(markup.trim());
     this.applied =
       parsed.structure === this.serialized.structure
-        ? { mode: "inplace", writes: this.planWrites(parsed.texts) }
-        : { mode: "replace", nodes: this.buildReplacement(markup.trim()) };
+        ? { mode: "inplace", writes: this.planWrites(parsed.texts), lang }
+        : { mode: "replace", nodes: this.buildReplacement(markup.trim()), lang };
     markTranslated(this.parent);
   }
 
@@ -52,6 +55,13 @@ export class Segment {
     const applied = this.applied;
     if (!applied) return true;
     const toTranslation = showing === "translation";
+    if (!this.swapNodes(applied, toTranslation)) return false;
+    if (toTranslation) setContentLang(this.parent, applied.lang);
+    else restoreContentLang(this.parent);
+    return true;
+  }
+
+  private swapNodes(applied: Applied, toTranslation: boolean): boolean {
     if (applied.mode === "inplace") {
       const current = (w: TextWrite) => (toTranslation ? w.original : w.translated);
       if (applied.writes.some((w) => w.node.data !== current(w))) return false;

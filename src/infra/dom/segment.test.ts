@@ -19,15 +19,26 @@ afterEach(() => {
 describe("Segment", () => {
   it("改行を保つ要素では訳文の改行を残して書き込む", () => {
     const { p, seg } = segmentOf("Hello\nworld", (el) => (el.style.whiteSpace = "pre-line"));
-    seg.applyTranslation("こんにちは\n  世界");
+    seg.applyTranslation("こんにちは\n  世界", "ja");
     seg.render("translation");
     expect(p.textContent).toBe("こんにちは\n世界");
   });
 
   it("改行を保たない要素では訳文の改行を空白にまとめる", () => {
     const { p, seg } = segmentOf("Hello world");
-    seg.applyTranslation("こんにちは\n世界");
+    seg.applyTranslation("こんにちは\n世界", "ja");
     seg.render("translation");
     expect(p.textContent).toBe("こんにちは 世界");
+  });
+
+  it("訳文の表示中だけ lang と dir を訳文の言語に合わせ、原文に戻すと元の属性に戻す", () => {
+    const { p, seg } = segmentOf("Hello", (el) => el.setAttribute("lang", "en"));
+    seg.applyTranslation("こんにちは", "ja");
+
+    seg.render("translation");
+    expect([p.getAttribute("lang"), p.getAttribute("dir")]).toEqual(["ja", "auto"]);
+
+    seg.render("original");
+    expect([p.getAttribute("lang"), p.hasAttribute("dir")]).toEqual(["en", false]);
   });
 });

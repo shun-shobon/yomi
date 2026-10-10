@@ -9,6 +9,7 @@ import { DomWatcher } from "@/infra/dom/dom-watcher";
 import {
   ensurePendingStyle,
   isInMainContent,
+  restoreContentLang,
   setPending,
   translatedAncestor,
   unmarkTranslated,
@@ -183,7 +184,9 @@ export class PageTranslator {
   private discard(seg: Segment) {
     seg.revert();
     this.transition(seg, "idle");
-    this.byParent.get(seg.parent)?.delete(seg);
+    const siblings = this.byParent.get(seg.parent);
+    siblings?.delete(seg);
+    if (![...(siblings ?? [])].some((s) => s.state === "done")) restoreContentLang(seg.parent);
     for (const node of seg.ownedNodes()) this.owner.delete(node);
     this.watcher.markDirty(seg.parent);
   }
@@ -251,7 +254,7 @@ export class PageTranslator {
       },
       createBatchDecoder((index, markup) => {
         const seg = batch[index];
-        if (seg && mine(seg)) this.applyResult(seg, markup);
+        if (seg && mine(seg)) this.applyResult(seg, markup, lang);
       }),
     );
     this.inflight.add(handle);
@@ -279,8 +282,8 @@ export class PageTranslator {
     this.schedulePump();
   }
 
-  private applyResult(seg: Segment, markup: string) {
-    seg.applyTranslation(markup);
+  private applyResult(seg: Segment, markup: string, lang: LanguageCode) {
+    seg.applyTranslation(markup, lang);
     this.transition(seg, "done");
     for (const node of seg.ownedNodes()) this.owner.set(node, seg);
     this.render(seg);
