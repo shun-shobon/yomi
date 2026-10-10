@@ -2,7 +2,7 @@
   "name": "yomi",
   "version": "0.1.0",
   "private": true,
-  "description": "ChatGPT プランで Web ページ全体や選択テキストを翻訳する Chrome 拡張",
+  "description": "ChatGPT サブスクリプションで Web ページ全体や選択テキストを翻訳する Chrome 拡張",
   "type": "module",
   "scripts": {
     "build": "wxt build",

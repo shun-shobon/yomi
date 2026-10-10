@@ -1,6 +1,6 @@
 # Yomi
 
-ChatGPT プラン（[Sign in with ChatGPT](https://developers.openai.com/siwc/token-sharing-open-source)）で Web ページを翻訳する Chrome 拡張。
+ChatGPT サブスクリプション（[Sign in with ChatGPT](https://developers.openai.com/siwc/token-sharing-open-source)）で Web ページを翻訳する Chrome 拡張。
 
 ## 機能
 
