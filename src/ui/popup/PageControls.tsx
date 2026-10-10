@@ -20,10 +20,10 @@ export function PageControls(props: {
           <p class="muted small center">このページは翻訳できません</p>
         </Match>
         <Match when={state()}>
-          {(state) => (
+          {(current) => (
             <>
               <Show
-                when={state().active}
+                when={current().active}
                 fallback={
                   <button
                     class="btn block primary"
@@ -47,24 +47,24 @@ export function PageControls(props: {
                   onClick={() =>
                     props.send({
                       type:
-                        state().showing === "translation"
+                        current().showing === "translation"
                           ? "page:showOriginal"
                           : "page:showTranslation",
                     })
                   }
                 >
-                  {state().showing === "translation" ? "原文を表示" : "訳文を表示"}
+                  {current().showing === "translation" ? "原文を表示" : "訳文を表示"}
                 </button>
               </Show>
-              <Show when={state().active || hasTranslations()}>
+              <Show when={current().active || hasTranslations()}>
                 <p class="progress small muted">
-                  <Show when={state().busy > 0}>
+                  <Show when={current().busy > 0}>
                     <span class="spinner" />
                   </Show>
-                  翻訳済み {state().done}
-                  {state().busy > 0 && ` · 処理中 ${state().busy}`}
-                  <Show when={state().failed > 0}>
-                    <span class="error-text"> · 失敗 {state().failed}</span>
+                  翻訳済み {current().done}
+                  {current().busy > 0 && ` · 処理中 ${current().busy}`}
+                  <Show when={current().failed > 0}>
+                    <span class="error-text"> · 失敗 {current().failed}</span>
                   </Show>
                 </p>
               </Show>

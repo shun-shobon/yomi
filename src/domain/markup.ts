@@ -10,7 +10,7 @@ export type Token =
   | { type: "text"; text: string }
   | { type: "tag"; kind: "open" | "close" | "atomic"; id: number };
 
-const TAG = /<(\/?)([gx])(\d+)\s*\/?>/g;
+const TAG = /<(\/?)([gx])(\d+)\s*\/?>/gu;
 
 export function* tokenize(markup: string): Generator<Token> {
   let last = 0;
@@ -42,6 +42,6 @@ export function parse(markup: string): { structure: string; texts: string[] } {
 }
 
 export function collapseWhitespace(text: string, keepNewlines: boolean): string {
-  if (!keepNewlines) return text.replace(/\s+/g, " ");
-  return text.replace(/[^\S\n]*\n[^\S\n]*/g, "\n").replace(/[^\S\n]+/g, " ");
+  if (!keepNewlines) return text.replaceAll(/\s+/gu, " ");
+  return text.replaceAll(/[^\S\n]*\n[^\S\n]*/gu, "\n").replaceAll(/[^\S\n]+/gu, " ");
 }

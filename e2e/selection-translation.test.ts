@@ -28,7 +28,7 @@ test("選択したテキストを翻訳ボタンから翻訳する", async () =>
 
   const selRect = await page.evaluate(() => {
     const rects = getSelection()!.getRangeAt(0).getClientRects();
-    const last = rects[rects.length - 1]!;
+    const last = rects.item(rects.length - 1)!;
     return { right: last.right, bottom: last.bottom };
   });
   await page.mouse.click(selRect.right, selRect.bottom + 8 + 15);

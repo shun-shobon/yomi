@@ -1,3 +1,5 @@
+// cloneNode は Node 型を返し append を持たないため appendChild を使う
+// oxlint-disable unicorn/prefer-dom-node-append
 import {
   atomic,
   collapseWhitespace,

@@ -109,7 +109,7 @@ export function isHidden(el: Element): boolean {
 }
 
 // white-space-collapse と text-wrap-mode の組み合わせによっては "preserve-breaks nowrap" のような値になる
-const KEEPS_NEWLINES = /^(pre|pre-wrap|pre-line|break-spaces|preserve|preserve-breaks)(?![\w-])/;
+const KEEPS_NEWLINES = /^(pre|pre-wrap|pre-line|break-spaces|preserve|preserve-breaks)(?![\w-])/u;
 
 export function keepsNewlines(el: Element): boolean {
   return KEEPS_NEWLINES.test(getComputedStyle(el).whiteSpace);

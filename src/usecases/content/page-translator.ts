@@ -140,8 +140,8 @@ export class PageTranslator {
     if (!anchor) return null;
     const texts = [...(this.byParent.get(anchor) ?? [])]
       .filter((s) => s.state === "done")
-      .map((s) => s.originalText.replace(/\s+/g, " ").trim());
-    return texts.length ? { anchor, text: texts.join("\n") } : null;
+      .map((s) => s.originalText.replaceAll(/\s+/gu, " ").trim());
+    return texts.length > 0 ? { anchor, text: texts.join("\n") } : null;
   }
 
   private *segments(): Generator<Segment> {
@@ -319,7 +319,7 @@ export class PageTranslator {
     // 一時的な失敗のほか、モデルが一部の seg を出力しなかった場合も含む
     const missing = misses.filter(mine);
     for (const seg of missing) this.transition(seg, "failed");
-    if (missing.length && !this.partialFailureNotified) {
+    if (missing.length > 0 && !this.partialFailureNotified) {
       this.partialFailureNotified = true;
       this.hooks.onPartialFailure();
     }

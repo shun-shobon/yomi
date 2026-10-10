@@ -74,6 +74,8 @@ export class Segment {
     const anchor = from.find((n) => n.parentNode === this.parent);
     if (!anchor) return true;
     for (const node of to) this.parent.insertBefore(node, anchor);
+    // Node 型は remove を持たないため removeChild を使う
+    // oxlint-disable-next-line unicorn/prefer-dom-node-remove
     for (const node of from) if (node.parentNode === this.parent) this.parent.removeChild(node);
     return true;
   }
@@ -105,9 +107,9 @@ export class Segment {
       const [head, ...rest] = slot.texts;
       if (head) {
         // 外側の空白は前後の要素との区切りなので原文のまま残す
-        if (i === 0) text = /^\s*/.exec(head.data)![0] + text.trimStart();
+        if (i === 0) text = /^\s*/u.exec(head.data)![0] + text.trimStart();
         if (i === slots.length - 1)
-          text = text.trimEnd() + /\s*$/.exec(slot.texts.at(-1)!.data)![0];
+          text = text.trimEnd() + /\s*$/u.exec(slot.texts.at(-1)!.data)![0];
         writes.push({ node: head, original: head.data, translated: text });
         for (const node of rest) writes.push({ node, original: node.data, translated: "" });
       } else if (text.trim() && slot.parent.isConnected) {
@@ -126,9 +128,9 @@ export class Segment {
     const nodes = Array.from(build(markup, this.serialized.placeholders).childNodes);
     const first = this.original[0];
     const last = this.original.at(-1);
-    if (first instanceof Text && /^\s/.test(first.data))
+    if (first instanceof Text && /^\s/u.test(first.data))
       nodes.unshift(document.createTextNode(" "));
-    if (last instanceof Text && /\s$/.test(last.data)) nodes.push(document.createTextNode(" "));
+    if (last instanceof Text && /\s$/u.test(last.data)) nodes.push(document.createTextNode(" "));
     return nodes;
   }
 }
