@@ -1,5 +1,5 @@
 [tools]
-node = "24.21.0"
+node = "26.11.1"
 pnpm = "12.9.1"
 
 [settings]

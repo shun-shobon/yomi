@@ -45,10 +45,9 @@ function tokens(overrides: Partial<TokenResponse> = {}): TokenResponse {
 }
 
 function idToken(claims: Record<string, unknown>): string {
-  const payload = btoa(JSON.stringify(claims))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
+  const payload = new TextEncoder()
+    .encode(JSON.stringify(claims))
+    .toBase64({ alphabet: "base64url", omitPadding: true });
   return `header.${payload}.signature`;
 }
 

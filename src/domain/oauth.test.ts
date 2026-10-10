@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import {
   REDIRECT_URI,
   TokenEndpointError,
-  base64url,
   buildAuthorizeUrl,
   createPkce,
   decodeIdToken,
@@ -182,7 +181,7 @@ describe("hasRequiredScope", () => {
 
 describe("decodeIdToken", () => {
   const jwt = (claims: unknown) =>
-    `header.${base64url(new TextEncoder().encode(JSON.stringify(claims)))}.signature`;
+    `header.${new TextEncoder().encode(JSON.stringify(claims)).toBase64({ alphabet: "base64url", omitPadding: true })}.signature`;
 
   it("nonce と email を取り出す", () => {
     expect(decodeIdToken(jwt({ nonce: "n", email: "a@example.com" }))).toEqual({

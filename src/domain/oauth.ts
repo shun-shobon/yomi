@@ -128,9 +128,7 @@ export interface IdTokenClaims {
 export function decodeIdToken(jwt: string): IdTokenClaims {
   const payload = jwt.split(".")[1];
   if (payload == null || payload === "") throw new Error("ID トークンの形式が不正です");
-  const bytes = Uint8Array.from(atob(payload.replace(/-/g, "+").replace(/_/g, "/")), (c) =>
-    c.charCodeAt(0),
-  );
+  const bytes = Uint8Array.fromBase64(payload, { alphabet: "base64url" });
   const claims: unknown = JSON.parse(new TextDecoder().decode(bytes));
   if (!isRecord(claims) || typeof claims["nonce"] !== "string") {
     throw new Error("ID トークンに nonce がありません");
@@ -144,18 +142,16 @@ export function decodeIdToken(jwt: string): IdTokenClaims {
 export async function createPkce(): Promise<{ verifier: string; challenge: string }> {
   const verifier = randomToken(32);
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier));
-  return { verifier, challenge: base64url(new Uint8Array(digest)) };
+  return {
+    verifier,
+    challenge: new Uint8Array(digest).toBase64({ alphabet: "base64url", omitPadding: true }),
+  };
 }
 
 export function randomToken(bytes: number): string {
-  return base64url(crypto.getRandomValues(new Uint8Array(bytes)));
-}
-
-export function base64url(bytes: Uint8Array): string {
-  return btoa(String.fromCharCode(...bytes))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
+  return crypto
+    .getRandomValues(new Uint8Array(bytes))
+    .toBase64({ alphabet: "base64url", omitPadding: true });
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

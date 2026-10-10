@@ -7,6 +7,7 @@ export default defineConfig({
   manifest: {
     name: "Yomi",
     description: "ChatGPT プランで Web ページ全体や選択テキストを翻訳します。",
+    minimum_chrome_version: "140",
     permissions: ["storage", "contextMenus"],
     host_permissions: [
       "https://auth.openai.com/*",
