@@ -1,0 +1,102 @@
+name: ci
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    steps:
+      - name: Setup | Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup | Development environment
+        uses: ./.github/actions/setup
+
+      - name: Run | Format
+        run: pnpm run format:check
+
+  lint:
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    steps:
+      - name: Setup | Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup | Development environment
+        uses: ./.github/actions/setup
+
+      - name: Run | Lint
+        run: pnpm run lint --deny-warnings
+
+  typecheck:
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    steps:
+      - name: Setup | Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup | Development environment
+        uses: ./.github/actions/setup
+
+      - name: Run | Typecheck
+        run: pnpm run typecheck
+
+  test:
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    steps:
+      - name: Setup | Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup | Development environment
+        uses: ./.github/actions/setup
+
+      - name: Run | Test
+        run: pnpm run test
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Setup | Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup | Development environment
+        uses: ./.github/actions/setup
+
+      - name: Build | Extension
+        run: pnpm run build
+
+      - name: Run | E2E
+        env:
+          CHROMIUM_PATH: /usr/bin/chromium
+          E2E_SCREENSHOT_DIR: ${{ runner.temp }}/screenshots
+        run: |
+          mkdir -p "$E2E_SCREENSHOT_DIR"
+          pnpm run test:e2e
+
+      - name: Upload | Screenshots
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: e2e-screenshots
+          path: ${{ runner.temp }}/screenshots
+          if-no-files-found: ignore
+
+  status-check:
+    needs: [format, lint, typecheck, test, e2e]
+    if: ${{ always() }}
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    steps:
+      - name: Verify | All CI jobs succeeded
+        env:
+          RESULTS: ${{ toJSON(needs.*.result) }}
+        run: jq -e 'all(.[]; . == "success")' <<< "$RESULTS"

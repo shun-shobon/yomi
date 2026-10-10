@@ -46,8 +46,9 @@ entrypoints → ui → usecases → infra → domain
 OpenAI API を service worker 内でモックし、ビルド済み拡張を Chromium で動かして翻訳パイプラインを検証する。Chrome 137 以降の正式版は `--load-extension` を無視するので、Chrome for Testing を使う。
 
 ```sh
+pnpm exec playwright-core install --no-shell chromium
 pnpm build
-CHROMIUM_PATH="<Chrome for Testing の実行ファイル>" pnpm test:e2e
+CHROMIUM_PATH="$(node -p "require('playwright-core').chromium.executablePath()")" pnpm test:e2e
 ```
 
 `E2E_SCREENSHOT_DIR` に出力先を指定すると、選択テキスト翻訳やポップアップなど目視で確認する画面のスクリーンショットを保存する。
