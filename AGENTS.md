@@ -1,6 +1,45 @@
 # AGENTS.md
 
-WXT + Solid + TypeScript の Chrome 拡張。機能・コマンド・ディレクトリ構成は README を参照する。
+WXT + Solid + TypeScript の Chrome 拡張。機能は README を参照する。
+
+## 開発
+
+Node.js と pnpm のバージョンは `mise.toml` で固定している。
+
+```sh
+mise install
+pnpm install
+pnpm dev        # 拡張を読み込んだ Chrome が起動する
+pnpm build      # .output/chrome-mv3 に出力
+pnpm typecheck
+pnpm test       # vitest
+pnpm lint       # oxlint（type-aware）。レイヤーの依存方向も検査する
+pnpm format     # oxfmt。CI 向けの検査は pnpm format:check
+```
+
+アイコンは `src/assets/icon.svg` を編集し、`public/icon/` の PNG を書き出し直す（Chromium は E2E と同じく `CHROMIUM_PATH` で指定する）。
+
+```sh
+CHROMIUM_PATH="$(node -p "require('playwright-core').chromium.executablePath()")" pnpm icons
+```
+
+README の画像は `docs/hero/` の HTML を編集し、同じく `pnpm hero` で `docs/hero.png` を書き出し直す。
+
+## ディレクトリ構成
+
+`src/` はレイヤーで分ける。各レイヤーは自分より右のレイヤー（間を飛ばしてもよい）にだけ依存でき、逆向きの import は `pnpm lint` がエラーにする。
+
+```
+entrypoints → ui → usecases → infra → domain
+```
+
+| ディレクトリ   | 置くもの                                                                                         |
+| -------------- | ------------------------------------------------------------------------------------------------ |
+| `domain/`      | 翻訳・設定・認証の規則。ブラウザ API・DOM・Solid に依存しない純粋なロジックと型                  |
+| `infra/`       | 外部とのやり取り。storage、拡張内メッセージング、OpenAI API、OAuth エンドポイント、ページ DOM    |
+| `usecases/`    | domain と infra を組み合わせた処理の流れ（サインイン、翻訳リクエスト、ページ翻訳の進行管理）     |
+| `ui/`          | Solid のコンポーネントとフック。content script の表示は `usecases/content/overlay.ts` を実装する |
+| `entrypoints/` | WXT のエントリポイント。リスナー登録と各レイヤーの配線だけを持つ                                 |
 
 ## 言語
 
@@ -9,7 +48,7 @@ WXT + Solid + TypeScript の Chrome 拡張。機能・コマンド・ディレ�
 
 ## 設計
 
-- `src/` のレイヤーと依存方向は README の「ディレクトリ構成」に従う。新しいコードはその表で置き場所を決める。違反は `pnpm lint` が検出する。
+- `src/` のレイヤーと依存方向は「ディレクトリ構成」に従う。新しいコードはその表で置き場所を決める。違反は `pnpm lint` が検出する。
 - ビジネスロジックは `domain/` と `usecases/` に置く。`ui/` のコンポーネントは表示と入力に専念し、`entrypoints/` はリスナー登録と配線だけにする。
 - UI は Solid で書く。他の UI ライブラリを持ち込まない。
 - content script がページ上に出す UI は、closed Shadow DOM を持つ `Overlay`（`src/ui/content/Overlay.tsx`）の中に描画する。ページの DOM に UI を直接置かない。
@@ -29,9 +68,21 @@ WXT + Solid + TypeScript の Chrome 拡張。機能・コマンド・ディレ�
 ## テスト
 
 - ユニットテストは対象ファイルと同じ場所に `*.test.ts` で置く（`pnpm test`）。
-- E2E は `e2e/` に置き、Vitest の `e2e` プロジェクトで動かす（`pnpm build` の後に `pnpm test:e2e`）。Vitest の設定は `vitest.config.ts` の `test.projects` に集約し、設定ファイルを増やさない。非同期の結果は固定時間待たず `expect.poll` で待つ。
+- E2E は `e2e/` に置き、Vitest の `e2e` プロジェクトで動かす。Vitest の設定は `vitest.config.ts` の `test.projects` に集約し、設定ファイルを増やさない。非同期の結果は固定時間待たず `expect.poll` で待つ。
 - バグを直すときは、修正前に失敗するテストを先に足す。
 - 変更後は `pnpm format`、`pnpm lint`、`pnpm typecheck`、`pnpm test` を通す。翻訳の流れやページ上の UI に触れた場合は E2E も実行する。
+
+### E2E テスト
+
+OpenAI API を service worker 内でモックし、ビルド済み拡張を Chromium で動かして翻訳パイプラインを検証する。Chrome 137 以降の正式版は `--load-extension` を無視するので、Chrome for Testing を使う。
+
+```sh
+pnpm exec playwright-core install --no-shell chromium
+pnpm build
+CHROMIUM_PATH="$(node -p "require('playwright-core').chromium.executablePath()")" pnpm test:e2e
+```
+
+`E2E_SCREENSHOT_DIR` に出力先を指定すると、選択テキスト翻訳やポップアップなど目視で確認する画面のスクリーンショットを保存する。
 
 ## UI デザイン
 
