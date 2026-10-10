@@ -4,3 +4,5 @@ saveExact: true
 strictDepBuilds: true
 trustPolicy: no-downgrade
 trustPolicyIgnoreAfter: 10080
+minimumReleaseAgeExclude:
+  - "@shun-shobon/*"

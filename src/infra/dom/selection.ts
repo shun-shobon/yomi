@@ -13,5 +13,5 @@ export function currentSelection(): TextSelection | null {
   if (anchor?.closest("input, textarea, [contenteditable=''], [contenteditable=true]")) return null;
   const range = sel.getRangeAt(0);
   const rects = range.getClientRects();
-  return { text, rect: rects[rects.length - 1] ?? range.getBoundingClientRect() };
+  return { text, rect: rects.item(rects.length - 1) ?? range.getBoundingClientRect() };
 }

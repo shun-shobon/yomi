@@ -1,5 +1,5 @@
 /** 閉じタグが欠けた seg が次の seg を飲み込まないよう、内容に <seg を含ませない */
-const SEG_PATTERN = /<seg id="?(\d+)"?>((?:(?!<seg[\s>])[\s\S])*?)<\/seg>/g;
+const SEG_PATTERN = /<seg id="?(\d+)"?>((?:(?!<seg[\s>])[\s\S])*?)<\/seg>/gu;
 
 export function encodeBatch(markups: readonly string[]): string {
   return markups.map((markup, i) => `<seg id="${i + 1}">${markup}</seg>`).join("\n");
@@ -11,7 +11,7 @@ export function createBatchDecoder(
 ): (delta: string) => void {
   let buffer = "";
   let cursor = 0;
-  const pattern = new RegExp(SEG_PATTERN);
+  const pattern = new RegExp(SEG_PATTERN.source, SEG_PATTERN.flags);
   return (delta) => {
     buffer += delta;
     pattern.lastIndex = cursor;

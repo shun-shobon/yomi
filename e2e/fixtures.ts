@@ -62,13 +62,13 @@ export async function launchExtension() {
     context,
     extensionId: new URL(sw.url()).host,
     sendToTab: <T = unknown>(message: unknown) =>
-      sw.evaluate(async (message): Promise<T> => {
+      sw.evaluate(async (msg): Promise<T> => {
         const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
-        return chrome.tabs.sendMessage(tab!.id!, message);
+        return chrome.tabs.sendMessage(tab!.id!, msg);
       }, message),
     requests: () => sw.evaluate(() => (globalThis as MockedGlobal).__requests),
     setSettings: (settings: Record<string, unknown>) =>
-      sw.evaluate((settings) => chrome.storage.sync.set({ settings }), settings),
+      sw.evaluate((s) => chrome.storage.sync.set({ settings: s }), settings),
     openTestPage: async (url = "https://test.example/page") => {
       const page = await context.newPage();
       await page.route("https://test.example/**", (route) =>
@@ -97,16 +97,21 @@ async function installMocks() {
   const fakeTranslate = (markup: string) =>
     markup.startsWith("Click ")
       ? // 語順が変わりタグ構造が原文と一致しないケース
-        markup.replace(/^Click (<g(\d+)>)here(<\/g\2>) now$/, "$1HERE$3 CLICK NOW")
+        markup.replace(/^Click (<g(\d+)>)here(<\/g\2>) now$/u, "$1HERE$3 CLICK NOW")
       : "JA:" +
-        markup.replace(/(^|>)([^<]*)/g, (_, gt: string, text: string) => gt + text.toUpperCase());
+        markup.replaceAll(
+          /(^|>)([^<]*)/gu,
+          (_, gt: string, text: string) => gt + text.toUpperCase(),
+        );
   const sse = (events: ({ type: string } & Record<string, unknown>)[]) => {
     const encoder = new TextEncoder();
     return new ReadableStream({
       async start(controller) {
         for (const e of events) {
           controller.enqueue(encoder.encode(`event: ${e.type}\ndata: ${JSON.stringify(e)}\n\n`));
-          await new Promise((r) => setTimeout(r, 5));
+          await new Promise((r) => {
+            setTimeout(r, 5);
+          });
         }
         controller.close();
       },
@@ -159,12 +164,12 @@ async function installMocks() {
       mocked.__requests.push(body);
       const input = body.input[0]!.content;
       const output = input.includes("<seg ")
-        ? input.replace(
-            /<seg id="(\d+)">([\s\S]*?)<\/seg>/g,
+        ? input.replaceAll(
+            /<seg id="(\d+)">([\s\S]*?)<\/seg>/gu,
             (_, id: string, m: string) => `<seg id="${id}">${fakeTranslate(m)}</seg>`,
           )
         : `訳: ${input}`;
-      const chunks = output.match(/[\s\S]{1,7}/g) ?? [];
+      const chunks = output.match(/[\s\S]{1,7}/gu) ?? [];
       return new Response(
         sse([
           ...chunks.map((delta) => ({ type: "response.output_text.delta", delta })),

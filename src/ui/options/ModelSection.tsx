@@ -39,7 +39,7 @@ export function ModelSection(props: {
         )}
       </Match>
       <Match when={models()}>
-        {(models) => (
+        {(list) => (
           <div class="stack">
             <label class="field">
               <span>翻訳に使うモデル</span>
@@ -47,14 +47,14 @@ export function ModelSection(props: {
                 value={props.settings.model ?? ""}
                 onChange={(e) => {
                   const { value } = e.currentTarget;
-                  const model = models().find((m) => m.slug === value);
+                  const model = list().find((m) => m.slug === value);
                   if (model) props.update(settingsForModel(props.settings, model));
                 }}
               >
                 <option value="" disabled>
                   選択してください
                 </option>
-                <For each={models()}>{(m) => <option value={m.slug}>{m.displayName}</option>}</For>
+                <For each={list()}>{(m) => <option value={m.slug}>{m.displayName}</option>}</For>
               </select>
             </label>
             <Show when={props.settings.model == null}>

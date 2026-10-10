@@ -18,28 +18,37 @@ export function createPageCommands(deps: {
     if (!wasActive) overlay.toast("ページの翻訳を開始しました");
   };
 
-  const run = (message: ContentMessage) => {
+  const run = (message: ContentMessage): void => {
     switch (message.type) {
       case "page:getState":
-        return;
+        break;
       case "page:translate":
-        return startPage();
+        startPage();
+        break;
       case "page:stop":
-        return page.stop();
-      case "page:showOriginal":
-        return page.showOriginal();
-      case "page:showTranslation":
-        return page.start();
-      case "command:translate":
-        if (selection.translateCurrent()) return;
-        if (!page.isActive) return startPage();
         page.stop();
-        return overlay.toast("翻訳を停止しました");
+        break;
+      case "page:showOriginal":
+        page.showOriginal();
+        break;
+      case "page:showTranslation":
+        page.start();
+        break;
+      case "command:translate":
+        if (selection.translateCurrent()) break;
+        if (page.isActive) {
+          page.stop();
+          overlay.toast("翻訳を停止しました");
+        } else {
+          startPage();
+        }
+        break;
       case "command:toggleOriginal":
         if (page.hasTranslations()) page.toggleOriginal();
-        return;
+        break;
       case "selection:translate":
-        return selection.translateText(message.text);
+        selection.translateText(message.text);
+        break;
     }
   };
 

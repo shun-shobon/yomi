@@ -1,10 +1,3 @@
-import { defineConfig } from "oxfmt";
+import { shun_shobon } from "@shun-shobon/oxfmt-config";
 
-export default defineConfig({
-  sortImports: {
-    groups: ["builtin", "external", "internal", "parent", "sibling", "index"],
-  },
-  sortPackageJson: {
-    sortScripts: true,
-  },
-});
+export default shun_shobon();
