@@ -39,6 +39,10 @@ WXT + Solid + TypeScript の Chrome 拡張。機能・コマンド・ディレ�
 - 配色は `src/ui/base.css` の CSS 変数を使う。Tailwind などの既定パレットを流用しない。背景は落ち着いた色、アクセントは彩度と明度を抑える。
 - グロー（背景のグローを含む）、不要な角丸、目立つ枠線、見出しの下のリード文を入れない。
 
+## GitHub Actions
+
+- `uses:` はタグで書き、SHA は `.github/workflows/actions.lock` で固定する。`uses:` を変えたら `gh-actions-lock`（mise で入る）を実行してロックファイルを更新する。
+
 ## コミット
 
 - ユーザーに頼まれたときだけコミットする。
