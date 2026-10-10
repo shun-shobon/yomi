@@ -1,20 +1,16 @@
 import { blockAncestor, isHidden } from "./segmenter";
 
-const PREFETCH_MARGIN = "800px 0px";
 const RESCAN_THROTTLE_MS = 400;
 const VISIBILITY_ATTRIBUTES = ["class", "style", "hidden", "open", "aria-hidden"];
 
 export interface DomWatcherHandlers {
   isOwn: (node: Node) => boolean;
-  onEnterView: (el: Element) => void;
   onTextChanged: (node: Text) => void;
   rescan: (roots: Element[]) => void;
 }
 
 export class DomWatcher {
-  private io: IntersectionObserver | null = null;
   private mo: MutationObserver | null = null;
-  private readonly visible = new Set<Element>();
   private readonly dirty = new Set<Element>();
   private readonly hidden = new Set<Element>();
   private visibilityChanged = false;
@@ -22,10 +18,7 @@ export class DomWatcher {
 
   constructor(private readonly handlers: DomWatcherHandlers) {}
 
-  start(observed: Iterable<Element>) {
-    this.io = new IntersectionObserver((entries) => this.onIntersect(entries), {
-      rootMargin: PREFETCH_MARGIN,
-    });
+  start() {
     this.mo = new MutationObserver((records) => this.onMutations(records));
     this.mo.observe(document.body, {
       childList: true,
@@ -34,30 +27,14 @@ export class DomWatcher {
       attributes: true,
       attributeFilter: VISIBILITY_ATTRIBUTES,
     });
-    for (const el of observed) this.io.observe(el);
   }
 
   stop() {
-    this.io?.disconnect();
     this.mo?.disconnect();
-    this.io = this.mo = null;
-    this.visible.clear();
+    this.mo = null;
     this.dirty.clear();
     if (this.timer) clearTimeout(this.timer);
     this.timer = null;
-  }
-
-  observe(el: Element) {
-    this.io?.observe(el);
-  }
-
-  unobserve(el: Element) {
-    this.io?.unobserve(el);
-    this.visible.delete(el);
-  }
-
-  isVisible(el: Element): boolean {
-    return this.visible.has(el);
   }
 
   trackHidden(el: Element) {
@@ -73,17 +50,6 @@ export class DomWatcher {
     if (!block) return;
     this.dirty.add(block);
     this.scheduleRescan();
-  }
-
-  private onIntersect(entries: IntersectionObserverEntry[]) {
-    for (const entry of entries) {
-      if (entry.isIntersecting) {
-        this.visible.add(entry.target);
-        this.handlers.onEnterView(entry.target);
-      } else {
-        this.visible.delete(entry.target);
-      }
-    }
   }
 
   private onMutations(records: MutationRecord[]) {

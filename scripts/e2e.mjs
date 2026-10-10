@@ -197,15 +197,17 @@ try {
   );
   check("pre は訳さない", (await text("#pre")) === 'const keepMe = "untranslated";');
   check("notranslate は訳さない", (await text("#nt .notranslate")) === "BrandName");
-  check("ビューポート外は未翻訳", !(await text("#far")).includes("JA:"), await text("#far"));
 
-  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   await page
     .waitForFunction(() => document.querySelector("#far")?.textContent?.includes("JA:"), null, {
       timeout: 5000,
     })
     .catch(() => {});
-  check("スクロールで追加翻訳される", (await text("#far")).includes("JA:"), await text("#far"));
+  check(
+    "スクロールしなくてもビューポート外まで翻訳される",
+    (await text("#far")).includes("JA:"),
+    await text("#far"),
+  );
 
   await page.evaluate(() => {
     const p = document.createElement("p");

@@ -54,9 +54,6 @@ export class PageTranslator {
   constructor(private readonly hooks: PageTranslatorHooks) {
     this.watcher = new DomWatcher({
       isOwn: (node) => this.owner.has(node),
-      onEnterView: (el) => {
-        for (const seg of this.byParent.get(el) ?? []) this.enqueue(seg);
-      },
       onTextChanged: (node) => this.onTextChanged(node),
       rescan: (roots) => {
         for (const root of roots) this.scan(root);
@@ -89,8 +86,11 @@ export class PageTranslator {
     this.partialFailureNotified = false;
     ensurePendingStyle();
     this.scan(document.body);
-    for (const seg of this.segments()) if (seg.state === "failed") this.transition(seg, "idle");
-    this.watcher.start(this.byParent.keys());
+    for (const seg of this.segments()) {
+      if (seg.state === "failed") this.transition(seg, "idle");
+      this.enqueue(seg);
+    }
+    this.watcher.start();
   }
 
   stop() {
@@ -184,8 +184,7 @@ export class PageTranslator {
     let siblings = this.byParent.get(seg.parent);
     if (!siblings) this.byParent.set(seg.parent, (siblings = new Set()));
     siblings.add(seg);
-    this.watcher.observe(seg.parent);
-    if (this.watcher.isVisible(seg.parent)) this.enqueue(seg);
+    this.enqueue(seg);
   }
 
   private discard(seg: Segment) {
@@ -204,7 +203,6 @@ export class PageTranslator {
       if (parent.isConnected) continue;
       for (const seg of segs) this.transition(seg, "idle");
       this.byParent.delete(parent);
-      this.watcher.unobserve(parent);
     }
   }
 
