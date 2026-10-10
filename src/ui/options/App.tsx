@@ -6,6 +6,7 @@ import { createAuth } from "@/ui/hooks/auth";
 import { createSettings } from "@/ui/hooks/settings";
 
 import { AccountSection } from "./AccountSection";
+import { CacheSection } from "./CacheSection";
 import { ModelSection } from "./ModelSection";
 import "./style.css";
 import { UsageSection } from "./UsageSection";
@@ -45,6 +46,8 @@ export function App() {
             />
           </div>
         </section>
+
+        <CacheSection />
 
         <UsageSection />
       </main>

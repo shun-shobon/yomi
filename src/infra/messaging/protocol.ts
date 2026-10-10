@@ -1,5 +1,6 @@
 import type { SerializedFailure } from "@/domain/failure";
 import type { ModelInfo } from "@/domain/models";
+import type { CachedTranslation } from "@/domain/translation-cache";
 
 export const TRANSLATE_PORT = "translate";
 
@@ -26,9 +27,22 @@ export interface BackgroundApi {
   "open:options": void;
   "open:usage": void;
   "open:shortcuts": void;
+  "cache:lookup": (string | null)[];
+  "cache:store": void;
 }
 
-export type BackgroundRequest = { type: keyof BackgroundApi };
+export interface BackgroundParams {
+  "cache:lookup": { keys: string[] };
+  "cache:store": { entries: CachedTranslation[] };
+}
+
+export type ParamsOf<K extends keyof BackgroundApi> = K extends keyof BackgroundParams
+  ? BackgroundParams[K]
+  : void;
+
+export type BackgroundRequest = {
+  [K in keyof BackgroundApi]: { type: K; params: ParamsOf<K> };
+}[keyof BackgroundApi];
 
 export type BackgroundResponse<K extends keyof BackgroundApi> =
   | { ok: true; value: BackgroundApi[K] }

@@ -304,6 +304,49 @@ try {
     requests.every((r) => r.input.every((m) => m.role !== "system")),
   );
 
+  const cachedPage = await context.newPage();
+  await cachedPage.route("https://test.example/**", (route) =>
+    route.fulfill({ contentType: "text/html", body: TEST_PAGE }),
+  );
+  await cachedPage.goto("https://test.example/page");
+  await cachedPage.waitForTimeout(500);
+  await cachedPage.bringToFront();
+  await sendToTab({ type: "page:translate" });
+  await cachedPage
+    .waitForFunction(() => document.querySelector("#far")?.textContent?.includes("JA:"), null, {
+      timeout: 5000,
+    })
+    .catch(() => {});
+  check(
+    "同じ内容のページはキャッシュから表示する",
+    (await cachedPage.textContent("#h1")).startsWith("JA:GETTING") &&
+      (await cachedPage.textContent("#far")).includes("JA:"),
+    await cachedPage.textContent("#far"),
+  );
+  const requestsAfterCache = await sw.evaluate(() => globalThis.__requests.length);
+  check(
+    "キャッシュに当たった分は API に送らない",
+    requestsAfterCache === requests.length,
+    `${requests.length} → ${requestsAfterCache}`,
+  );
+
+  await cachedPage.goto("https://test.example/other-page");
+  await cachedPage.waitForTimeout(500);
+  await sendToTab({ type: "page:translate" });
+  await cachedPage
+    .waitForFunction(() => document.querySelector("#far")?.textContent?.includes("JA:"), null, {
+      timeout: 5000,
+    })
+    .catch(() => {});
+  const requestsOnOtherPage = await sw.evaluate(() => globalThis.__requests.length);
+  check(
+    "URL が違うページではキャッシュを使わない",
+    requestsOnOtherPage > requestsAfterCache,
+    `${requestsAfterCache} → ${requestsOnOtherPage}`,
+  );
+  await cachedPage.close();
+  await page.bringToFront();
+
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.hover("#li1");
   await page.waitForTimeout(500);
@@ -366,6 +409,15 @@ try {
         JSON.stringify(efforts),
       );
       check("高速モードのスイッチを表示する", (await p.getByText("高速モード").count()) === 1);
+      const cacheLabel = await p.getByText(/保存済みの訳文/).textContent();
+      check("保存済みの訳文の件数を表示する", !/ 0 件|-/.test(cacheLabel), cacheLabel);
+      await p.getByRole("button", { name: "キャッシュを消去" }).click();
+      await p.waitForTimeout(200);
+      check(
+        "キャッシュを消去できる",
+        (await p.getByText(/保存済みの訳文/).textContent()).includes(" 0 件"),
+        await p.getByText(/保存済みの訳文/).textContent(),
+      );
     }
     await p.close();
   }

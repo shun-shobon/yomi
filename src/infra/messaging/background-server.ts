@@ -6,6 +6,7 @@ import {
   type BackgroundApi,
   type BackgroundRequest,
   type BackgroundResponse,
+  type ParamsOf,
   type TranslateEvent,
   type TranslateRequest,
 } from "./protocol";
@@ -14,14 +15,16 @@ import {
 const KEEP_ALIVE_INTERVAL_MS = 20_000;
 
 export type BackgroundHandlers = {
-  [K in keyof BackgroundApi]: () => Promise<BackgroundApi[K]>;
+  [K in keyof BackgroundApi]: (params: ParamsOf<K>) => Promise<BackgroundApi[K]>;
 };
 
 type ToFailure = (e: unknown) => SerializedFailure;
 
 export function serveBackgroundApi(handlers: BackgroundHandlers, toFailure: ToFailure) {
   browser.runtime.onMessage.addListener((request: BackgroundRequest, _sender, sendResponse) => {
-    handlers[request.type]().then(
+    // TS は union になった関数を引数の対応付きで呼べない
+    const handler = handlers[request.type] as (params: unknown) => Promise<unknown>;
+    handler(request.params).then(
       (value) => sendResponse({ ok: true, value }),
       (e: unknown) =>
         sendResponse({

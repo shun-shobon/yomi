@@ -10,6 +10,7 @@ import {
 import { serveBackgroundApi, serveTranslatePort } from "@/infra/messaging/background-server";
 import { sendToContent } from "@/infra/messaging/content-client";
 import type { CommandName, ContentMessage } from "@/infra/messaging/protocol";
+import { lookupTranslations, storeTranslations } from "@/infra/storage/translation-cache";
 import {
   getAuthState,
   handleTabRemoved,
@@ -65,6 +66,8 @@ export default defineBackground(() => {
       "open:options": openOptionsPage,
       "open:usage": openUsagePage,
       "open:shortcuts": openShortcutsPage,
+      "cache:lookup": ({ keys }) => lookupTranslations(keys),
+      "cache:store": ({ entries }) => storeTranslations(entries),
     },
     serializeFailure,
   );
