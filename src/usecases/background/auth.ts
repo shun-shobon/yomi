@@ -28,7 +28,7 @@ const REFRESH_MARGIN_MS = 60 * 1000;
 
 export async function getAuthState(): Promise<AuthState> {
   const creds = await credentialsItem.getValue();
-  return { signedIn: creds !== null, email: creds?.email ?? null };
+  return { signedIn: creds != null, email: creds?.email ?? null };
 }
 
 export async function startSignIn(): Promise<void> {
@@ -63,7 +63,7 @@ export async function startSignIn(): Promise<void> {
       idTokenHint: previous?.idToken ?? null,
     }),
   });
-  if (tab.id === undefined) throw new Error("認可タブを開けませんでした");
+  if (tab.id == null) throw new Error("認可タブを開けませんでした");
   await signInItem.setValue({
     status: "pending",
     tabId: tab.id,
@@ -75,7 +75,7 @@ export async function startSignIn(): Promise<void> {
 }
 
 export async function handleTabUpdated(tabId: number, url: string | undefined): Promise<boolean> {
-  if (!url || !isRedirectUrl(url)) return false;
+  if (url == null || !isRedirectUrl(url)) return false;
   const pending = await signInItem.getValue();
   if (pending?.status !== "pending" || pending.tabId !== tabId) return false;
   await browser.tabs.remove(tabId);
@@ -112,7 +112,7 @@ async function completeSignIn(pending: PendingSignIn, callback: URL): Promise<vo
   if (!hasRequiredScope(tokens.scope)) {
     throw new Error("このアカウントでは ChatGPT プランを利用できません（Plus / Pro が必要です）");
   }
-  if (!tokens.idToken) throw new Error("ID トークンが発行されませんでした");
+  if (tokens.idToken == null) throw new Error("ID トークンが発行されませんでした");
   const claims = decodeIdToken(tokens.idToken);
   if (claims.nonce !== pending.nonce) throw new Error("ID トークンの nonce が一致しません");
 
@@ -196,7 +196,7 @@ export async function signOut(): Promise<void> {
 
 async function getHostId(): Promise<string> {
   const existing = await hostIdItem.getValue();
-  if (existing) return existing;
+  if (existing != null) return existing;
   const id = `urn:uuid:${crypto.randomUUID()}`;
   await hostIdItem.setValue(id);
   return id;

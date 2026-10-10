@@ -8,7 +8,7 @@ export default defineConfig({
         plugins: [WxtVitest()],
         test: {
           name: "unit",
-          include: ["src/**/*.test.ts"],
+          include: ["src/**/*.test.ts", "lint/**/*.test.ts"],
           // fakeBrowser の storage などをテストごとに初期化する
           restoreMocks: true,
         },

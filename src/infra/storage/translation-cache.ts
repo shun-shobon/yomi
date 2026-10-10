@@ -25,7 +25,7 @@ function openDb(): Promise<IDBDatabase> {
       req.result.createObjectStore(STORE, { keyPath: "key" }).createIndex(USED_AT, USED_AT);
     };
     req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
+    req.onerror = () => reject(req.error ?? new Error("IndexedDB を開けませんでした"));
   }).catch((e: unknown) => {
     dbPromise = null;
     throw e;
@@ -47,7 +47,8 @@ async function transact<T>(
   const collect = run(tx.objectStore(STORE));
   await new Promise<void>((resolve, reject) => {
     tx.oncomplete = () => resolve();
-    tx.onerror = tx.onabort = () => reject(tx.error);
+    tx.onerror = tx.onabort = () =>
+      reject(tx.error ?? new Error("IndexedDB のトランザクションが中断されました"));
   });
   return collect();
 }

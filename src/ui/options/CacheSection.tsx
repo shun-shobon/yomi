@@ -13,7 +13,11 @@ export function CacheSection() {
       <h2>キャッシュ</h2>
       <div class="row">
         <div class="grow">保存済みの訳文 {count()?.toLocaleString() ?? "-"} 件</div>
-        <button class="btn" disabled={!count()} onClick={() => void clear()}>
+        <button
+          class="btn"
+          disabled={count() == null || count() === 0}
+          onClick={() => void clear()}
+        >
           キャッシュを消去
         </button>
       </div>

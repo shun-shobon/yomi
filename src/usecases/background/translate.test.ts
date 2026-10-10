@@ -23,8 +23,8 @@ describe("translate", () => {
     fakeBrowser.reset();
     vi.mocked(getAccessToken).mockReset();
     vi.mocked(streamResponse).mockReset();
-    vi.mocked(getAccessToken).mockImplementation(async (force) =>
-      force ? "refreshed-token" : "token",
+    vi.mocked(getAccessToken).mockImplementation((force) =>
+      Promise.resolve(force != null && force ? "refreshed-token" : "token"),
     );
     await updateSettings({ model: "gpt-test" });
   });
@@ -58,9 +58,10 @@ describe("translate", () => {
   });
 
   it("受け取った訳文の断片を順に onDelta へ渡す", async () => {
-    vi.mocked(streamResponse).mockImplementation(async (opts: StreamOptions) => {
+    vi.mocked(streamResponse).mockImplementation((opts: StreamOptions) => {
       opts.onDelta("こん");
       opts.onDelta("にちは");
+      return Promise.resolve();
     });
     const deltas: string[] = [];
 
@@ -107,9 +108,9 @@ describe("translate", () => {
 
   it("訳文の一部を受け取った後の 401 は再試行しない", async () => {
     const error = new ApiError(401, null, "expired");
-    vi.mocked(streamResponse).mockImplementation(async (opts: StreamOptions) => {
+    vi.mocked(streamResponse).mockImplementation((opts: StreamOptions) => {
       opts.onDelta("こん");
-      throw error;
+      return Promise.reject(error);
     });
     const deltas: string[] = [];
 

@@ -32,7 +32,7 @@ export function serialize({ parent, nodes }: Run): Serialized {
   const keepsNewlinesCache = new Map<Node, boolean>();
   const slotOf = (p: Node, before: Node | null): Slot => {
     let keepNewlines = keepsNewlinesCache.get(p);
-    if (keepNewlines === undefined) {
+    if (keepNewlines == null) {
       keepNewlines = p instanceof Element && keepsNewlines(p);
       keepsNewlinesCache.set(p, keepNewlines);
     }

@@ -93,7 +93,7 @@ export class PageTranslator {
 
   start() {
     const { targetLang } = this.hooks.getSettings();
-    if (this.lang !== null && this.lang !== targetLang) this.reset();
+    if (this.lang != null && this.lang !== targetLang) this.reset();
     this.lang = targetLang;
     if (this.showing === "original") this.renderAll("translation");
     if (this.active) return;

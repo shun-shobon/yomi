@@ -57,10 +57,10 @@ export function ModelSection(props: {
                 <For each={models()}>{(m) => <option value={m.slug}>{m.displayName}</option>}</For>
               </select>
             </label>
-            <Show when={!props.settings.model}>
+            <Show when={props.settings.model == null}>
               <p class="notice">翻訳を始める前にモデルを選択してください。</p>
             </Show>
-            <Show when={props.settings.model && !selected()}>
+            <Show when={props.settings.model != null && !selected()}>
               <p class="notice">
                 選択中のモデル（{props.settings.model}）はこのアカウントでは利用できません。
               </p>

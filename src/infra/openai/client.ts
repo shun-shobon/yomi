@@ -65,6 +65,8 @@ export async function streamResponse(opts: StreamOptions): Promise<void> {
       }
       case "error":
         throw new ApiError(null, event.code, event.message);
+      default:
+        break;
     }
   }
   throw new ApiError(null, null, "応答が途中で終了しました");
@@ -74,8 +76,11 @@ async function withApiErrors<T>(fn: () => Promise<T>): Promise<T> {
   try {
     return await fn();
   } catch (e) {
-    if (!(e instanceof APIError) || e.status === undefined) throw e;
-    const message = e.requestID ? `${e.message} (request id: ${e.requestID})` : e.message;
+    if (!(e instanceof APIError) || typeof e.status !== "number") throw e;
+    const message =
+      e.requestID == null || e.requestID === ""
+        ? e.message
+        : `${e.message} (request id: ${e.requestID})`;
     throw new ApiError(e.status, e.code ?? null, message);
   }
 }

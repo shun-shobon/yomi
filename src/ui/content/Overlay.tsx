@@ -33,8 +33,7 @@ export function createOverlay(): Overlay {
 
   let host: HTMLElement | null = null;
   const mount = () => {
-    if (host?.isConnected) return;
-    if (!host) {
+    if (host == null) {
       host = document.createElement("yomi-ui");
       host.setAttribute("data-gt-ui", "");
       host.style.cssText =
@@ -46,6 +45,7 @@ export function createOverlay(): Overlay {
       layer.className = "layer";
       shadow.append(style, layer);
       // Solid は onClick などを document で委譲して受けるが、closed shadow DOM 内のノードは document 側の composedPath に現れず届かない
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion
       delegateEvents(["click", "mousedown"], shadow as unknown as Document);
       render(
         () => (
@@ -64,19 +64,22 @@ export function createOverlay(): Overlay {
         ),
         layer,
       );
+    } else if (host.isConnected) {
+      return;
     }
     // ページが documentElement の子を差し替えても、描画済みの UI ごと付け直す
     document.documentElement.append(host);
   };
 
   return {
-    isOwnTarget: (target) => target !== null && target === host,
+    isOwnTarget: (target) => target != null && target === host,
 
     toast(message: string, opts: ToastOptions = {}) {
       mount();
       const id = nextId++;
       setToasts((items) => [...items, { id, message, ...opts }]);
-      if (!opts.error && !opts.action) setTimeout(() => dismissToast(id), TOAST_DURATION_MS);
+      if ((opts.error == null || !opts.error) && opts.action == null)
+        setTimeout(() => dismissToast(id), TOAST_DURATION_MS);
     },
 
     showTooltip(anchor, label, text) {
@@ -92,7 +95,7 @@ export function createOverlay(): Overlay {
     },
     hideSelectionButton: () => setButton(null),
     get selectionButtonShown() {
-      return button() !== null;
+      return button() != null;
     },
 
     openPanel(anchor, title, onClose) {

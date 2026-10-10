@@ -19,6 +19,7 @@ export const LANGUAGES = {
 
 export type LanguageCode = keyof typeof LANGUAGES;
 
+// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Object.keys は string[] を返すが、LANGUAGES は as const なので余分なキーを持たない
 export const LANGUAGE_CODES = Object.keys(LANGUAGES) as LanguageCode[];
 
 export const LanguageCodeSchema = v.picklist(LANGUAGE_CODES);

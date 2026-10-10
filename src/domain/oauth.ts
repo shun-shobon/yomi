@@ -38,8 +38,8 @@ export function buildAuthorizeUrl(req: AuthorizeRequest): string {
     code_challenge_method: "S256",
     code_challenge: req.codeChallenge,
   });
-  if (!req.clientId) params.set("agent_name_hint", APP_NAME);
-  if (req.idTokenHint) params.set("id_token_hint", req.idTokenHint);
+  if (req.clientId == null) params.set("agent_name_hint", APP_NAME);
+  if (req.idTokenHint != null) params.set("id_token_hint", req.idTokenHint);
   return `${AUTHORIZE_URL}?${params}`;
 }
 
@@ -56,12 +56,12 @@ export function parseAuthorizationCallback(
     throw new Error("認可レスポンスの state が一致しません");
   }
   const error = params.get("error");
-  if (error) throw new Error(params.get("error_description") ?? error);
+  if (error != null) throw new Error(params.get("error_description") ?? error);
   const code = params.get("code");
-  if (!code) throw new Error("認可コードを取得できませんでした");
+  if (code == null || code === "") throw new Error("認可コードを取得できませんでした");
   // 発行済みの client_id で再認可した場合、コールバックには client_id が付かない
   const clientId = params.get("client_id") ?? expected.clientId;
-  if (!clientId) throw new Error("client_id が発行されませんでした");
+  if (clientId == null || clientId === "") throw new Error("client_id が発行されませんでした");
   return { code, clientId };
 }
 
@@ -108,7 +108,7 @@ export function parseTokenResponse(status: number, ok: boolean, json: unknown): 
     typeof refreshToken !== "string" ||
     typeof expiresIn !== "number" ||
     typeof scope !== "string" ||
-    (idToken !== undefined && typeof idToken !== "string")
+    (idToken != null && typeof idToken !== "string")
   ) {
     throw new Error("トークンエンドポイントの応答に必要な項目がありません");
   }
@@ -127,7 +127,7 @@ export interface IdTokenClaims {
 /** 署名は検証しない。トークンは TLS で発行元から直接受け取っており、表示用の email と nonce の照合にだけ使う */
 export function decodeIdToken(jwt: string): IdTokenClaims {
   const payload = jwt.split(".")[1];
-  if (!payload) throw new Error("ID トークンの形式が不正です");
+  if (payload == null || payload === "") throw new Error("ID トークンの形式が不正です");
   const bytes = Uint8Array.from(atob(payload.replace(/-/g, "+").replace(/_/g, "/")), (c) =>
     c.charCodeAt(0),
   );
@@ -159,5 +159,5 @@ export function base64url(bytes: Uint8Array): string {
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
+  return typeof value === "object" && value != null;
 }

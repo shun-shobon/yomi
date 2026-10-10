@@ -30,7 +30,7 @@ export function restoreContentLang(el: Element) {
   if (!saved) return;
   savedLang.delete(el);
   for (const [name, value] of Object.entries(saved)) {
-    if (value === null) el.removeAttribute(name);
+    if (value == null) el.removeAttribute(name);
     else el.setAttribute(name, value);
   }
 }
@@ -43,12 +43,13 @@ export function setPending(el: Element, pending: boolean) {
 let style: HTMLStyleElement | null = null;
 
 export function ensurePendingStyle() {
-  if (style?.isConnected) return;
-  style = document.createElement("style");
-  style.textContent = pendingCss;
-  document.head.append(style);
+  if (style == null || !style.isConnected) {
+    style = document.createElement("style");
+    style.textContent = pendingCss;
+    document.head.append(style);
+  }
 }
 
 export function isInMainContent(el: Element): boolean {
-  return el.closest("main, [role=main], article") !== null;
+  return el.closest("main, [role=main], article") != null;
 }

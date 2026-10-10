@@ -1,5 +1,5 @@
 import type { Page } from "playwright-core";
-import { afterAll, beforeAll, expect, test } from "vitest";
+import { beforeAll, expect, test } from "vitest";
 
 import { type Extension, launchExtension, screenshot } from "./fixtures";
 
@@ -8,11 +8,13 @@ let page: Page;
 
 beforeAll(async () => {
   ext = await launchExtension();
+  return () => ext.context.close();
+});
+
+beforeAll(async () => {
   await ext.setSettings({ model: "gpt-6-luna", targetLang: "ja", fastMode: true });
   page = await ext.openTestPage();
 });
-
-afterAll(() => ext?.context.close());
 
 // 選択テキスト翻訳の UI は closed shadow DOM なので、操作は座標で行い表示はスクリーンショットで確認する
 test("選択したテキストを翻訳ボタンから翻訳する", async () => {

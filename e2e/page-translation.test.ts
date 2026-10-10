@@ -1,5 +1,5 @@
 import type { Page } from "playwright-core";
-import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { beforeAll, describe, expect, test } from "vitest";
 
 import { type Extension, launchExtension, screenshot, takesScreenshots } from "./fixtures";
 
@@ -13,6 +13,10 @@ const text = (sel: string) => page.textContent(sel);
 
 beforeAll(async () => {
   ext = await launchExtension();
+  return () => ext.context.close();
+});
+
+beforeAll(async () => {
   page = await ext.openTestPage();
   originalP1 = await page.innerHTML("#p1");
   await page.evaluate(() => {
@@ -20,12 +24,10 @@ beforeAll(async () => {
   });
 
   await ext.sendToTab({ type: "page:translate" });
-  await page.waitForFunction(() => document.querySelector("#li2")?.textContent?.includes("JA:"));
+  await page.waitForFunction(() => document.querySelector("#li2")?.textContent.includes("JA:"));
   await page.waitForTimeout(300);
   await screenshot(page, "page-translated");
 });
-
-afterAll(() => ext?.context.close());
 
 describe("ページ翻訳", () => {
   test("見出しが翻訳される", async () => {

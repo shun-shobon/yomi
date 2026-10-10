@@ -34,7 +34,7 @@ export function App() {
           </section>
         </Show>
 
-        <Show when={auth()!.signedIn && !settings()!.model}>
+        <Show when={auth()!.signedIn && settings()!.model == null}>
           <div class="notice">
             翻訳に使うモデルが未選択です。
             <button class="btn link" onClick={() => void callBackground("open:options")}>
@@ -46,7 +46,7 @@ export function App() {
         <PageControls
           page={page()}
           send={sendToPage}
-          disabled={!auth()!.signedIn || !settings()!.model}
+          disabled={!auth()!.signedIn || settings()!.model == null}
         />
 
         <section class="settings">

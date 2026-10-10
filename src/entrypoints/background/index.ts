@@ -48,10 +48,10 @@ export default defineBackground(() => {
   });
 
   browser.contextMenus.onClicked.addListener((info, tab) => {
-    if (tab?.id === undefined || !v.is(ContextMenuIdSchema, info.menuItemId)) return;
+    if (tab?.id == null || !v.is(ContextMenuIdSchema, info.menuItemId)) return;
     if (info.menuItemId === "translate-page") {
       notifyTab(tab.id, { type: "page:translate" });
-    } else if (info.menuItemId === "translate-selection" && info.selectionText) {
+    } else if (info.selectionText != null) {
       notifyTab(tab.id, { type: "selection:translate", text: info.selectionText });
     }
   });
@@ -59,7 +59,7 @@ export default defineBackground(() => {
   browser.commands.onCommand.addListener((command) => {
     if (!v.is(CommandNameSchema, command)) return;
     void activeTabId().then((tabId) => {
-      if (tabId !== undefined) notifyTab(tabId, COMMAND_MESSAGES[command]);
+      if (tabId != null) notifyTab(tabId, COMMAND_MESSAGES[command]);
     });
   });
 

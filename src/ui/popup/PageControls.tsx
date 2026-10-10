@@ -9,7 +9,10 @@ export function PageControls(props: {
   disabled: boolean;
 }) {
   const state = () => (props.page.status === "ready" ? props.page.state : undefined);
-  const hasTranslations = () => (state()?.done ?? 0) > 0;
+  const hasTranslations = () => {
+    const s = state();
+    return s != null && s.done > 0;
+  };
   return (
     <section class="page">
       <Switch>

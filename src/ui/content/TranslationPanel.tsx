@@ -35,7 +35,10 @@ export function TranslationPanel(props: PanelItem) {
       </header>
       <div
         class="body"
-        classList={{ cursor: !!translating()?.text, error: !!failed() }}
+        classList={{
+          cursor: props.state.status === "translating" && props.state.text !== "",
+          error: props.state.status === "failed",
+        }}
         aria-live="polite"
       >
         <Switch>

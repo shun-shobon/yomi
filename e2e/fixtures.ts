@@ -34,10 +34,10 @@ export const TEST_PAGE = `<!doctype html><html lang="en"><head><title>Test page<
 
 const screenshotDir = process.env["E2E_SCREENSHOT_DIR"];
 
-export const takesScreenshots = screenshotDir !== undefined;
+export const takesScreenshots = screenshotDir != null;
 
 export async function screenshot(page: Page, name: string, options?: { fullPage?: boolean }) {
-  if (screenshotDir)
+  if (screenshotDir != null)
     await page.screenshot({ path: join(screenshotDir, `${name}.png`), ...options });
 }
 
@@ -45,7 +45,8 @@ export type Extension = Awaited<ReturnType<typeof launchExtension>>;
 
 export async function launchExtension() {
   const executablePath = process.env["CHROMIUM_PATH"];
-  if (!executablePath) throw new Error("CHROMIUM_PATH を指定してください");
+  if (executablePath == null || executablePath === "")
+    throw new Error("CHROMIUM_PATH を指定してください");
   const extensionPath = resolve(".output/chrome-mv3");
 
   const context = await chromium.launchPersistentContext(mkdtempSync(join(tmpdir(), "yomi-e2e-")), {

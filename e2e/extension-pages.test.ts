@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { beforeAll, describe, expect, test } from "vitest";
 
 import { type Extension, launchExtension, screenshot, takesScreenshots } from "./fixtures";
 
@@ -6,9 +6,8 @@ let ext: Extension;
 
 beforeAll(async () => {
   ext = await launchExtension();
+  return () => ext.context.close();
 });
-
-afterAll(() => ext?.context.close());
 
 test.runIf(takesScreenshots)("ポップアップを表示する", async () => {
   const popup = await ext.context.newPage();

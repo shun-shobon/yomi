@@ -16,7 +16,7 @@ export function* tokenize(markup: string): Generator<Token> {
     const [, slash, letter, id] = match;
     yield {
       type: "tag",
-      kind: letter === "x" ? "atomic" : slash ? "close" : "open",
+      kind: letter === "x" ? "atomic" : slash === "/" ? "close" : "open",
       id: Number(id),
     };
   }

@@ -29,6 +29,8 @@ function fromApiError(e: ApiError): TranslateFailure {
       );
     case "subscription_sharing_invalid_user":
       return new TranslateFailure("signed_out", e.message);
+    default:
+      break;
   }
   switch (e.status) {
     case 403:

@@ -17,7 +17,7 @@ export function createActivePage(): [Accessor<PageView>, (message: ContentMessag
   let tabId: number | undefined;
 
   const send = (message: ContentMessage) => {
-    if (tabId === undefined) return;
+    if (tabId == null) return;
     sendToContent(tabId, message).then(
       (state) => setView({ status: "ready", state }),
       () => setView({ status: "unavailable" }),
@@ -27,7 +27,7 @@ export function createActivePage(): [Accessor<PageView>, (message: ContentMessag
   let timer: ReturnType<typeof setInterval> | undefined;
   onCleanup(() => clearInterval(timer));
   void activeTabId().then((id) => {
-    if (id === undefined) {
+    if (id == null) {
       setView({ status: "unavailable" });
       return;
     }

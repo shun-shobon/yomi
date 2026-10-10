@@ -94,7 +94,7 @@ const inlineCache = new WeakMap<Element, boolean>();
 
 function isInline(el: Element): boolean {
   const cached = inlineCache.get(el);
-  if (cached !== undefined) return cached;
+  if (cached != null) return cached;
   const display = INLINE_TAGS.has(el.tagName) ? getComputedStyle(el).display : null;
   const result =
     (display === "inline" || display === "contents") &&
@@ -121,7 +121,7 @@ function hasTranslatableText(nodes: Node[]): boolean {
   return nodes.some(
     (node) =>
       (node instanceof Text || (node instanceof Element && !isAtomic(node))) &&
-      LETTER.test(node.textContent ?? ""),
+      LETTER.test(node.textContent),
   );
 }
 
