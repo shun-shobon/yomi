@@ -1,8 +1,10 @@
+import * as v from "valibot";
+
 import { browser, type Browser } from "#imports";
 import { TranslateFailure } from "@/domain/failure";
 import {
   TRANSLATE_PORT,
-  type TranslateEvent,
+  TranslateEventSchema,
   type TranslateRequest,
 } from "@/infra/messaging/protocol";
 
@@ -40,7 +42,13 @@ export function requestTranslation(
     settle();
   };
 
-  port.onMessage.addListener((event: TranslateEvent) => {
+  port.onMessage.addListener((raw: unknown) => {
+    const parsed = v.safeParse(TranslateEventSchema, raw);
+    if (!parsed.success) {
+      finish(() => reject(new TranslateFailure("other", "拡張機能から不正な応答を受け取りました")));
+      return;
+    }
+    const event = parsed.output;
     switch (event.type) {
       case "delta":
         onDelta(event.text);

@@ -1,12 +1,16 @@
-import type { ReasoningEffort, Settings } from "./settings";
+import * as v from "valibot";
 
-export interface ModelInfo {
-  slug: string;
-  displayName: string;
-  reasoningEfforts: ReasoningEffort[];
-  defaultReasoningEffort: ReasoningEffort;
-  supportsFast: boolean;
-}
+import { ReasoningEffortSchema, type ReasoningEffort, type Settings } from "./settings";
+
+export const ModelInfoSchema = v.object({
+  slug: v.string(),
+  displayName: v.string(),
+  reasoningEfforts: v.array(ReasoningEffortSchema),
+  defaultReasoningEffort: ReasoningEffortSchema,
+  supportsFast: v.boolean(),
+});
+
+export type ModelInfo = v.InferOutput<typeof ModelInfoSchema>;
 
 export function supportsEffort(model: ModelInfo, effort: ReasoningEffort): boolean {
   return model.reasoningEfforts.includes(effort);

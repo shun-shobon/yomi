@@ -172,6 +172,9 @@ importers:
       solid-js:
         specifier: 1.9.15
         version: 1.9.15
+      valibot:
+        specifier: 1.5.0
+        version: 1.5.0(typescript@6.0.3)
     devDependencies:
       '@tsconfig/strictest':
         specifier: 2.0.8
@@ -1475,6 +1478,14 @@ packages:
     peerDependencies:
       browserslist: '>= 4.21.0'
 
+  valibot@1.5.0:
+    resolution: {integrity: sha512-nil6AkP2TChWL43Z5uJ6GTxX01CUA+g8LWUM+N/rB9NBbkUMaUsi9PUNzlUPgoKASgmx9f7eGOYpJ04/fSa6FQ==}
+    peerDependencies:
+      typescript: '>=5'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
   vite-plugin-solid@2.11.14:
     resolution: {integrity: sha512-7ZVBt8rpoyqmlwin2kRIUveaHoF6/kulY7gsnD+qFh4nS29V4OPAnw+ojoAspXIjObiL9o1xh9a/nTuYHm02Rw==}
     peerDependencies:
@@ -2666,6 +2677,10 @@ snapshots:
       browserslist: 4.29.3
       escalade: 3.2.0
       picocolors: 1.1.1
+
+  valibot@1.5.0(typescript@6.0.3):
+    optionalDependencies:
+      typescript: 6.0.3
 
   vite-plugin-solid@2.11.14(solid-js@1.9.15)(vite@8.3.2(@types/node@26.6.4)(jiti@2.7.0)):
     dependencies:

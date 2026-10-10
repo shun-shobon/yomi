@@ -1,7 +1,9 @@
+import * as v from "valibot";
+
 import { browser, defineContentScript } from "#imports";
 import { FAILURE_POLICY } from "@/domain/failure";
 import type { PageState } from "@/domain/page";
-import type { ContentMessage } from "@/infra/messaging/protocol";
+import { ContentMessageSchema } from "@/infra/messaging/protocol";
 import { getSettings, watchSettings } from "@/infra/storage/settings";
 import { createOverlay } from "@/ui/content/Overlay";
 import { watchHoverOriginal } from "@/usecases/content/hover-original";
@@ -41,7 +43,8 @@ export default defineContentScript({
 
     const runCommand = createPageCommands({ overlay, page, selection });
     browser.runtime.onMessage.addListener(
-      (message: ContentMessage, _sender, sendResponse: (state: PageState) => void) => {
+      (message: unknown, _sender, sendResponse: (state: PageState) => void) => {
+        if (!v.is(ContentMessageSchema, message)) return;
         sendResponse(runCommand(message));
       },
     );

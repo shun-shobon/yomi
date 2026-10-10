@@ -1,17 +1,24 @@
-export type TranslateErrorKind =
-  | "signed_out"
-  | "no_model"
-  | "usage_limit"
-  | "not_eligible"
-  | "extension_reloaded"
-  | "unavailable"
-  | "other";
+import * as v from "valibot";
+
+const TranslateErrorKindSchema = v.picklist([
+  "signed_out",
+  "no_model",
+  "usage_limit",
+  "not_eligible",
+  "extension_reloaded",
+  "unavailable",
+  "other",
+]);
+
+export type TranslateErrorKind = v.InferOutput<typeof TranslateErrorKindSchema>;
 
 /** runtime messaging を通すため plain object */
-export interface SerializedFailure {
-  kind: TranslateErrorKind;
-  message: string;
-}
+export const SerializedFailureSchema = v.object({
+  kind: TranslateErrorKindSchema,
+  message: v.string(),
+});
+
+export type SerializedFailure = v.InferOutput<typeof SerializedFailureSchema>;
 
 export class TranslateFailure extends Error {
   constructor(

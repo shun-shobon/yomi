@@ -1,14 +1,20 @@
-export type Showing = "translation" | "original";
+import * as v from "valibot";
+
+const ShowingSchema = v.picklist(["translation", "original"]);
+
+export type Showing = v.InferOutput<typeof ShowingSchema>;
 
 export type SegmentState = "idle" | "queued" | "pending" | "done" | "failed";
 
-export interface PageState {
-  active: boolean;
-  showing: Showing;
-  busy: number;
-  done: number;
-  failed: number;
-}
+export const PageStateSchema = v.object({
+  active: v.boolean(),
+  showing: ShowingSchema,
+  busy: v.number(),
+  done: v.number(),
+  failed: v.number(),
+});
+
+export type PageState = v.InferOutput<typeof PageStateSchema>;
 
 export function summarizePage(
   active: boolean,

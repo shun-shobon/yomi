@@ -1,4 +1,10 @@
-import { CACHE_MAX_ENTRIES, type CachedTranslation } from "@/domain/translation-cache";
+import * as v from "valibot";
+
+import {
+  CACHE_MAX_ENTRIES,
+  CachedTranslationSchema,
+  type CachedTranslation,
+} from "@/domain/translation-cache";
 
 const DB_NAME = "translation-cache";
 const STORE = "entries";
@@ -6,9 +12,9 @@ const USED_AT = "usedAt";
 /** 当たるたびに更新すると、表示するだけで書き込みが続く */
 const TOUCH_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
-interface Row extends CachedTranslation {
-  usedAt: number;
-}
+const RowSchema = v.object({ ...CachedTranslationSchema.entries, usedAt: v.number() });
+
+type Row = v.InferOutput<typeof RowSchema>;
 
 let dbPromise: Promise<IDBDatabase> | null = null;
 
@@ -52,10 +58,11 @@ export async function lookupTranslations(keys: string[]): Promise<(string | null
     const now = Date.now();
     const found: (string | null)[] = keys.map(() => null);
     hashed.forEach((key, i) => {
-      const req = store.get(key) as IDBRequest<Row | undefined>;
+      const req = store.get(key);
       req.onsuccess = () => {
-        const row = req.result;
-        if (!row) return;
+        const parsed = v.safeParse(RowSchema, req.result);
+        if (!parsed.success) return;
+        const row = parsed.output;
         found[i] = row.translation;
         if (now - row.usedAt > TOUCH_INTERVAL_MS) store.put({ ...row, usedAt: now });
       };

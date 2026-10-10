@@ -1,6 +1,10 @@
+import * as v from "valibot";
+
 import { browser } from "#imports";
 
-export type ContextMenuId = "translate-page" | "translate-selection";
+export const ContextMenuIdSchema = v.picklist(["translate-page", "translate-selection"]);
+
+type ContextMenuId = v.InferOutput<typeof ContextMenuIdSchema>;
 
 export async function setUpContextMenus(): Promise<void> {
   await browser.contextMenus.removeAll();

@@ -1,3 +1,5 @@
+import * as v from "valibot";
+
 export const LANGUAGES = {
   ja: { label: "日本語", englishName: "Japanese" },
   en: { label: "英語", englishName: "English" },
@@ -19,6 +21,8 @@ export type LanguageCode = keyof typeof LANGUAGES;
 
 export const LANGUAGE_CODES = Object.keys(LANGUAGES) as LanguageCode[];
 
+export const LanguageCodeSchema = v.picklist(LANGUAGE_CODES);
+
 export function isLanguageCode(value: string): value is LanguageCode {
-  return Object.hasOwn(LANGUAGES, value);
+  return v.is(LanguageCodeSchema, value);
 }

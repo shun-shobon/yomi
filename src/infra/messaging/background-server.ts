@@ -1,12 +1,17 @@
+import * as v from "valibot";
+
 import { browser } from "#imports";
 import type { SerializedFailure } from "@/domain/failure";
 
 import {
+  BACKGROUND_API,
+  BackgroundRequestSchema,
   TRANSLATE_PORT,
-  type BackgroundApi,
-  type BackgroundRequest,
+  TranslateRequestSchema,
+  type BackgroundMethod,
   type BackgroundResponse,
   type ParamsOf,
+  type ResultOf,
   type TranslateEvent,
   type TranslateRequest,
 } from "./protocol";
@@ -15,25 +20,29 @@ import {
 const KEEP_ALIVE_INTERVAL_MS = 20_000;
 
 export type BackgroundHandlers = {
-  [K in keyof BackgroundApi]: (params: ParamsOf<K>) => Promise<BackgroundApi[K]>;
+  [K in BackgroundMethod]: (params: ParamsOf<K>) => Promise<ResultOf<K>>;
 };
 
 type ToFailure = (e: unknown) => SerializedFailure;
 
 export function serveBackgroundApi(handlers: BackgroundHandlers, toFailure: ToFailure) {
-  browser.runtime.onMessage.addListener((request: BackgroundRequest, _sender, sendResponse) => {
-    // TS は union になった関数を引数の対応付きで呼べない
-    const handler = handlers[request.type] as (params: unknown) => Promise<unknown>;
-    handler(request.params).then(
-      (value) => sendResponse({ ok: true, value }),
-      (e: unknown) =>
-        sendResponse({
-          ok: false,
-          failure: toFailure(e),
-        } satisfies BackgroundResponse<keyof BackgroundApi>),
+  browser.runtime.onMessage.addListener((raw: unknown, _sender, sendResponse) => {
+    const respond = (response: BackgroundResponse) => sendResponse(response);
+    dispatch(handlers, raw).then(
+      (value) => respond({ ok: true, value }),
+      (e: unknown) => respond({ ok: false, failure: toFailure(e) }),
     );
     return true;
   });
+}
+
+async function dispatch(handlers: BackgroundHandlers, raw: unknown): Promise<unknown> {
+  const { type, params } = v.parse(BackgroundRequestSchema, raw);
+  return call(handlers, type, params);
+}
+
+function call<K extends BackgroundMethod>(handlers: BackgroundHandlers, type: K, params: unknown) {
+  return handlers[type](v.parse(BACKGROUND_API[type].params, params));
 }
 
 export type TranslateHandler = (
@@ -47,7 +56,7 @@ export function serveTranslatePort(translate: TranslateHandler, toFailure: ToFai
     if (port.name !== TRANSLATE_PORT) return;
     const controller = new AbortController();
     port.onDisconnect.addListener(() => controller.abort());
-    port.onMessage.addListener((req: TranslateRequest) => {
+    port.onMessage.addListener((raw: unknown) => {
       const post = (event: TranslateEvent) => {
         if (!controller.signal.aborted) port.postMessage(event);
       };
@@ -55,7 +64,11 @@ export function serveTranslatePort(translate: TranslateHandler, toFailure: ToFai
         () => void browser.runtime.getPlatformInfo(),
         KEEP_ALIVE_INTERVAL_MS,
       );
-      void translate(req, controller.signal, (text) => post({ type: "delta", text }))
+      const run = async () =>
+        translate(v.parse(TranslateRequestSchema, raw), controller.signal, (text) =>
+          post({ type: "delta", text }),
+        );
+      void run()
         .then(
           () => post({ type: "done" }),
           (e: unknown) => post({ type: "error", failure: toFailure(e) }),

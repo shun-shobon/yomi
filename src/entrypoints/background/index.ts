@@ -1,6 +1,8 @@
+import * as v from "valibot";
+
 import { browser, defineBackground } from "#imports";
 import { toTranslateFailure } from "@/domain/api-error";
-import { setUpContextMenus, type ContextMenuId } from "@/infra/browser/context-menus";
+import { ContextMenuIdSchema, setUpContextMenus } from "@/infra/browser/context-menus";
 import {
   activeTabId,
   openOptionsPage,
@@ -9,7 +11,11 @@ import {
 } from "@/infra/browser/tabs";
 import { serveBackgroundApi, serveTranslatePort } from "@/infra/messaging/background-server";
 import { sendToContent } from "@/infra/messaging/content-client";
-import type { CommandName, ContentMessage } from "@/infra/messaging/protocol";
+import {
+  CommandNameSchema,
+  type CommandName,
+  type ContentMessage,
+} from "@/infra/messaging/protocol";
 import { lookupTranslations, storeTranslations } from "@/infra/storage/translation-cache";
 import {
   getAuthState,
@@ -42,18 +48,18 @@ export default defineBackground(() => {
   });
 
   browser.contextMenus.onClicked.addListener((info, tab) => {
-    if (tab?.id === undefined) return;
-    const id = info.menuItemId as ContextMenuId;
-    if (id === "translate-page") {
+    if (tab?.id === undefined || !v.is(ContextMenuIdSchema, info.menuItemId)) return;
+    if (info.menuItemId === "translate-page") {
       notifyTab(tab.id, { type: "page:translate" });
-    } else if (id === "translate-selection" && info.selectionText) {
+    } else if (info.menuItemId === "translate-selection" && info.selectionText) {
       notifyTab(tab.id, { type: "selection:translate", text: info.selectionText });
     }
   });
 
   browser.commands.onCommand.addListener((command) => {
+    if (!v.is(CommandNameSchema, command)) return;
     void activeTabId().then((tabId) => {
-      if (tabId !== undefined) notifyTab(tabId, COMMAND_MESSAGES[command as CommandName]);
+      if (tabId !== undefined) notifyTab(tabId, COMMAND_MESSAGES[command]);
     });
   });
 

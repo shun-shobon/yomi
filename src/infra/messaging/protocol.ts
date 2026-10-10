@@ -1,61 +1,94 @@
-import type { SerializedFailure } from "@/domain/failure";
-import type { ModelInfo } from "@/domain/models";
-import type { CachedTranslation } from "@/domain/translation-cache";
+import * as v from "valibot";
+
+import { SerializedFailureSchema } from "@/domain/failure";
+import { ModelInfoSchema } from "@/domain/models";
+import { CachedTranslationSchema } from "@/domain/translation-cache";
 
 export const TRANSLATE_PORT = "translate";
 
-export interface TranslateRequest {
-  instructions: string;
-  input: string;
-}
+export const TranslateRequestSchema = v.object({
+  instructions: v.string(),
+  input: v.string(),
+});
 
-export type TranslateEvent =
-  | { type: "delta"; text: string }
-  | { type: "done" }
-  | { type: "error"; failure: SerializedFailure };
+export type TranslateRequest = v.InferOutput<typeof TranslateRequestSchema>;
 
-export interface AuthState {
-  signedIn: boolean;
-  email: string | null;
-}
+export const TranslateEventSchema = v.variant("type", [
+  v.object({ type: v.literal("delta"), text: v.string() }),
+  v.object({ type: v.literal("done") }),
+  v.object({ type: v.literal("error"), failure: SerializedFailureSchema }),
+]);
 
-export interface BackgroundApi {
-  "auth:getState": AuthState;
-  "auth:signIn": void;
-  "auth:signOut": void;
-  "models:list": ModelInfo[];
-  "open:options": void;
-  "open:usage": void;
-  "open:shortcuts": void;
-  "cache:lookup": (string | null)[];
-  "cache:store": void;
-}
+export type TranslateEvent = v.InferOutput<typeof TranslateEventSchema>;
 
-export interface BackgroundParams {
-  "cache:lookup": { keys: string[] };
-  "cache:store": { entries: CachedTranslation[] };
-}
+const AuthStateSchema = v.object({
+  signedIn: v.boolean(),
+  email: v.nullable(v.string()),
+});
 
-export type ParamsOf<K extends keyof BackgroundApi> = K extends keyof BackgroundParams
-  ? BackgroundParams[K]
-  : void;
+export type AuthState = v.InferOutput<typeof AuthStateSchema>;
 
-export type BackgroundRequest = {
-  [K in keyof BackgroundApi]: { type: K; params: ParamsOf<K> };
-}[keyof BackgroundApi];
+const endpoint = <P extends v.GenericSchema, R extends v.GenericSchema>(params: P, result: R) => ({
+  params,
+  result,
+});
 
-export type BackgroundResponse<K extends keyof BackgroundApi> =
-  | { ok: true; value: BackgroundApi[K] }
-  | { ok: false; failure: SerializedFailure };
+export const BACKGROUND_API = {
+  "auth:getState": endpoint(v.void(), AuthStateSchema),
+  "auth:signIn": endpoint(v.void(), v.void()),
+  "auth:signOut": endpoint(v.void(), v.void()),
+  "models:list": endpoint(v.void(), v.array(ModelInfoSchema)),
+  "open:options": endpoint(v.void(), v.void()),
+  "open:usage": endpoint(v.void(), v.void()),
+  "open:shortcuts": endpoint(v.void(), v.void()),
+  "cache:lookup": endpoint(
+    v.object({ keys: v.array(v.string()) }),
+    v.array(v.nullable(v.string())),
+  ),
+  "cache:store": endpoint(v.object({ entries: v.array(CachedTranslationSchema) }), v.void()),
+};
 
-export type ContentMessage =
-  | { type: "page:getState" }
-  | { type: "page:translate" }
-  | { type: "page:stop" }
-  | { type: "page:showOriginal" }
-  | { type: "page:showTranslation" }
-  | { type: "command:translate" }
-  | { type: "command:toggleOriginal" }
-  | { type: "selection:translate"; text: string };
+type BackgroundApi = typeof BACKGROUND_API;
 
-export type CommandName = "translate-page" | "toggle-original";
+export type BackgroundMethod = keyof BackgroundApi;
+
+export type ParamsOf<K extends BackgroundMethod> = v.InferOutput<BackgroundApi[K]["params"]>;
+
+export type ParamlessMethod = {
+  [K in BackgroundMethod]: [ParamsOf<K>] extends [void] ? K : never;
+}[BackgroundMethod];
+
+export type ResultOf<K extends BackgroundMethod> = v.InferOutput<BackgroundApi[K]["result"]>;
+
+export const BackgroundRequestSchema = v.object({
+  type: v.custom<BackgroundMethod>(
+    (type) => typeof type === "string" && Object.hasOwn(BACKGROUND_API, type),
+  ),
+  // undefined のキーはメッセージングで落ちる。中身は type ごとのスキーマで検証する
+  params: v.optional(v.unknown()),
+});
+
+export const BackgroundResponseSchema = v.variant("ok", [
+  // undefined のキーはメッセージングで落ちる。中身は type ごとのスキーマで検証する
+  v.object({ ok: v.literal(true), value: v.optional(v.unknown()) }),
+  v.object({ ok: v.literal(false), failure: SerializedFailureSchema }),
+]);
+
+export type BackgroundResponse = v.InferOutput<typeof BackgroundResponseSchema>;
+
+export const ContentMessageSchema = v.variant("type", [
+  v.object({ type: v.literal("page:getState") }),
+  v.object({ type: v.literal("page:translate") }),
+  v.object({ type: v.literal("page:stop") }),
+  v.object({ type: v.literal("page:showOriginal") }),
+  v.object({ type: v.literal("page:showTranslation") }),
+  v.object({ type: v.literal("command:translate") }),
+  v.object({ type: v.literal("command:toggleOriginal") }),
+  v.object({ type: v.literal("selection:translate"), text: v.string() }),
+]);
+
+export type ContentMessage = v.InferOutput<typeof ContentMessageSchema>;
+
+export const CommandNameSchema = v.picklist(["translate-page", "toggle-original"]);
+
+export type CommandName = v.InferOutput<typeof CommandNameSchema>;

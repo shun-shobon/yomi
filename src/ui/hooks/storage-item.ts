@@ -1,10 +1,8 @@
 import { createSignal, onCleanup, type Accessor } from "solid-js";
 
-import type { WxtStorageItem } from "#imports";
+import type { StorageItem } from "@/infra/storage/item";
 
-export function createStorageItem<T>(
-  item: WxtStorageItem<T, Record<string, unknown>>,
-): Accessor<T> {
+export function createStorageItem<T>(item: StorageItem<T>): Accessor<T> {
   // T が関数型でも setter の updater 形式と解釈されないよう、常に関数で包んで渡す
   const [value, setValue] = createSignal<T>(item.fallback);
   const set = (v: T) => setValue(() => v);

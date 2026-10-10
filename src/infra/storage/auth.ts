@@ -1,35 +1,48 @@
-import { storage } from "#imports";
+import * as v from "valibot";
 
-export interface Credentials {
-  clientId: string;
-  email: string | null;
-  idToken: string;
-  accessToken: string;
-  refreshToken: string;
-  expiresAt: number;
-}
+import { defineValidatedItem } from "./item";
 
-export const credentialsItem = storage.defineItem<Credentials | null>("local:credentials", {
-  fallback: null,
+const CredentialsSchema = v.object({
+  clientId: v.string(),
+  email: v.nullable(v.string()),
+  idToken: v.string(),
+  accessToken: v.string(),
+  refreshToken: v.string(),
+  expiresAt: v.number(),
 });
 
-export interface PendingSignIn {
-  status: "pending";
-  tabId: number;
-  verifier: string;
-  state: string;
-  nonce: string;
-  clientId: string | null;
-}
+export type Credentials = v.InferOutput<typeof CredentialsSchema>;
+
+export const credentialsItem = defineValidatedItem(
+  "local:credentials",
+  v.nullable(CredentialsSchema),
+  null,
+);
+
+const PendingSignInSchema = v.object({
+  status: v.literal("pending"),
+  tabId: v.number(),
+  verifier: v.string(),
+  state: v.string(),
+  nonce: v.string(),
+  clientId: v.nullable(v.string()),
+});
+
+export type PendingSignIn = v.InferOutput<typeof PendingSignInSchema>;
 
 /** 認可画面での操作中に service worker が停止しても完了できるよう session storage に置く */
-export type SignInState = PendingSignIn | { status: "failed"; message: string } | null;
-
-export const signInItem = storage.defineItem<SignInState>("session:signIn", { fallback: null });
+export const signInItem = defineValidatedItem(
+  "session:signIn",
+  v.nullable(
+    v.variant("status", [
+      PendingSignInSchema,
+      v.object({ status: v.literal("failed"), message: v.string() }),
+    ]),
+  ),
+  null,
+);
 
 /** 発行済み client_id はサインアウト後の再サインインでも使い回す */
-export const clientIdItem = storage.defineItem<string | null>("local:clientId", { fallback: null });
+export const clientIdItem = defineValidatedItem("local:clientId", v.nullable(v.string()), null);
 
-export const hostIdItem = storage.defineItem<string | null>("local:extAgentHostId", {
-  fallback: null,
-});
+export const hostIdItem = defineValidatedItem("local:extAgentHostId", v.nullable(v.string()), null);

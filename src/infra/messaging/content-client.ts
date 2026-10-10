@@ -1,8 +1,11 @@
+import * as v from "valibot";
+
 import { browser } from "#imports";
-import type { PageState } from "@/domain/page";
+import { PageStateSchema, type PageState } from "@/domain/page";
 
 import type { ContentMessage } from "./protocol";
 
-export function sendToContent(tabId: number, message: ContentMessage): Promise<PageState> {
-  return browser.tabs.sendMessage(tabId, message);
+export async function sendToContent(tabId: number, message: ContentMessage): Promise<PageState> {
+  const raw: unknown = await browser.tabs.sendMessage(tabId, message);
+  return v.parse(PageStateSchema, raw);
 }

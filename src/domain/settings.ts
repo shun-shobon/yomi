@@ -1,34 +1,37 @@
-import type { LanguageCode } from "./languages";
+import * as v from "valibot";
 
-const REASONING_EFFORTS = ["none", "minimal", "low", "medium", "high", "xhigh", "max"] as const;
+import { LanguageCodeSchema } from "./languages";
 
-export type ReasoningEffort = (typeof REASONING_EFFORTS)[number];
+export const ReasoningEffortSchema = v.picklist([
+  "none",
+  "minimal",
+  "low",
+  "medium",
+  "high",
+  "xhigh",
+  "max",
+]);
+
+export type ReasoningEffort = v.InferOutput<typeof ReasoningEffortSchema>;
 
 export function isReasoningEffort(value: string): value is ReasoningEffort {
-  return (REASONING_EFFORTS as readonly string[]).includes(value);
+  return v.is(ReasoningEffortSchema, value);
 }
 
-export interface Settings {
-  targetLang: LanguageCode;
+/** 保存値の一部が古い・壊れていても、その項目だけ既定値に戻して他の設定は残す */
+const SettingsSchema = v.object({
+  targetLang: v.fallback(LanguageCodeSchema, "ja"),
   /** アカウントごとに利用可能なモデルが異なるため既定値を持たない */
-  model: string | null;
-  reasoningEffort: ReasoningEffort;
-  fastMode: boolean;
-  showSelectionButton: boolean;
-  hoverOriginal: boolean;
-  highlightPending: boolean;
-}
+  model: v.fallback(v.nullable(v.string()), null),
+  reasoningEffort: v.fallback(ReasoningEffortSchema, "low"),
+  fastMode: v.fallback(v.boolean(), false),
+  showSelectionButton: v.fallback(v.boolean(), true),
+  hoverOriginal: v.fallback(v.boolean(), true),
+  highlightPending: v.fallback(v.boolean(), true),
+});
 
-export const DEFAULT_SETTINGS: Settings = {
-  targetLang: "ja",
-  model: null,
-  reasoningEffort: "low",
-  fastMode: false,
-  showSelectionButton: true,
-  hoverOriginal: true,
-  highlightPending: true,
-};
+export type Settings = v.InferOutput<typeof SettingsSchema>;
 
-export function withDefaults(overrides: Partial<Settings>): Settings {
-  return { ...DEFAULT_SETTINGS, ...overrides };
+export function withDefaults(overrides: Record<string, unknown>): Settings {
+  return v.parse(SettingsSchema, overrides);
 }

@@ -1,14 +1,22 @@
+import * as v from "valibot";
+
 import { browser } from "#imports";
 import { TranslateFailure } from "@/domain/failure";
 
-import type { BackgroundApi, BackgroundRequest, BackgroundResponse, ParamsOf } from "./protocol";
+import {
+  BACKGROUND_API,
+  BackgroundResponseSchema,
+  type BackgroundMethod,
+  type ParamsOf,
+  type ResultOf,
+} from "./protocol";
 
-export async function callBackground<K extends keyof BackgroundApi>(
+export async function callBackground<K extends BackgroundMethod>(
   type: K,
-  ...[params]: ParamsOf<K> extends void ? [] : [ParamsOf<K>]
-): Promise<BackgroundApi[K]> {
-  const request = { type, params } as BackgroundRequest;
-  const response: BackgroundResponse<K> = await browser.runtime.sendMessage(request);
+  ...[params]: [ParamsOf<K>] extends [void] ? [] : [Exclude<ParamsOf<K>, void>]
+): Promise<ResultOf<K>> {
+  const raw: unknown = await browser.runtime.sendMessage({ type, params });
+  const response = v.parse(BackgroundResponseSchema, raw);
   if (!response.ok) throw TranslateFailure.from(response.failure);
-  return response.value;
+  return v.parse(BACKGROUND_API[type].result, response.value);
 }
