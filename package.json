@@ -12,8 +12,8 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "postinstall": "wxt prepare",
-    "test": "vitest run",
-    "test:e2e": "node scripts/e2e.mjs",
+    "test": "vitest run --project unit",
+    "test:e2e": "vitest run --project e2e",
     "typecheck": "tsc --noEmit",
     "zip": "wxt zip"
   },

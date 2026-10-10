@@ -47,5 +47,7 @@ OpenAI API を service worker 内でモックし、ビルド済み拡張を Chro
 
 ```sh
 pnpm build
-CHROMIUM_PATH="<Chrome for Testing の実行ファイル>" pnpm test:e2e [スクリーンショットの出力先]
+CHROMIUM_PATH="<Chrome for Testing の実行ファイル>" pnpm test:e2e
 ```
+
+`E2E_SCREENSHOT_DIR` に出力先を指定すると、選択テキスト翻訳やポップアップなど目視で確認する画面のスクリーンショットを保存する。
