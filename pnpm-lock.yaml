@@ -183,11 +183,11 @@ importers:
         version: 1.5.0(typescript@6.0.3)
     devDependencies:
       '@shun-shobon/oxfmt-config':
-        specifier: 6.0.0
-        version: 6.0.0(oxfmt@0.72.0)
+        specifier: 6.0.1
+        version: 6.0.1(oxfmt@0.72.0)
       '@shun-shobon/oxlint-config':
-        specifier: 6.0.0
-        version: 6.0.0(oxlint-tsgolint@7.0.2003)(oxlint@1.87.0(oxlint-tsgolint@7.0.2003))
+        specifier: 6.0.1
+        version: 6.0.1(oxlint-tsgolint@7.0.2003)(oxlint@1.87.0(oxlint-tsgolint@7.0.2003))
       '@tsconfig/strictest':
         specifier: 2.0.8
         version: 2.0.8
@@ -710,13 +710,13 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
-  '@shun-shobon/oxfmt-config@6.0.0':
-    resolution: {integrity: sha512-kge61f4bGoanWp5STnV4WDOmtOFkmR4qkCK33LDAN05sX7caYfB3+Me2cdNlc1464wVzESV8xO6o4vc1nP8K8w==}
+  '@shun-shobon/oxfmt-config@6.0.1':
+    resolution: {integrity: sha512-IC1FjZ0ymn4iHrKz5WXrF7dXS3ldhkGugxwMpvqJdWv2IPk5O/M9ecxwfdxQw3ItVeRqsHd8jXVmXkPHagTLpA==}
     peerDependencies:
       oxfmt: ^0.72.0
 
-  '@shun-shobon/oxlint-config@6.0.0':
-    resolution: {integrity: sha512-LjK3XC+QCcycqu4RxTSVlkRm76rgiZFWQCV00dP0dmFv95Tuzn0/RV/mg6sQ29ylAwNRiASaPx0nhX6GBjurvg==}
+  '@shun-shobon/oxlint-config@6.0.1':
+    resolution: {integrity: sha512-JRW7YsuiBFo22o07FHslLT9tUFtKoMBMyYkjBRUXsCJ5u/7LfA3sWw+2slZtwfJM560Z026DRXiJY8glh+3ivQ==}
     peerDependencies:
       oxlint: ^1.87.0
       oxlint-tsgolint: ^7.0.2003
@@ -2004,12 +2004,12 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
-  '@shun-shobon/oxfmt-config@6.0.0(oxfmt@0.72.0)':
+  '@shun-shobon/oxfmt-config@6.0.1(oxfmt@0.72.0)':
     dependencies:
       local-pkg: 1.2.1
       oxfmt: 0.72.0
 
-  '@shun-shobon/oxlint-config@6.0.0(oxlint-tsgolint@7.0.2003)(oxlint@1.87.0(oxlint-tsgolint@7.0.2003))':
+  '@shun-shobon/oxlint-config@6.0.1(oxlint-tsgolint@7.0.2003)(oxlint@1.87.0(oxlint-tsgolint@7.0.2003))':
     dependencies:
       local-pkg: 1.2.1
       oxlint: 1.87.0(oxlint-tsgolint@7.0.2003)

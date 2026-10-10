@@ -38,7 +38,7 @@ export function serveBackgroundApi(handlers: BackgroundHandlers, toFailure: ToFa
 
 async function dispatch(handlers: BackgroundHandlers, raw: unknown): Promise<unknown> {
   const { type, params } = v.parse(BackgroundRequestSchema, raw);
-  return call(handlers, type, params);
+  return await call(handlers, type, params);
 }
 
 function call<K extends BackgroundMethod>(handlers: BackgroundHandlers, type: K, params: unknown) {
@@ -65,7 +65,7 @@ export function serveTranslatePort(translate: TranslateHandler, toFailure: ToFai
         KEEP_ALIVE_INTERVAL_MS,
       );
       const run = async () =>
-        translate(v.parse(TranslateRequestSchema, raw), controller.signal, (text) =>
+        await translate(v.parse(TranslateRequestSchema, raw), controller.signal, (text) =>
           post({ type: "delta", text }),
         );
       void run()

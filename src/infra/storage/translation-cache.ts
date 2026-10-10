@@ -53,9 +53,9 @@ async function write<T>(run: (tx: WriteTransaction) => Promise<T>): Promise<T> {
 
 export async function lookupTranslations(keys: string[]): Promise<(string | null)[]> {
   const hashed = await Promise.all(keys.map(hashKey));
-  return write(async ({ store }) => {
+  return await write(async ({ store }) => {
     const now = Date.now();
-    return Promise.all(
+    return await Promise.all(
       hashed.map(async (key) => {
         const parsed = v.safeParse(RowSchema, await store.get(key));
         if (!parsed.success) return null;
@@ -71,7 +71,7 @@ export async function storeTranslations(entries: CachedTranslation[]): Promise<v
   const rows = await Promise.all(
     entries.map(async ({ key, translation }) => ({ key: await hashKey(key), translation })),
   );
-  return write(async ({ store }) => {
+  await write(async ({ store }) => {
     const now = Date.now();
     await Promise.all(rows.map((row) => store.put({ ...row, usedAt: now } satisfies Row)));
     let excess = (await store.count()) - CACHE_MAX_ENTRIES;
@@ -83,9 +83,9 @@ export async function storeTranslations(entries: CachedTranslation[]): Promise<v
 }
 
 export async function countTranslations(): Promise<number> {
-  return (await openDb()).count(STORE);
+  return await (await openDb()).count(STORE);
 }
 
 export async function clearTranslations(): Promise<void> {
-  return (await openDb()).clear(STORE);
+  await (await openDb()).clear(STORE);
 }

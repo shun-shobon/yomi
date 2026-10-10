@@ -64,7 +64,7 @@ export async function launchExtension() {
     sendToTab: <T = unknown>(message: unknown) =>
       sw.evaluate(async (msg): Promise<T> => {
         const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
-        return chrome.tabs.sendMessage(tab!.id!, msg);
+        return await chrome.tabs.sendMessage(tab!.id!, msg);
       }, message),
     requests: () => sw.evaluate(() => (globalThis as MockedGlobal).__requests),
     setSettings: (settings: Record<string, unknown>) =>
@@ -178,6 +178,6 @@ async function installMocks() {
         { headers: { "content-type": "text/event-stream" } },
       );
     }
-    return realFetch(url, init);
+    return await realFetch(url, init);
   };
 }
