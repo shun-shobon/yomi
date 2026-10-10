@@ -18,6 +18,8 @@
     "zip": "wxt zip"
   },
   "dependencies": {
+    "entities": "8.1.0",
+    "idb": "8.0.4",
     "openai": "7.27.0",
     "solid-js": "1.9.15",
     "valibot": "1.5.0"

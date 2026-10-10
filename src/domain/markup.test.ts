@@ -34,8 +34,16 @@ describe("parse", () => {
     expect(parse("&#65;&#x3042;&#X1F600;").texts).toEqual(["Aあ😀"]);
   });
 
-  it("未知の名前や Unicode の範囲外はそのまま残す", () => {
-    expect(parse("&copy;&#x110000;&#99999999;").texts).toEqual(["&copy;&#x110000;&#99999999;"]);
+  it("HTML の名前付き文字参照をすべてデコードする", () => {
+    expect(parse("&mdash;&hellip;&copy;&nbsp;").texts).toEqual(["—…© "]);
+  });
+
+  it("未知の名前やセミコロンのない参照はそのまま残す", () => {
+    expect(parse("&foo;&copy").texts).toEqual(["&foo;&copy"]);
+  });
+
+  it("Unicode の範囲外は置換文字にする", () => {
+    expect(parse("&#x110000;").texts).toEqual(["�"]);
   });
 
   it("エスケープされたタグはタグとして扱わない", () => {

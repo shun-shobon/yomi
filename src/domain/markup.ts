@@ -1,3 +1,7 @@
+import { decodeHTMLStrict } from "entities";
+
+export { escapeText } from "entities";
+
 export const groupOpen = (id: number) => `<g${id}>`;
 export const groupClose = (id: number) => `</g${id}>`;
 export const atomic = (id: number) => `<x${id}/>`;
@@ -11,7 +15,7 @@ const TAG = /<(\/?)([gx])(\d+)\s*\/?>/g;
 export function* tokenize(markup: string): Generator<Token> {
   let last = 0;
   for (const match of markup.matchAll(TAG)) {
-    yield { type: "text", text: decodeEntities(markup.slice(last, match.index)) };
+    yield { type: "text", text: decodeHTMLStrict(markup.slice(last, match.index)) };
     last = match.index + match[0].length;
     const [, slash, letter, id] = match;
     yield {
@@ -20,7 +24,7 @@ export function* tokenize(markup: string): Generator<Token> {
       id: Number(id),
     };
   }
-  yield { type: "text", text: decodeEntities(markup.slice(last)) };
+  yield { type: "text", text: decodeHTMLStrict(markup.slice(last)) };
 }
 
 export function tagSignature(token: Extract<Token, { type: "tag" }>): string {
@@ -40,27 +44,4 @@ export function parse(markup: string): { structure: string; texts: string[] } {
 export function collapseWhitespace(text: string, keepNewlines: boolean): string {
   if (!keepNewlines) return text.replace(/\s+/g, " ");
   return text.replace(/[^\S\n]*\n[^\S\n]*/g, "\n").replace(/[^\S\n]+/g, " ");
-}
-
-export function escapeText(text: string): string {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
-const NAMED_ENTITIES: Record<string, string> = {
-  amp: "&",
-  lt: "<",
-  gt: ">",
-  quot: '"',
-  apos: "'",
-  nbsp: " ",
-};
-
-function decodeEntities(text: string): string {
-  return text.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (whole, body: string) => {
-    if (body.startsWith("#")) {
-      const code = /^#x/i.test(body) ? parseInt(body.slice(2), 16) : parseInt(body.slice(1), 10);
-      return code <= 0x10ffff ? String.fromCodePoint(code) : whole;
-    }
-    return NAMED_ENTITIES[body.toLowerCase()] ?? whole;
-  });
 }
