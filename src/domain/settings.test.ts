@@ -6,6 +6,7 @@ describe("withDefaults", () => {
 	it("保存されていない項目を既定値で補う", () => {
 		expect(withDefaults({ targetLang: "en" })).toMatchObject({
 			targetLang: "en",
+			model: "gpt-6-luna",
 			reasoningEffort: "low",
 			showSelectionButton: true,
 		});

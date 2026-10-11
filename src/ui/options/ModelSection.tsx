@@ -44,23 +44,17 @@ export function ModelSection(props: {
 						<label class="field">
 							<span>翻訳に使うモデル</span>
 							<select
-								value={props.settings.model ?? ""}
+								value={props.settings.model}
 								onChange={(e) => {
 									const { value } = e.currentTarget;
 									const model = list().find((m) => m.slug === value);
 									if (model) props.update(settingsForModel(props.settings, model));
 								}}
 							>
-								<option value="" disabled>
-									選択してください
-								</option>
 								<For each={list()}>{(m) => <option value={m.slug}>{m.displayName}</option>}</For>
 							</select>
 						</label>
-						<Show when={props.settings.model == null}>
-							<p class="notice">翻訳を始める前にモデルを選択してください。</p>
-						</Show>
-						<Show when={props.settings.model != null && !selected()}>
+						<Show when={!selected()}>
 							<p class="notice">
 								選択中のモデル（{props.settings.model}）はこのアカウントでは利用できません。
 							</p>

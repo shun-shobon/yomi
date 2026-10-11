@@ -20,7 +20,7 @@ describe("ApiError.isAuthExpired", () => {
 
 describe("toTranslateFailure", () => {
 	it("TranslateFailure はそのまま返す", () => {
-		const failure = new TranslateFailure("no_model", "モデル未選択");
+		const failure = new TranslateFailure("usage_limit", "上限に達しました");
 		expect(toTranslateFailure(failure)).toBe(failure);
 	});
 

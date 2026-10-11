@@ -39,19 +39,10 @@ export function App() {
 					</section>
 				</Show>
 
-				<Show when={auth()!.signedIn && settings()!.model == null}>
-					<div class="notice">
-						翻訳に使うモデルが未選択です。
-						<button class="btn link" onClick={() => void callBackground("open:options")}>
-							設定で選択
-						</button>
-					</div>
-				</Show>
-
 				<PageControls
 					page={page()}
 					send={sendToPage}
-					disabled={!auth()!.signedIn || settings()!.model == null}
+					disabled={!auth()!.signedIn}
 					alwaysTranslate={(host) => siteRules()!.alwaysTranslate.includes(host)}
 					setAlwaysTranslate={(host, enabled) =>
 						updateSiteRules((rules) => withAlwaysTranslate(rules, host, enabled))
