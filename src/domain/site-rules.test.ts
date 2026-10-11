@@ -45,6 +45,7 @@ describe("decidePageOffer", () => {
 		pageLang: "en",
 		targetLang: "ja",
 		offerEnabled: true,
+		continuing: false,
 	} as const;
 
 	it("翻訳先と違う言語なら提案する", () => {
@@ -60,6 +61,16 @@ describe("decidePageOffer", () => {
 		const rules = withRule(EMPTY_SITE_RULES, "alwaysTranslate", "example.com");
 		expect(decidePageOffer({ ...base, rules, offerEnabled: false })).toBe("translate");
 		expect(decidePageOffer({ ...base, rules, pageLang: null })).toBe("translate");
+	});
+
+	it("このタブで翻訳を続けているなら、除外したサイトや言語不明のページでも翻訳する", () => {
+		const rules = withRule(EMPTY_SITE_RULES, "neverOffer", "example.com");
+		expect(decidePageOffer({ ...base, continuing: true, rules })).toBe("translate");
+		expect(decidePageOffer({ ...base, continuing: true, pageLang: null })).toBe("translate");
+	});
+
+	it("このタブで翻訳を続けていても、翻訳先と同じ言語なら何もしない", () => {
+		expect(decidePageOffer({ ...base, continuing: true, pageLang: "ja" })).toBe("none");
 	});
 
 	it("言語が不明なら提案しない", () => {

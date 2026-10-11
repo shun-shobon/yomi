@@ -23,9 +23,10 @@ import {
 } from "@/usecases/background/auth";
 import {
 	dismissOffer,
-	forgetOfferDismissal,
-	isOfferDismissed,
-} from "@/usecases/background/offer-dismissal";
+	enterPage,
+	forgetTab,
+	setTranslating,
+} from "@/usecases/background/tab-state";
 import { listModels, translate } from "@/usecases/background/translate";
 import {
 	lookupPageTranslations,
@@ -49,7 +50,7 @@ export default defineBackground(() => {
 	});
 	browser.tabs.onRemoved.addListener((tabId) => {
 		void handleTabRemoved(tabId);
-		void forgetOfferDismissal(tabId);
+		void forgetTab(tabId);
 	});
 
 	browser.runtime.onInstalled.addListener(({ reason }) => {
@@ -84,7 +85,13 @@ export default defineBackground(() => {
 			"open:shortcuts": openShortcutsPage,
 			"cache:lookup": lookupPageTranslations,
 			"cache:store": storePageTranslations,
-			"offer:isDismissed": async (_, { tabId }) => tabId != null && (await isOfferDismissed(tabId)),
+			"tab:enterPage": async (params, { tabId }) =>
+				tabId == null
+					? { offerDismissed: false, translating: false }
+					: await enterPage(tabId, params),
+			"tab:setTranslating": async ({ translating }, { tabId }) => {
+				if (tabId != null) await setTranslating(tabId, translating);
+			},
 			"offer:dismiss": async (_, { tabId }) => {
 				if (tabId != null) await dismissOffer(tabId);
 			},
