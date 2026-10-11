@@ -34,10 +34,11 @@ export async function offerPageTranslation(deps: {
 	if (host === "") return;
 
 	const settings = deps.getSettings();
-	const [allowed, rules, detected] = await Promise.all([
+	const [allowed, rules, detected, dismissed] = await Promise.all([
 		canTranslate(settings),
 		getSiteRules(),
 		detectPageLanguage(),
+		callBackground("offer:isDismissed").catch(() => false),
 	]);
 	if (!allowed || page.isActive) return;
 
@@ -53,7 +54,7 @@ export async function offerPageTranslation(deps: {
 		page.start();
 		return;
 	}
-	if (decision === "none" || pageLang == null) return;
+	if (decision === "none" || pageLang == null || dismissed) return;
 
 	const label = languageLabel(pageLang);
 	overlay.showOffer({
@@ -78,5 +79,6 @@ export async function offerPageTranslation(deps: {
 				onClick: () => void updateSiteRules((r) => withRule(r, "neverOfferLangs", pageLang)),
 			},
 		],
+		onDismiss: () => void callBackground("offer:dismiss").catch(() => {}),
 	});
 }

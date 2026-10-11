@@ -2,11 +2,11 @@ import { createSignal, For, Show } from "solid-js";
 
 import type { OfferOptions } from "@/usecases/content/overlay";
 
-export function OfferCard(props: OfferOptions & { onDismiss: () => void }) {
+export function OfferCard(props: OfferOptions & { onClose: () => void }) {
 	const [menuOpen, setMenuOpen] = createSignal(false);
 	const run = (onClick: () => void) => {
 		onClick();
-		props.onDismiss();
+		props.onClose();
 	};
 
 	return (

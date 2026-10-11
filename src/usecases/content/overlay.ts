@@ -26,6 +26,8 @@ export interface OfferOptions {
 	message: string;
 	actions: OverlayAction[];
 	menu: OverlayAction[];
+	/** 操作を選ばずに ✕ やカードの外のクリックで閉じたときだけ呼ぶ */
+	onDismiss: () => void;
 }
 
 export type PanelState =

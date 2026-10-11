@@ -33,9 +33,13 @@ export function createOverlay(): Overlay {
 		setOffer(null);
 		document.removeEventListener("pointerdown", dismissOfferOutside, true);
 	};
+	const dismissOffer = () => {
+		offer()?.onDismiss();
+		hideOffer();
+	};
 	// shadow DOM 内のクリックは host に付け替わって届くので、host 以外ならカードの外
 	const dismissOfferOutside = (e: PointerEvent) => {
-		if (e.target !== host) hideOffer();
+		if (e.target !== host) dismissOffer();
 	};
 
 	let host: HTMLElement | null = null;
@@ -59,7 +63,9 @@ export function createOverlay(): Overlay {
 					<>
 						{/* z-index を使わず、後に書いたものほど上に重ねる */}
 						<Toasts items={toasts()} onDismiss={dismissToast} />
-						<Show when={offer()}>{(item) => <OfferCard {...item()} onDismiss={hideOffer} />}</Show>
+						<Show when={offer()}>
+							{(item) => <OfferCard {...item()} onDismiss={dismissOffer} onClose={hideOffer} />}
+						</Show>
 						<Show when={panel()}>{(item) => <TranslationPanel {...item()} />}</Show>
 						{/* 選び直すたびに作り直し、出現アニメーションを再生する */}
 						<Show when={button()} keyed>

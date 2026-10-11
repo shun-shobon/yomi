@@ -19,8 +19,18 @@ function setup({
 	signedIn = true,
 	model = "gpt",
 	active = false,
-}: { signedIn?: boolean; model?: string | null; active?: boolean } = {}) {
-	deps.callBackground.mockResolvedValue({ signedIn, email: null });
+	dismissed = false,
+}: { signedIn?: boolean; model?: string | null; active?: boolean; dismissed?: boolean } = {}) {
+	deps.callBackground.mockImplementation((method: string) => {
+		switch (method) {
+			case "auth:getState":
+				return Promise.resolve({ signedIn, email: null });
+			case "offer:isDismissed":
+				return Promise.resolve(dismissed);
+			default:
+				return Promise.resolve();
+		}
+	});
 	const page = { isActive: active, start: vi.fn() };
 	const overlay = { showOffer: vi.fn<(offer: OfferOptions) => void>() };
 	const settings = withDefaults({ model, targetLang: "ja" });
@@ -57,6 +67,32 @@ describe("offerPageTranslation", () => {
 
 		expect(ctx.offer().message).toBe("このページは英語です。翻訳しますか？");
 		expect(ctx.page.start).not.toHaveBeenCalled();
+	});
+
+	it("このタブで提案を閉じたことがあれば提案しない", async () => {
+		const ctx = setup({ dismissed: true });
+
+		await ctx.run();
+
+		expect(ctx.overlay.showOffer).not.toHaveBeenCalled();
+	});
+
+	it("このタブで提案を閉じたことがあっても、常に翻訳するサイトは翻訳する", async () => {
+		await updateSiteRules((r) => ({ ...r, alwaysTranslate: ["example.com"] }));
+		const ctx = setup({ dismissed: true });
+
+		await ctx.run();
+
+		expect(ctx.page.start).toHaveBeenCalled();
+	});
+
+	it("提案を閉じるとタブに記録する", async () => {
+		const ctx = setup();
+		await ctx.run();
+
+		ctx.offer().onDismiss();
+
+		expect(deps.callBackground).toHaveBeenCalledWith("offer:dismiss");
 	});
 
 	it("翻訳先と同じ言語のページでは何もしない", async () => {

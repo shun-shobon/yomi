@@ -35,6 +35,21 @@ test("カードの外をクリックすると提案を閉じる", async () => {
 	await page.close();
 });
 
+test("提案を閉じたタブでは、ページを移っても提案しない", async () => {
+	const page = await ext.openTestPage("https://test.example/first");
+	await page.mouse.click(100, 400);
+	await page.goto("https://test.example/second");
+
+	// カードを出すまでオーバーレイの host 要素は作られない
+	const hasOverlay = (p: typeof page) =>
+		p.evaluate(() => document.querySelector("yomi-ui") != null);
+	const other = await ext.openTestPage("https://test.example/other-tab");
+	await expect.poll(() => hasOverlay(other)).toBe(true);
+	expect(await hasOverlay(page)).toBe(false);
+	await page.close();
+	await other.close();
+});
+
 test("常に翻訳するサイトは開いただけで翻訳する", async () => {
 	await ext.setSiteRules({ alwaysTranslate: ["test.example"] });
 	const page = await ext.openTestPage();
