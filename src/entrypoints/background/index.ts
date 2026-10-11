@@ -21,6 +21,11 @@ import {
 	signOut,
 	startSignIn,
 } from "@/usecases/background/auth";
+import {
+	dismissOffer,
+	forgetOfferDismissal,
+	isOfferDismissed,
+} from "@/usecases/background/offer-dismissal";
 import { listModels, translate } from "@/usecases/background/translate";
 
 const COMMAND_MESSAGES: Record<CommandName, ContentMessage> = {
@@ -37,7 +42,10 @@ export default defineBackground(() => {
 			if (signedIn) await openOptionsPage();
 		});
 	});
-	browser.tabs.onRemoved.addListener((tabId) => void handleTabRemoved(tabId));
+	browser.tabs.onRemoved.addListener((tabId) => {
+		void handleTabRemoved(tabId);
+		void forgetOfferDismissal(tabId);
+	});
 
 	browser.runtime.onInstalled.addListener(({ reason }) => {
 		void setUpContextMenus();
@@ -71,6 +79,10 @@ export default defineBackground(() => {
 			"open:shortcuts": openShortcutsPage,
 			"cache:lookup": ({ keys }) => lookupTranslations(keys),
 			"cache:store": ({ entries }) => storeTranslations(entries),
+			"offer:isDismissed": async (_, { tabId }) => tabId != null && (await isOfferDismissed(tabId)),
+			"offer:dismiss": async (_, { tabId }) => {
+				if (tabId != null) await dismissOffer(tabId);
+			},
 		},
 		serializeFailure,
 	);

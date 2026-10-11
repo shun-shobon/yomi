@@ -46,6 +46,8 @@ export const BACKGROUND_API = {
 		v.array(v.nullable(v.string())),
 	),
 	"cache:store": endpoint(v.object({ entries: v.array(CachedTranslationSchema) }), v.void()),
+	"offer:isDismissed": endpoint(v.void(), v.boolean()),
+	"offer:dismiss": endpoint(v.void(), v.void()),
 };
 
 type BackgroundApi = typeof BACKGROUND_API;
