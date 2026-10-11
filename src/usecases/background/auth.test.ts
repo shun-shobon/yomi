@@ -202,12 +202,12 @@ describe("signOut", () => {
 		await expect(auth.getAuthState()).resolves.toEqual({ signedIn: false, email: null });
 	});
 
-	it("revoke に失敗しても例外にならず、資格情報は消える", async () => {
+	it("revoke に失敗したら資格情報を消したうえで失敗を返す", async () => {
 		const auth = await load();
 		await auth.credentialsItem.setValue(credentials());
 		endpoint.revokeRefreshToken.mockRejectedValue(new Error("network"));
 
-		await expect(auth.signOut()).resolves.toBeUndefined();
+		await expect(auth.signOut()).rejects.toBeInstanceOf(auth.TranslateFailure);
 		expect(await auth.credentialsItem.getValue()).toBeNull();
 	});
 

@@ -1,4 +1,4 @@
-import { Show } from "solid-js";
+import { createSignal, Show } from "solid-js";
 
 import { callBackground } from "@/infra/messaging/background-client";
 import type { AuthState } from "@/infra/messaging/protocol";
@@ -8,16 +8,26 @@ import { SignInCard } from "@/ui/components/SignInCard";
 import { createStorageItem } from "@/ui/hooks/storage-item";
 
 export function AccountSection(props: { auth: AuthState }) {
+	const [signOutFailure, setSignOutFailure] = createSignal<string>();
+	const signOut = () => {
+		setSignOutFailure(undefined);
+		callBackground("auth:signOut").catch((e: unknown) => {
+			setSignOutFailure(e instanceof Error ? e.message : String(e));
+		});
+	};
 	return (
 		<section class="section">
 			<h2>アカウント</h2>
+			<Show when={!props.auth.signedIn && signOutFailure()}>
+				{(message) => <p class="error-text">{message()}</p>}
+			</Show>
 			<Show when={props.auth.signedIn} fallback={<SignInPanel />}>
 				<div class="row">
 					<div class="grow">
 						<PlanStatus />
 						<div class="muted small">{props.auth.email ?? "ChatGPT アカウント"}</div>
 					</div>
-					<button class="btn" onClick={() => void callBackground("auth:signOut")}>
+					<button class="btn" onClick={signOut}>
 						サインアウト
 					</button>
 				</div>
