@@ -192,17 +192,31 @@ kbd {
 	border-radius: 3px;
 	background: var(--raised);
 }
-.plan-status {
-	display: inline-flex;
+.account-status {
+	display: flex;
 	align-items: center;
-	gap: 6px;
+	gap: 12px;
+	min-width: 0;
 }
-.plan-status::before {
+.account-name {
+	min-width: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+.account-name::before {
 	content: "";
+	display: inline-block;
+	margin-right: 6px;
+	vertical-align: 1px;
 	width: 8px;
 	height: 8px;
 	border-radius: 50%;
 	background: var(--ok);
+}
+.account-status .btn {
+	flex: none;
+	white-space: nowrap;
 }
 
 .sign-in-card {
@@ -217,11 +231,6 @@ kbd {
 }
 .sign-in-card p {
 	margin: 0;
-}
-.plan-status-row {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
 }
 .block {
 	display: block;

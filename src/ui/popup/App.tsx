@@ -4,7 +4,7 @@ import { withAlwaysTranslate } from "@/domain/site-rules";
 import { callBackground } from "@/infra/messaging/background-client";
 
 import "@/ui/base.css";
-import { PlanStatus } from "@/ui/components/PlanStatus";
+import { AccountStatus } from "@/ui/components/AccountStatus";
 import { SignInCard } from "@/ui/components/SignInCard";
 import { TranslationSettingsFields } from "@/ui/components/TranslationSettingsFields";
 import { createActivePage } from "@/ui/hooks/active-page";
@@ -35,7 +35,7 @@ export function App() {
 
 				<Show when={auth()!.signedIn} fallback={<SignInCard />}>
 					<section class="account">
-						<PlanStatus />
+						<AccountStatus email={auth()!.email} />
 					</section>
 				</Show>
 
