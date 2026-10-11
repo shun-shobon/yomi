@@ -1,8 +1,9 @@
 import { createSignal, Show } from "solid-js";
 import { delegateEvents, render } from "solid-js/web";
 
-import type { Overlay, PanelState, ToastOptions } from "@/usecases/content/overlay";
+import type { OfferOptions, Overlay, PanelState, ToastOptions } from "@/usecases/content/overlay";
 
+import { OfferCard } from "./OfferCard";
 import { currentViewport, placeBelow } from "./position";
 import { SELECTION_BUTTON_SIZE, SelectionButton } from "./SelectionButton";
 import type { SelectionButtonItem } from "./SelectionButton";
@@ -23,9 +24,19 @@ export function createOverlay(): Overlay {
 	const [tooltip, setTooltip] = createSignal<TooltipItem | null>(null);
 	const [button, setButton] = createSignal<SelectionButtonItem | null>(null);
 	const [panel, setPanel] = createSignal<PanelItem | null>(null);
+	const [offer, setOffer] = createSignal<OfferOptions | null>(null);
 	let nextId = 0;
 
 	const dismissToast = (id: number) => setToasts((items) => items.filter((t) => t.id !== id));
+
+	const hideOffer = () => {
+		setOffer(null);
+		document.removeEventListener("pointerdown", dismissOfferOutside, true);
+	};
+	// shadow DOM 内のクリックは host に付け替わって届くので、host 以外ならカードの外
+	const dismissOfferOutside = (e: PointerEvent) => {
+		if (e.target !== host) hideOffer();
+	};
 
 	let host: HTMLElement | null = null;
 	const mount = () => {
@@ -48,6 +59,7 @@ export function createOverlay(): Overlay {
 					<>
 						{/* z-index を使わず、後に書いたものほど上に重ねる */}
 						<Toasts items={toasts()} onDismiss={dismissToast} />
+						<Show when={offer()}>{(item) => <OfferCard {...item()} onDismiss={hideOffer} />}</Show>
 						<Show when={panel()}>{(item) => <TranslationPanel {...item()} />}</Show>
 						{/* 選び直すたびに作り直し、出現アニメーションを再生する */}
 						<Show when={button()} keyed>
@@ -93,6 +105,13 @@ export function createOverlay(): Overlay {
 		get selectionButtonShown() {
 			return button() != null;
 		},
+
+		showOffer(item) {
+			mount();
+			setOffer(item);
+			document.addEventListener("pointerdown", dismissOfferOutside, true);
+		},
+		hideOffer,
 
 		openPanel(anchor, title, onClose) {
 			mount();

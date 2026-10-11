@@ -26,6 +26,7 @@ const SettingsSchema = v.object({
 	reasoningEffort: v.fallback(ReasoningEffortSchema, "low"),
 	fastMode: v.fallback(v.boolean(), false),
 	showSelectionButton: v.fallback(v.boolean(), true),
+	offerTranslation: v.fallback(v.boolean(), true),
 	hoverOriginal: v.fallback(v.boolean(), true),
 	highlightPending: v.fallback(v.boolean(), true),
 });

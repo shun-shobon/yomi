@@ -13,6 +13,7 @@ export function createPageCommands(deps: {
 	const { overlay, page, selection } = deps;
 
 	const startPage = () => {
+		overlay.hideOffer();
 		const wasActive = page.isActive;
 		page.start();
 		if (!wasActive) overlay.toast("ページの翻訳を開始しました");
@@ -32,6 +33,7 @@ export function createPageCommands(deps: {
 				page.showOriginal();
 				break;
 			case "page:showTranslation":
+				overlay.hideOffer();
 				page.start();
 				break;
 			case "command:translate":
