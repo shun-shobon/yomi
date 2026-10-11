@@ -13,6 +13,7 @@ import { serveBackgroundApi, serveTranslatePort } from "@/infra/messaging/backgr
 import { sendToContent } from "@/infra/messaging/content-client";
 import { CommandNameSchema } from "@/infra/messaging/protocol";
 import type { CommandName, ContentMessage } from "@/infra/messaging/protocol";
+import { hideAuthStorageFromContentScripts } from "@/infra/storage/auth";
 import {
 	getAuthState,
 	handleTabRemoved,
@@ -39,6 +40,7 @@ const COMMAND_MESSAGES: Record<CommandName, ContentMessage> = {
 const serializeFailure = (e: unknown) => toTranslateFailure(e).serialize();
 
 export default defineBackground(() => {
+	void hideAuthStorageFromContentScripts();
 	// service worker 再起動後もサインインを完了できるよう、リスナーはトップレベルで同期的に登録する
 	browser.tabs.onUpdated.addListener((tabId, info) => {
 		void handleTabUpdated(tabId, info.url).then(async (signedIn) => {

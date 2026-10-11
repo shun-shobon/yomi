@@ -1,6 +1,16 @@
 import * as v from "valibot";
 
+import { browser } from "#imports";
+
 import { defineValidatedItem } from "./item";
+
+/** 既定では content script からも読めるため、ページのレンダラーが侵害されると refresh token まで渡ってしまう */
+export async function hideAuthStorageFromContentScripts(): Promise<void> {
+	await Promise.all([
+		browser.storage.local.setAccessLevel({ accessLevel: "TRUSTED_CONTEXTS" }),
+		browser.storage.session.setAccessLevel({ accessLevel: "TRUSTED_CONTEXTS" }),
+	]);
+}
 
 const CredentialsSchema = v.object({
 	clientId: v.string(),
