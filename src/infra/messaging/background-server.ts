@@ -24,6 +24,7 @@ const KEEP_ALIVE_INTERVAL_MS = 20_000;
 /** 送信元が拡張のページ（ポップアップなど）のときは tabId がない */
 export interface BackgroundSender {
 	tabId: number | undefined;
+	origin: string | undefined;
 }
 
 export type BackgroundHandlers = {
@@ -35,7 +36,7 @@ type ToFailure = (e: unknown) => SerializedFailure;
 export function serveBackgroundApi(handlers: BackgroundHandlers, toFailure: ToFailure) {
 	browser.runtime.onMessage.addListener((raw: unknown, sender, sendResponse) => {
 		const respond = (response: BackgroundResponse) => sendResponse(response);
-		dispatch(handlers, raw, { tabId: sender.tab?.id }).then(
+		dispatch(handlers, raw, { tabId: sender.tab?.id, origin: sender.origin }).then(
 			(value) => respond({ ok: true, value }),
 			(e: unknown) => respond({ ok: false, failure: toFailure(e) }),
 		);

@@ -1,8 +1,8 @@
 import * as v from "valibot";
 
 import { SerializedFailureSchema } from "@/domain/failure";
+import { LanguageCodeSchema } from "@/domain/languages";
 import { ModelInfoSchema } from "@/domain/models";
-import { CachedTranslationSchema } from "@/domain/translation-cache";
 
 export const TRANSLATE_PORT = "translate";
 
@@ -42,10 +42,17 @@ export const BACKGROUND_API = {
 	"open:usage": endpoint(v.void(), v.void()),
 	"open:shortcuts": endpoint(v.void(), v.void()),
 	"cache:lookup": endpoint(
-		v.object({ keys: v.array(v.string()) }),
+		v.object({ pageUrl: v.string(), lang: LanguageCodeSchema, markups: v.array(v.string()) }),
 		v.array(v.nullable(v.string())),
 	),
-	"cache:store": endpoint(v.object({ entries: v.array(CachedTranslationSchema) }), v.void()),
+	"cache:store": endpoint(
+		v.object({
+			pageUrl: v.string(),
+			lang: LanguageCodeSchema,
+			entries: v.array(v.object({ markup: v.string(), translation: v.string() })),
+		}),
+		v.void(),
+	),
 	"offer:isDismissed": endpoint(v.void(), v.boolean()),
 	"offer:dismiss": endpoint(v.void(), v.void()),
 };

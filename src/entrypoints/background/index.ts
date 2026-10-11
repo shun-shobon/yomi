@@ -13,7 +13,6 @@ import { serveBackgroundApi, serveTranslatePort } from "@/infra/messaging/backgr
 import { sendToContent } from "@/infra/messaging/content-client";
 import { CommandNameSchema } from "@/infra/messaging/protocol";
 import type { CommandName, ContentMessage } from "@/infra/messaging/protocol";
-import { lookupTranslations, storeTranslations } from "@/infra/storage/translation-cache";
 import {
 	getAuthState,
 	handleTabRemoved,
@@ -27,6 +26,10 @@ import {
 	isOfferDismissed,
 } from "@/usecases/background/offer-dismissal";
 import { listModels, translate } from "@/usecases/background/translate";
+import {
+	lookupPageTranslations,
+	storePageTranslations,
+} from "@/usecases/background/translation-cache";
 
 const COMMAND_MESSAGES: Record<CommandName, ContentMessage> = {
 	"translate-page": { type: "command:translate" },
@@ -77,8 +80,8 @@ export default defineBackground(() => {
 			"open:options": openOptionsPage,
 			"open:usage": openUsagePage,
 			"open:shortcuts": openShortcutsPage,
-			"cache:lookup": ({ keys }) => lookupTranslations(keys),
-			"cache:store": ({ entries }) => storeTranslations(entries),
+			"cache:lookup": lookupPageTranslations,
+			"cache:store": storePageTranslations,
 			"offer:isDismissed": async (_, { tabId }) => tabId != null && (await isOfferDismissed(tabId)),
 			"offer:dismiss": async (_, { tabId }) => {
 				if (tabId != null) await dismissOffer(tabId);
