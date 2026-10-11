@@ -1,5 +1,4 @@
 import { ApiError } from "@/domain/api-error";
-import { TranslateFailure } from "@/domain/failure";
 import type { ModelInfo } from "@/domain/models";
 import type { TranslateRequest } from "@/infra/messaging/protocol";
 import { listModels as fetchModels, streamResponse } from "@/infra/openai/client";
@@ -17,7 +16,6 @@ export async function translate(
 	onDelta: (text: string) => void,
 ): Promise<void> {
 	const { model, reasoningEffort, fastMode } = await getSettings();
-	if (model == null) throw new TranslateFailure("no_model", "翻訳に使うモデルを選択してください。");
 	let received = false;
 	await withAuthRetry(
 		(token) =>

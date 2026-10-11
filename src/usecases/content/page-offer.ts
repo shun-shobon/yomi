@@ -13,9 +13,8 @@ import { getSiteRules, updateSiteRules } from "@/infra/storage/site-rules";
 import type { Overlay } from "./overlay";
 import type { PageTranslator } from "./page-translator";
 
-/** サインインやモデル選択の前に翻訳を始めると、ページを開くたびにエラーを出してしまうので何もしない */
-async function canTranslate(settings: Settings): Promise<boolean> {
-	if (settings.model == null) return false;
+/** サインイン前に翻訳を始めると、ページを開くたびにエラーを出してしまうので何もしない */
+async function canTranslate(): Promise<boolean> {
 	try {
 		return (await callBackground("auth:getState")).signedIn;
 	} catch {
@@ -35,7 +34,7 @@ export async function offerPageTranslation(deps: {
 
 	const settings = deps.getSettings();
 	const [allowed, rules, detected, dismissed] = await Promise.all([
-		canTranslate(settings),
+		canTranslate(),
 		getSiteRules(),
 		detectPageLanguage(),
 		callBackground("offer:isDismissed").catch(() => false),

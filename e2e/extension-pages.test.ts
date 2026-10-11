@@ -29,7 +29,7 @@ describe("設定ページ", () => {
 		// 表示対象のモデルだけが並ぶ
 		await expect
 			.poll(() => selects.first().locator("option").allTextContents())
-			.toEqual(["選択してください", "GPT-6 Luna", "GPT-6.1 Sol"]);
+			.toEqual(["GPT-6 Luna", "GPT-6.1 Sol"]);
 		// 推論の強さはモデルが対応するものだけ並ぶ
 		expect(await selects.nth(1).locator("option").allTextContents()).toEqual(["low", "medium"]);
 		expect(await options.getByText("高速モード").count()).toBe(1);

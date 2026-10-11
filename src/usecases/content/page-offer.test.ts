@@ -17,10 +17,9 @@ vi.mock("@/infra/messaging/background-client", () => ({ callBackground: deps.cal
 
 function setup({
 	signedIn = true,
-	model = "gpt",
 	active = false,
 	dismissed = false,
-}: { signedIn?: boolean; model?: string | null; active?: boolean; dismissed?: boolean } = {}) {
+}: { signedIn?: boolean; active?: boolean; dismissed?: boolean } = {}) {
 	deps.callBackground.mockImplementation((method: string) => {
 		switch (method) {
 			case "auth:getState":
@@ -33,7 +32,7 @@ function setup({
 	});
 	const page = { isActive: active, start: vi.fn() };
 	const overlay = { showOffer: vi.fn<(offer: OfferOptions) => void>() };
-	const settings = withDefaults({ model, targetLang: "ja" });
+	const settings = withDefaults({ targetLang: "ja" });
 	const run = () =>
 		offerPageTranslation({
 			page: page as unknown as PageTranslator,
@@ -116,7 +115,6 @@ describe("offerPageTranslation", () => {
 
 	it.each([
 		["サインインしていない", { signedIn: false }],
-		["モデルが未選択", { model: null }],
 		["すでに翻訳を始めている", { active: true }],
 	])("%s なら何もしない", async (_, options) => {
 		await updateSiteRules((r) => ({ ...r, alwaysTranslate: ["example.com"] }));

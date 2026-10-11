@@ -3,7 +3,7 @@ import { createSignal, Show } from "solid-js";
 import { callBackground } from "@/infra/messaging/background-client";
 import type { AuthState } from "@/infra/messaging/protocol";
 import { signInItem } from "@/infra/storage/auth";
-import { PlanStatus } from "@/ui/components/PlanStatus";
+import { AccountStatus } from "@/ui/components/AccountStatus";
 import { SignInCard } from "@/ui/components/SignInCard";
 import { createStorageItem } from "@/ui/hooks/storage-item";
 
@@ -24,8 +24,7 @@ export function AccountSection(props: { auth: AuthState }) {
 			<Show when={props.auth.signedIn} fallback={<SignInPanel />}>
 				<div class="row">
 					<div class="grow">
-						<PlanStatus />
-						<div class="muted small">{props.auth.email ?? "ChatGPT アカウント"}</div>
+						<AccountStatus email={props.auth.email} />
 					</div>
 					<button class="btn" onClick={signOut}>
 						サインアウト

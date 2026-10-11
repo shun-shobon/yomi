@@ -7,7 +7,6 @@ import type { Overlay } from "./overlay";
 
 const REMEDY_ACTIONS: Record<FailureRemedy, { label: string; request: ParamlessMethod }> = {
 	sign_in: { label: "ChatGPT でサインイン", request: "auth:signIn" },
-	open_options: { label: "設定を開く", request: "open:options" },
 	open_usage: { label: "使用状況を管理", request: "open:usage" },
 };
 

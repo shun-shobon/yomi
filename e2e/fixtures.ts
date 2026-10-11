@@ -96,7 +96,7 @@ async function installMocks() {
 			expiresAt: Date.now() + 3600_000,
 		},
 	});
-	await chrome.storage.sync.set({ settings: { model: "gpt-6-luna", targetLang: "ja" } });
+	await chrome.storage.sync.set({ settings: { targetLang: "ja" } });
 
 	const fakeTranslate = (markup: string) =>
 		markup.startsWith("Click ")

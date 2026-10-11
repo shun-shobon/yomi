@@ -4,7 +4,7 @@ import { withAlwaysTranslate } from "@/domain/site-rules";
 import { callBackground } from "@/infra/messaging/background-client";
 
 import "@/ui/base.css";
-import { PlanStatus } from "@/ui/components/PlanStatus";
+import { AccountStatus } from "@/ui/components/AccountStatus";
 import { SignInCard } from "@/ui/components/SignInCard";
 import { TranslationSettingsFields } from "@/ui/components/TranslationSettingsFields";
 import { createActivePage } from "@/ui/hooks/active-page";
@@ -35,23 +35,14 @@ export function App() {
 
 				<Show when={auth()!.signedIn} fallback={<SignInCard />}>
 					<section class="account">
-						<PlanStatus />
+						<AccountStatus email={auth()!.email} />
 					</section>
-				</Show>
-
-				<Show when={auth()!.signedIn && settings()!.model == null}>
-					<div class="notice">
-						翻訳に使うモデルが未選択です。
-						<button class="btn link" onClick={() => void callBackground("open:options")}>
-							設定で選択
-						</button>
-					</div>
 				</Show>
 
 				<PageControls
 					page={page()}
 					send={sendToPage}
-					disabled={!auth()!.signedIn || settings()!.model == null}
+					disabled={!auth()!.signedIn}
 					alwaysTranslate={(host) => siteRules()!.alwaysTranslate.includes(host)}
 					setAlwaysTranslate={(host, enabled) =>
 						updateSiteRules((rules) => withAlwaysTranslate(rules, host, enabled))
