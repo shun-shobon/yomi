@@ -1,5 +1,6 @@
 import { Show } from "solid-js";
 
+import { withAlwaysTranslate } from "@/domain/site-rules";
 import { callBackground } from "@/infra/messaging/background-client";
 
 import "@/ui/base.css";
@@ -9,6 +10,7 @@ import { TranslationSettingsFields } from "@/ui/components/TranslationSettingsFi
 import { createActivePage } from "@/ui/hooks/active-page";
 import { createAuth } from "@/ui/hooks/auth";
 import { createSettings } from "@/ui/hooks/settings";
+import { createSiteRules } from "@/ui/hooks/site-rules";
 
 import { PageControls } from "./PageControls";
 import { ShortcutHints } from "./ShortcutHints";
@@ -19,9 +21,10 @@ export function App() {
 	const auth = createAuth();
 	const [settings, update] = createSettings();
 	const [page, sendToPage] = createActivePage();
+	const [siteRules, updateSiteRules] = createSiteRules();
 
 	return (
-		<Show when={auth() && settings()} fallback={<div class="popup" />}>
+		<Show when={auth() && settings() && siteRules()} fallback={<div class="popup" />}>
 			<div class="popup">
 				<header class="top">
 					<span class="brand">Yomi</span>
@@ -49,6 +52,10 @@ export function App() {
 					page={page()}
 					send={sendToPage}
 					disabled={!auth()!.signedIn || settings()!.model == null}
+					alwaysTranslate={(host) => siteRules()!.alwaysTranslate.includes(host)}
+					setAlwaysTranslate={(host, enabled) =>
+						updateSiteRules((rules) => withAlwaysTranslate(rules, host, enabled))
+					}
 				/>
 
 				<section class="settings">

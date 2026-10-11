@@ -8,6 +8,7 @@ import { createSettings } from "@/ui/hooks/settings";
 import { AccountSection } from "./AccountSection";
 import { CacheSection } from "./CacheSection";
 import { ModelSection } from "./ModelSection";
+import { SiteRulesSection } from "./SiteRulesSection";
 
 import "./style.css";
 import { UsageSection } from "./UsageSection";
@@ -43,10 +44,17 @@ export function App() {
 						<TranslationSettingsFields
 							settings={settings()!}
 							update={update}
-							switches={["showSelectionButton", "hoverOriginal", "highlightPending"]}
+							switches={[
+								"offerTranslation",
+								"showSelectionButton",
+								"hoverOriginal",
+								"highlightPending",
+							]}
 						/>
 					</div>
 				</section>
+
+				<SiteRulesSection />
 
 				<CacheSection />
 
