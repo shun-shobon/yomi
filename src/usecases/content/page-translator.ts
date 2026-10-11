@@ -81,7 +81,10 @@ export class PageTranslator {
 	}
 
 	getState(): PageState {
-		return summarizePage(this.active, this.showing, this.connectedStates());
+		return {
+			host: location.hostname,
+			...summarizePage(this.active, this.showing, this.connectedStates()),
+		};
 	}
 
 	private *connectedStates(): Generator<SegmentState> {

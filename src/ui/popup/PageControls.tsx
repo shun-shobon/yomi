@@ -7,6 +7,8 @@ export function PageControls(props: {
 	page: PageView;
 	send: (message: ContentMessage) => void;
 	disabled: boolean;
+	alwaysTranslate: (host: string) => boolean;
+	setAlwaysTranslate: (host: string, enabled: boolean) => void;
 }) {
 	const state = () => (props.page.status === "ready" ? props.page.state : undefined);
 	const hasTranslations = () => {
@@ -67,6 +69,21 @@ export function PageControls(props: {
 										<span class="error-text"> · 失敗 {current().failed}</span>
 									</Show>
 								</p>
+							</Show>
+							<Show when={current().host !== ""}>
+								<label class="switch">
+									<span>このサイトは常に翻訳</span>
+									<input
+										type="checkbox"
+										checked={props.alwaysTranslate(current().host)}
+										onChange={(e) => {
+											const enabled = e.currentTarget.checked;
+											props.setAlwaysTranslate(current().host, enabled);
+											if (enabled && !current().active && !props.disabled)
+												props.send({ type: "page:translate" });
+										}}
+									/>
+								</label>
 							</Show>
 						</>
 					)}

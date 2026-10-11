@@ -3,9 +3,14 @@ import { For } from "solid-js";
 import { isLanguageCode, LANGUAGE_CODES, LANGUAGES } from "@/domain/languages";
 import type { Settings } from "@/domain/settings";
 
-type DisplaySwitch = "showSelectionButton" | "hoverOriginal" | "highlightPending";
+type DisplaySwitch =
+	| "offerTranslation"
+	| "showSelectionButton"
+	| "hoverOriginal"
+	| "highlightPending";
 
 const SWITCH_LABELS: Record<DisplaySwitch, string> = {
+	offerTranslation: "翻訳先と違う言語のページで翻訳を提案",
 	showSelectionButton: "テキスト選択時に翻訳ボタンを表示",
 	hoverOriginal: "翻訳後のテキストにホバーで原文を表示",
 	highlightPending: "翻訳中のテキストをハイライト",

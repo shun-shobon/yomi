@@ -70,6 +70,8 @@ export async function launchExtension() {
 		requests: () => sw.evaluate(() => (globalThis as MockedGlobal).__requests),
 		setSettings: (settings: Record<string, unknown>) =>
 			sw.evaluate((s) => chrome.storage.sync.set({ settings: s }), settings),
+		setSiteRules: (rules: Record<string, string[]>) =>
+			sw.evaluate((r) => chrome.storage.sync.set({ siteRules: r }), rules),
 		openTestPage: async (url = "https://test.example/page") => {
 			const page = await context.newPage();
 			await page.route("https://test.example/**", (route) =>

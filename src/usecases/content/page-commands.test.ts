@@ -25,7 +25,7 @@ function setup({ active = false, selected = false, translated = false } = {}) {
 		translateCurrent: vi.fn(() => selected),
 		translateText: vi.fn(),
 	};
-	const overlay = { toast: vi.fn() };
+	const overlay = { toast: vi.fn(), hideOffer: vi.fn() };
 	const run = createPageCommands({
 		page: page as unknown as PageTranslator,
 		selection: selection as unknown as SelectionTranslator,
@@ -88,6 +88,14 @@ describe("createPageCommands", () => {
 
 			expect(ctx.page.start).toHaveBeenCalledTimes(1);
 			expect(ctx.overlay.toast).toHaveBeenCalledWith("ページの翻訳を開始しました");
+		});
+
+		it("翻訳の提案を閉じる", () => {
+			ctx = setup();
+
+			ctx.run({ type: "page:translate" });
+
+			expect(ctx.overlay.hideOffer).toHaveBeenCalled();
 		});
 
 		it("開始済みならトーストを出さない", () => {

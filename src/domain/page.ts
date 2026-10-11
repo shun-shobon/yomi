@@ -7,6 +7,7 @@ export type Showing = v.InferOutput<typeof ShowingSchema>;
 export type SegmentState = "idle" | "queued" | "pending" | "done" | "failed";
 
 export const PageStateSchema = v.object({
+	host: v.string(),
 	active: v.boolean(),
 	showing: ShowingSchema,
 	busy: v.number(),
@@ -16,11 +17,13 @@ export const PageStateSchema = v.object({
 
 export type PageState = v.InferOutput<typeof PageStateSchema>;
 
+export type PageSummary = Omit<PageState, "host">;
+
 export function summarizePage(
 	active: boolean,
 	showing: Showing,
 	states: Iterable<SegmentState>,
-): PageState {
+): PageSummary {
 	const counts: Record<SegmentState, number> = {
 		idle: 0,
 		queued: 0,

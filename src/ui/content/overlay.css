@@ -85,6 +85,75 @@ button {
 	background: color-mix(in srgb, var(--fg) 8%, transparent);
 }
 
+.offer {
+	position: fixed;
+	top: 16px;
+	right: 16px;
+	width: min(360px, calc(100vw - 32px));
+	padding: 12px 10px 10px 14px;
+	border-radius: 6px;
+	background: var(--bg);
+	border: 1px solid var(--border);
+	box-shadow: var(--shadow);
+	animation: fade 0.15s ease-out;
+}
+.offer .msg {
+	margin: 0 0 8px;
+}
+.offer .actions {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+.offer .actions > button:not(.icon-btn) {
+	border: 1px solid var(--border);
+	background: transparent;
+	border-radius: 4px;
+	padding: 3px 10px;
+	white-space: nowrap;
+}
+.offer .actions > button:not(.icon-btn):hover {
+	background: color-mix(in srgb, var(--fg) 6%, transparent);
+}
+.offer .actions > button.primary {
+	border-color: var(--accent);
+	background: var(--accent);
+	color: var(--accent-fg);
+	font-weight: 600;
+}
+.offer .actions > button.primary:hover {
+	background: color-mix(in srgb, var(--accent) 88%, var(--fg));
+}
+.offer .spacer {
+	flex: 1;
+}
+.offer .menu-area {
+	position: relative;
+}
+.offer .menu {
+	position: absolute;
+	top: calc(100% + 4px);
+	right: 0;
+	display: flex;
+	flex-direction: column;
+	min-width: max-content;
+	padding: 4px;
+	border-radius: 4px;
+	background: #161519;
+	border: 1px solid var(--border);
+	box-shadow: var(--shadow);
+}
+.offer .menu button {
+	border: 0;
+	background: transparent;
+	text-align: left;
+	padding: 5px 10px;
+	border-radius: 3px;
+}
+.offer .menu button:hover {
+	background: color-mix(in srgb, var(--fg) 8%, transparent);
+}
+
 .tooltip {
 	position: absolute;
 	width: max-content;
