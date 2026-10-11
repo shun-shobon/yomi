@@ -1,18 +1,19 @@
-import { createSignal, type Accessor } from "solid-js";
+import { createSignal } from "solid-js";
+import type { Accessor } from "solid-js";
 
 import { browser } from "#imports";
 import type { CommandName } from "@/infra/messaging/protocol";
 
 export function createShortcuts(): Accessor<Partial<Record<CommandName, string>>> {
-  const [shortcuts, setShortcuts] = createSignal<Partial<Record<CommandName, string>>>({});
-  void browser.commands.getAll().then((commands) => {
-    setShortcuts(
-      Object.fromEntries(
-        commands
-          .filter((c) => c.shortcut != null && c.shortcut !== "")
-          .map((c) => [c.name, c.shortcut]),
-      ),
-    );
-  });
-  return shortcuts;
+	const [shortcuts, setShortcuts] = createSignal<Partial<Record<CommandName, string>>>({});
+	void browser.commands.getAll().then((commands) => {
+		setShortcuts(
+			Object.fromEntries(
+				commands
+					.filter((c) => c.shortcut != null && c.shortcut !== "")
+					.map((c) => [c.name, c.shortcut]),
+			),
+		);
+	});
+	return shortcuts;
 }

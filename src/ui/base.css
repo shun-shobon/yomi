@@ -1,228 +1,228 @@
 :root {
-  color-scheme: dark;
-  --bg: #161519;
-  --surface: #1c1b20;
-  --raised: #242328;
-  --fg: #e4e0d8;
-  --muted: #99948b;
-  --border: #2c2b31;
-  --accent: #c8a764;
-  --accent-hover: #d4b678;
-  --accent-fg: #1a1814;
-  --accent-soft: rgba(200, 167, 100, 0.12);
-  --danger: #d98a7f;
-  --warn-bg: rgba(200, 167, 100, 0.08);
-  --warn-border: rgba(200, 167, 100, 0.45);
-  --ok: #8dbf9f;
-  --radius: 6px;
-  font:
-    14px/1.6 system-ui,
-    -apple-system,
-    "Segoe UI",
-    "Hiragino Sans",
-    "Noto Sans JP",
-    sans-serif;
-  color: var(--fg);
-  background: var(--bg);
+	color-scheme: dark;
+	--bg: #161519;
+	--surface: #1c1b20;
+	--raised: #242328;
+	--fg: #e4e0d8;
+	--muted: #99948b;
+	--border: #2c2b31;
+	--accent: #c8a764;
+	--accent-hover: #d4b678;
+	--accent-fg: #1a1814;
+	--accent-soft: rgba(200, 167, 100, 0.12);
+	--danger: #d98a7f;
+	--warn-bg: rgba(200, 167, 100, 0.08);
+	--warn-border: rgba(200, 167, 100, 0.45);
+	--ok: #8dbf9f;
+	--radius: 6px;
+	font:
+		14px/1.6 system-ui,
+		-apple-system,
+		"Segoe UI",
+		"Hiragino Sans",
+		"Noto Sans JP",
+		sans-serif;
+	color: var(--fg);
+	background: var(--bg);
 }
 * {
-  box-sizing: border-box;
+	box-sizing: border-box;
 }
 body {
-  margin: 0;
-  background: var(--bg);
+	margin: 0;
+	background: var(--bg);
 }
 ::selection {
-  background: rgba(200, 167, 100, 0.3);
+	background: rgba(200, 167, 100, 0.3);
 }
 button,
 select,
 input {
-  font: inherit;
-  color: inherit;
+	font: inherit;
+	color: inherit;
 }
 a {
-  color: var(--accent);
+	color: var(--accent);
 }
 :focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
 }
 
 .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  border: 1px solid var(--border);
-  background: var(--raised);
-  border-radius: 4px;
-  padding: 6px 12px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background 0.15s;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	border: 1px solid var(--border);
+	background: var(--raised);
+	border-radius: 4px;
+	padding: 6px 12px;
+	cursor: pointer;
+	font-weight: 500;
+	transition: background 0.15s;
 }
 .btn:hover {
-  background: #2b2a30;
+	background: #2b2a30;
 }
 .btn:disabled {
-  opacity: 0.45;
-  cursor: default;
+	opacity: 0.45;
+	cursor: default;
 }
 .btn.primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-fg);
-  font-weight: 700;
+	background: var(--accent);
+	border-color: var(--accent);
+	color: var(--accent-fg);
+	font-weight: 700;
 }
 .btn.primary:hover:not(:disabled) {
-  background: var(--accent-hover);
-  border-color: var(--accent-hover);
+	background: var(--accent-hover);
+	border-color: var(--accent-hover);
 }
 .btn.block {
-  width: 100%;
-  padding: 9px 12px;
+	width: 100%;
+	padding: 9px 12px;
 }
 .btn.link {
-  border: 0;
-  background: none;
-  padding: 0;
-  color: var(--accent);
-  font-weight: 500;
+	border: 0;
+	background: none;
+	padding: 0;
+	color: var(--accent);
+	font-weight: 500;
 }
 .btn.link:hover {
-  background: none;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+	background: none;
+	text-decoration: underline;
+	text-underline-offset: 3px;
 }
 
 .chatgpt-btn {
-  background: #fff;
-  border-color: #fff;
-  color: #0d0d0d;
-  font-weight: 600;
+	background: #fff;
+	border-color: #fff;
+	color: #0d0d0d;
+	font-weight: 600;
 }
 .chatgpt-btn:hover {
-  background: #e5e5e5;
-  border-color: #e5e5e5;
+	background: #e5e5e5;
+	border-color: #e5e5e5;
 }
 
 select {
-  appearance: none;
-  width: 100%;
-  padding: 6px 30px 6px 10px;
-  border-radius: 4px;
-  border: 1px solid var(--border);
-  /* ネイティブの矢印は右端に寄りすぎて位置を調整できないため自前で描く */
-  background: var(--raised)
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5 6 7.5 9 4.5' fill='none' stroke='%2399948b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
-    no-repeat right 10px center / 12px;
-  cursor: pointer;
+	appearance: none;
+	width: 100%;
+	padding: 6px 30px 6px 10px;
+	border-radius: 4px;
+	border: 1px solid var(--border);
+	/* ネイティブの矢印は右端に寄りすぎて位置を調整できないため自前で描く */
+	background: var(--raised)
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5 6 7.5 9 4.5' fill='none' stroke='%2399948b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+		no-repeat right 10px center / 12px;
+	cursor: pointer;
 }
 select:hover {
-  background-color: #2b2a30;
+	background-color: #2b2a30;
 }
 
 .switch {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	cursor: pointer;
 }
 .switch input {
-  appearance: none;
-  width: 34px;
-  height: 20px;
-  border-radius: 10px;
-  background: var(--border);
-  position: relative;
-  flex: none;
-  cursor: pointer;
-  transition: background 0.15s;
-  margin: 0;
+	appearance: none;
+	width: 34px;
+	height: 20px;
+	border-radius: 10px;
+	background: var(--border);
+	position: relative;
+	flex: none;
+	cursor: pointer;
+	transition: background 0.15s;
+	margin: 0;
 }
 .switch input::after {
-  content: "";
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--muted);
-  transition:
-    transform 0.15s,
-    background 0.15s;
+	content: "";
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: var(--muted);
+	transition:
+		transform 0.15s,
+		background 0.15s;
 }
 .switch input:checked {
-  background: var(--accent);
+	background: var(--accent);
 }
 .switch input:checked::after {
-  transform: translateX(14px);
-  background: var(--accent-fg);
+	transform: translateX(14px);
+	background: var(--accent-fg);
 }
 
 .notice {
-  border: 1px solid var(--warn-border);
-  background: var(--warn-bg);
-  border-radius: 4px;
-  padding: 8px 10px;
-  font-size: 13px;
+	border: 1px solid var(--warn-border);
+	background: var(--warn-bg);
+	border-radius: 4px;
+	padding: 8px 10px;
+	font-size: 13px;
 }
 .error-text {
-  color: var(--danger);
-  font-size: 13px;
+	color: var(--danger);
+	font-size: 13px;
 }
 .muted {
-  color: var(--muted);
+	color: var(--muted);
 }
 .small {
-  font-size: 12px;
+	font-size: 12px;
 }
 kbd {
-  font:
-    12px ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    monospace;
-  color: var(--fg);
-  padding: 1px 6px;
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  background: var(--raised);
+	font:
+		12px ui-monospace,
+		SFMono-Regular,
+		Menlo,
+		monospace;
+	color: var(--fg);
+	padding: 1px 6px;
+	border: 1px solid var(--border);
+	border-radius: 3px;
+	background: var(--raised);
 }
 .plan-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
 }
 .plan-status::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--ok);
+	content: "";
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--ok);
 }
 
 .sign-in-card {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 6px;
+	padding: 12px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background: var(--surface);
 }
 .sign-in-card p {
-  margin: 0;
+	margin: 0;
 }
 .plan-status-row {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
 }
 .block {
-  display: block;
+	display: block;
 }

@@ -1,246 +1,246 @@
 :host {
-  all: initial;
+	all: initial;
 }
 * {
-  box-sizing: border-box;
+	box-sizing: border-box;
 }
 .layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 0;
-  height: 0;
-  font:
-    14px/1.6 system-ui,
-    -apple-system,
-    "Segoe UI",
-    "Hiragino Sans",
-    "Noto Sans JP",
-    sans-serif;
-  color: var(--fg);
-  --bg: #1c1b20;
-  --fg: #e4e0d8;
-  --muted: #99948b;
-  --border: #2c2b31;
-  --accent: #c8a764;
-  --accent-fg: #1a1814;
-  --danger: #d98a7f;
-  --ok: #8dbf9f;
-  --shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-  color-scheme: dark;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 0;
+	height: 0;
+	font:
+		14px/1.6 system-ui,
+		-apple-system,
+		"Segoe UI",
+		"Hiragino Sans",
+		"Noto Sans JP",
+		sans-serif;
+	color: var(--fg);
+	--bg: #1c1b20;
+	--fg: #e4e0d8;
+	--muted: #99948b;
+	--border: #2c2b31;
+	--accent: #c8a764;
+	--accent-fg: #1a1814;
+	--danger: #d98a7f;
+	--ok: #8dbf9f;
+	--shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+	color-scheme: dark;
 }
 button {
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
+	font: inherit;
+	color: inherit;
+	cursor: pointer;
 }
 
 .toasts {
-  position: fixed;
-  right: 16px;
-  bottom: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: flex-end;
-  pointer-events: none;
+	position: fixed;
+	right: 16px;
+	bottom: 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	align-items: flex-end;
+	pointer-events: none;
 }
 .toast {
-  pointer-events: auto;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  max-width: min(420px, calc(100vw - 32px));
-  padding: 10px 12px 10px 14px;
-  border-radius: 6px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  animation: rise 0.18s ease-out;
+	pointer-events: auto;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	max-width: min(420px, calc(100vw - 32px));
+	padding: 10px 12px 10px 14px;
+	border-radius: 6px;
+	background: var(--bg);
+	border: 1px solid var(--border);
+	box-shadow: var(--shadow);
+	animation: rise 0.18s ease-out;
 }
 .toast.error {
-  border-left: 4px solid var(--danger);
+	border-left: 4px solid var(--danger);
 }
 .toast .msg {
-  flex: 1;
+	flex: 1;
 }
 .toast .action {
-  border: 0;
-  border-radius: 4px;
-  padding: 4px 10px;
-  background: var(--accent);
-  color: var(--accent-fg);
-  font-weight: 600;
-  white-space: nowrap;
+	border: 0;
+	border-radius: 4px;
+	padding: 4px 10px;
+	background: var(--accent);
+	color: var(--accent-fg);
+	font-weight: 600;
+	white-space: nowrap;
 }
 .icon-btn {
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  padding: 2px 6px;
-  border-radius: 4px;
-  line-height: 1;
+	border: 0;
+	background: transparent;
+	color: var(--muted);
+	padding: 2px 6px;
+	border-radius: 4px;
+	line-height: 1;
 }
 .icon-btn:hover {
-  background: color-mix(in srgb, var(--fg) 8%, transparent);
+	background: color-mix(in srgb, var(--fg) 8%, transparent);
 }
 
 .tooltip {
-  position: absolute;
-  width: max-content;
-  max-width: min(480px, calc(100vw - 16px));
-  padding: 8px 12px;
-  border-radius: 4px;
-  background: #161519;
-  color: var(--fg);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  font-size: 13px;
-  line-height: 1.55;
-  pointer-events: none;
-  animation: fade 0.12s ease-out;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
+	position: absolute;
+	width: max-content;
+	max-width: min(480px, calc(100vw - 16px));
+	padding: 8px 12px;
+	border-radius: 4px;
+	background: #161519;
+	color: var(--fg);
+	border: 1px solid var(--border);
+	box-shadow: var(--shadow);
+	font-size: 13px;
+	line-height: 1.55;
+	pointer-events: none;
+	animation: fade 0.12s ease-out;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
 }
 .tooltip .label {
-  display: block;
-  font-size: 11px;
-  color: var(--muted);
-  margin-bottom: 2px;
+	display: block;
+	font-size: 11px;
+	color: var(--muted);
+	margin-bottom: 2px;
 }
 
 .sel-btn {
-  position: absolute;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--accent);
-  box-shadow: var(--shadow);
-  display: grid;
-  place-items: center;
-  padding: 0;
-  animation: fade 0.15s ease-out;
-  transition: transform 0.12s;
+	position: absolute;
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	border: 1px solid var(--border);
+	background: var(--bg);
+	color: var(--accent);
+	box-shadow: var(--shadow);
+	display: grid;
+	place-items: center;
+	padding: 0;
+	animation: fade 0.15s ease-out;
+	transition: transform 0.12s;
 }
 .sel-btn:hover {
-  transform: scale(1.1);
+	transform: scale(1.1);
 }
 .sel-btn svg {
-  width: 17px;
-  height: 17px;
+	width: 17px;
+	height: 17px;
 }
 
 .panel {
-  position: absolute;
-  width: min(440px, calc(100vw - 24px));
-  border-radius: 6px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  animation: fade 0.15s ease-out;
-  overflow: hidden;
+	position: absolute;
+	width: min(440px, calc(100vw - 24px));
+	border-radius: 6px;
+	background: var(--bg);
+	border: 1px solid var(--border);
+	box-shadow: var(--shadow);
+	animation: fade 0.15s ease-out;
+	overflow: hidden;
 }
 .panel header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 8px 8px 14px;
-  border-bottom: 1px solid var(--border);
-  color: var(--muted);
-  font-size: 12px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 8px 8px 14px;
+	border-bottom: 1px solid var(--border);
+	color: var(--muted);
+	font-size: 12px;
 }
 .panel header .title {
-  flex: 1;
-  font-weight: 600;
+	flex: 1;
+	font-weight: 600;
 }
 .panel .body {
-  padding: 12px 14px;
-  max-height: 50vh;
-  overflow: auto;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  min-height: 44px;
+	padding: 12px 14px;
+	max-height: 50vh;
+	overflow: auto;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	min-height: 44px;
 }
 .panel .body.error {
-  color: var(--danger);
+	color: var(--danger);
 }
 .panel footer {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  padding: 6px 8px 8px 14px;
-  color: var(--muted);
-  font-size: 12px;
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	padding: 6px 8px 8px 14px;
+	color: var(--muted);
+	font-size: 12px;
 }
 .panel footer .spacer {
-  flex: 1;
+	flex: 1;
 }
 .panel footer button {
-  border: 1px solid var(--border);
-  background: transparent;
-  border-radius: 4px;
-  padding: 3px 10px;
+	border: 1px solid var(--border);
+	background: transparent;
+	border-radius: 4px;
+	padding: 3px 10px;
 }
 .panel footer button:hover {
-  background: color-mix(in srgb, var(--fg) 6%, transparent);
+	background: color-mix(in srgb, var(--fg) 6%, transparent);
 }
 .panel footer button.copied {
-  color: var(--ok);
-  border-color: var(--ok);
+	color: var(--ok);
+	border-color: var(--ok);
 }
 .panel footer a {
-  color: inherit;
+	color: inherit;
 }
 .cursor::after {
-  content: "";
-  display: inline-block;
-  width: 0.5em;
-  height: 1em;
-  margin-left: 2px;
-  vertical-align: -0.15em;
-  background: var(--accent);
-  animation: blink 1s steps(2) infinite;
+	content: "";
+	display: inline-block;
+	width: 0.5em;
+	height: 1em;
+	margin-left: 2px;
+	vertical-align: -0.15em;
+	background: var(--accent);
+	animation: blink 1s steps(2) infinite;
 }
 .dots {
-  display: inline-flex;
-  gap: 4px;
+	display: inline-flex;
+	gap: 4px;
 }
 .dots i {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--muted);
-  animation: blink 1s infinite;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--muted);
+	animation: blink 1s infinite;
 }
 .dots i:nth-child(2) {
-  animation-delay: 0.15s;
+	animation-delay: 0.15s;
 }
 .dots i:nth-child(3) {
-  animation-delay: 0.3s;
+	animation-delay: 0.3s;
 }
 
 @keyframes fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 @keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
 }
 @keyframes blink {
-  50% {
-    opacity: 0.25;
-  }
+	50% {
+		opacity: 0.25;
+	}
 }
