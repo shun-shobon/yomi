@@ -95,6 +95,23 @@ describe("ページの変化への追従", () => {
 		await expect.poll(() => text("#dyn")).toContain("JA:");
 	});
 
+	test("翻訳しない要素の中に後から追加された要素は訳さない", async () => {
+		await page.evaluate(() => {
+			const inside = document.createElement("p");
+			inside.textContent = "Inserted into an excluded box";
+			document.querySelector("#dynamic-excluded")!.append(inside);
+			const sentinel = document.createElement("p");
+			sentinel.id = "dyn-sentinel";
+			sentinel.textContent = "Inserted next to the excluded box";
+			document.querySelector("#dynamic-root")!.append(sentinel);
+		});
+		await expect.poll(() => text("#dyn-sentinel")).toContain("JA:");
+
+		const sent = (await ext.requests()).map((req) => req.input[0]!.content).join("\n");
+		expect(sent).not.toContain("Inserted into an excluded box");
+		expect(await text("#dynamic-excluded")).toBe("Inserted into an excluded box");
+	});
+
 	test("ページが書き換えたテキストを訳し直す", async () => {
 		await page.evaluate(() => {
 			window.scrollTo(0, 0);

@@ -3,6 +3,7 @@ import type { TokenResponse } from "@/domain/oauth";
 
 const TOKEN_URL = "https://auth.openai.com/api/accounts/oauth/token";
 const REVOKE_URL = "https://auth.openai.com/api/accounts/oauth/revoke";
+const REVOKE_TIMEOUT_MS = 10_000;
 
 export async function postToken(body: Record<string, string>): Promise<TokenResponse> {
 	const res = await fetch(TOKEN_URL, {
@@ -14,8 +15,9 @@ export async function postToken(body: Record<string, string>): Promise<TokenResp
 }
 
 export async function revokeRefreshToken(refreshToken: string, clientId: string): Promise<void> {
-	await fetch(REVOKE_URL, {
+	const res = await fetch(REVOKE_URL, {
 		method: "POST",
+		signal: AbortSignal.timeout(REVOKE_TIMEOUT_MS),
 		headers: { "Content-Type": "application/x-www-form-urlencoded" },
 		body: new URLSearchParams({
 			token: refreshToken,
@@ -23,4 +25,5 @@ export async function revokeRefreshToken(refreshToken: string, clientId: string)
 			client_id: clientId,
 		}),
 	});
+	if (!res.ok) throw new Error(`revoke failed: ${res.status}`);
 }

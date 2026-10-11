@@ -44,7 +44,10 @@ export function buildAuthorizeUrl(req: AuthorizeRequest): string {
 }
 
 export function isRedirectUrl(url: string): boolean {
-	return url.startsWith(REDIRECT_URI);
+	if (!URL.canParse(url)) return false;
+	const actual = new URL(url);
+	const expected = new URL(REDIRECT_URI);
+	return actual.origin === expected.origin && actual.pathname === expected.pathname;
 }
 
 export function parseAuthorizationCallback(

@@ -7,6 +7,7 @@ import {
 	createPkce,
 	decodeIdToken,
 	hasRequiredScope,
+	isRedirectUrl,
 	parseAuthorizationCallback,
 	parseTokenResponse,
 } from "./oauth";
@@ -217,5 +218,18 @@ describe("createPkce", () => {
 		const expected = Buffer.from(digest).toString("base64url");
 		expect(challenge).toBe(expected);
 		expect(verifier).toMatch(/^[A-Za-z0-9_-]{43,128}$/u);
+	});
+});
+
+describe("isRedirectUrl", () => {
+	it("リダイレクト先と同じパスならクエリが付いていても受け付ける", () => {
+		expect(isRedirectUrl(`${REDIRECT_URI}?code=c&state=s`)).toBe(true);
+	});
+
+	it("前方一致するだけの別パスやホストは受け付けない", () => {
+		expect(isRedirectUrl(`${REDIRECT_URI}-extra?code=c`)).toBe(false);
+		expect(isRedirectUrl(`${REDIRECT_URI}/nested`)).toBe(false);
+		expect(isRedirectUrl("http://127.0.0.1:14550/callback")).toBe(false);
+		expect(isRedirectUrl("not a url")).toBe(false);
 	});
 });

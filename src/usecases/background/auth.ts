@@ -186,7 +186,10 @@ export async function signOut(): Promise<void> {
 	try {
 		await revokeRefreshToken(creds.refreshToken, creds.clientId);
 	} catch {
-		// ローカルの資格情報は既に消しているので、revocation の失敗でサインアウトを妨げない
+		throw new TranslateFailure(
+			"other",
+			"サインアウトしましたが、サーバー側でのログイン情報の無効化を確認できませんでした。",
+		);
 	}
 }
 

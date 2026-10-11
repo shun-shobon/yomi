@@ -86,6 +86,13 @@ function isExcluded(el: Element): boolean {
 	);
 }
 
+function hasSkippedAncestor(el: Element): boolean {
+	for (let ancestor = el.parentElement; ancestor; ancestor = ancestor.parentElement) {
+		if (SKIP_TAGS.has(ancestor.tagName) || isExcluded(ancestor)) return true;
+	}
+	return false;
+}
+
 export function isAtomic(el: Element): boolean {
 	return ATOMIC_TAGS.has(el.tagName) || isExcluded(el);
 }
@@ -171,7 +178,8 @@ export function collectRuns(
 		flush();
 	};
 
-	visit(root);
+	// DOM の変更で再走査するときは途中の要素から始まるので、祖先の除外指定は visit では見えない
+	if (!hasSkippedAncestor(root)) visit(root);
 	return runs;
 }
 

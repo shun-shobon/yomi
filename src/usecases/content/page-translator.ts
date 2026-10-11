@@ -6,8 +6,6 @@ import { summarizePage } from "@/domain/page";
 import type { PageState, SegmentState, Showing } from "@/domain/page";
 import { pageInstructions } from "@/domain/prompts";
 import type { Settings } from "@/domain/settings";
-import { cacheKey } from "@/domain/translation-cache";
-import type { CachedTranslation } from "@/domain/translation-cache";
 import { DomWatcher } from "@/infra/dom/dom-watcher";
 import {
 	ensurePendingStyle,
@@ -32,16 +30,22 @@ function pageContext() {
 	return { title: document.title, description: description?.content ?? "" };
 }
 
-async function lookupCache(keys: string[]): Promise<(string | null)[]> {
+async function lookupCache(
+	pageUrl: string,
+	lang: LanguageCode,
+	markups: string[],
+): Promise<(string | null)[]> {
 	try {
-		return await callBackground("cache:lookup", { keys });
+		return await callBackground("cache:lookup", { pageUrl, lang, markups });
 	} catch {
-		return keys.map(() => null);
+		return markups.map(() => null);
 	}
 }
 
-function storeCache(entry: CachedTranslation) {
-	callBackground("cache:store", { entries: [entry] }).catch(() => {});
+function storeCache(pageUrl: string, lang: LanguageCode, markup: string, translation: string) {
+	callBackground("cache:store", { pageUrl, lang, entries: [{ markup, translation }] }).catch(
+		() => {},
+	);
 }
 
 export interface PageTranslatorHooks {
@@ -280,9 +284,12 @@ export class PageTranslator {
 		for (const seg of batch) seg.batch = token;
 		const mine = (seg: Segment) => seg.batch === token && seg.state === "pending";
 		const pageUrl = location.href;
-		const keyOf = (seg: Segment) => cacheKey(lang, pageUrl, seg.serialized.markup);
 
-		const cached = await lookupCache(batch.map(keyOf));
+		const cached = await lookupCache(
+			pageUrl,
+			lang,
+			batch.map((seg) => seg.serialized.markup),
+		);
 		batch.forEach((seg, i) => {
 			const hit = cached[i];
 			if (hit != null && mine(seg)) this.applyResult(seg, hit, lang);
@@ -300,7 +307,7 @@ export class PageTranslator {
 				if (!seg || !mine(seg)) return;
 				this.applyResult(seg, markup, lang);
 				// バッチの完了を待って書き込むと、途中でページを離れたときに訳せた分まで失われる
-				storeCache({ key: keyOf(seg), translation: markup });
+				storeCache(pageUrl, lang, seg.serialized.markup, markup);
 			}),
 		);
 		this.inflight.add(handle);

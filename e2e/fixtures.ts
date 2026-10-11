@@ -31,6 +31,7 @@ export const TEST_PAGE = `<!doctype html><html lang="en"><head><title>Test page<
 <div style="height:3000px"></div>
 <p id="far">This paragraph is far below the fold.</p>
 <div id="dynamic-root"></div>
+<div id="dynamic-excluded" class="notranslate"></div>
 </body></html>`;
 
 const screenshotDir = process.env["E2E_SCREENSHOT_DIR"];
