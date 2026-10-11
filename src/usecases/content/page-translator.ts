@@ -52,6 +52,7 @@ export interface PageTranslatorHooks {
 	getSettings: () => Settings;
 	onFatalFailure: (failure: TranslateFailure) => void;
 	onPartialFailure: () => void;
+	onActiveChange: (active: boolean) => void;
 }
 
 export class PageTranslator {
@@ -104,6 +105,7 @@ export class PageTranslator {
 		if (this.showing === "original") this.renderAll("translation");
 		if (this.active) return;
 		this.active = true;
+		this.hooks.onActiveChange(true);
 		this.partialFailureNotified = false;
 		ensurePendingStyle();
 		this.scan(document.body);
@@ -117,6 +119,7 @@ export class PageTranslator {
 	stop() {
 		if (!this.active) return;
 		this.active = false;
+		this.hooks.onActiveChange(false);
 		this.watcher.stop();
 		for (const handle of this.inflight) handle.cancel();
 		this.inflight.clear();

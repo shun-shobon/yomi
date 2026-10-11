@@ -6,6 +6,7 @@ import {
 	withAlwaysTranslate,
 	withRule,
 } from "@/domain/site-rules";
+import { isReload } from "@/infra/dom/navigation";
 import { detectPageLanguage } from "@/infra/dom/page-language";
 import { callBackground } from "@/infra/messaging/background-client";
 import { getSiteRules, updateSiteRules } from "@/infra/storage/site-rules";
@@ -33,11 +34,14 @@ export async function offerPageTranslation(deps: {
 	if (host === "") return;
 
 	const settings = deps.getSettings();
-	const [allowed, rules, detected, dismissed] = await Promise.all([
+	const [allowed, rules, detected, tab] = await Promise.all([
 		canTranslate(),
 		getSiteRules(),
 		detectPageLanguage(),
-		callBackground("offer:isDismissed").catch(() => false),
+		callBackground("tab:enterPage", { reloaded: isReload() }).catch(() => ({
+			offerDismissed: false,
+			translating: false,
+		})),
 	]);
 	if (!allowed || page.isActive) return;
 
@@ -48,12 +52,13 @@ export async function offerPageTranslation(deps: {
 		pageLang,
 		targetLang: settings.targetLang,
 		offerEnabled: settings.offerTranslation,
+		continuing: tab.translating,
 	});
 	if (decision === "translate") {
 		page.start();
 		return;
 	}
-	if (decision === "none" || pageLang == null || dismissed) return;
+	if (decision === "none" || pageLang == null || tab.offerDismissed) return;
 
 	const label = languageLabel(pageLang);
 	overlay.showOffer({
@@ -80,4 +85,9 @@ export async function offerPageTranslation(deps: {
 		],
 		onDismiss: () => void callBackground("offer:dismiss").catch(() => {}),
 	});
+}
+
+/** 同じタブで次に開いたページでも翻訳を続けるために、翻訳中かどうかを background に残す */
+export function rememberPageTranslating(translating: boolean): void {
+	callBackground("tab:setTranslating", { translating }).catch(() => {});
 }

@@ -11,21 +11,24 @@ import type { PageTranslator } from "./page-translator";
 const deps = vi.hoisted(() => ({
 	detectPageLanguage: vi.fn<() => Promise<string | null>>(),
 	callBackground: vi.fn(),
+	isReload: vi.fn<() => boolean>(),
 }));
 vi.mock("@/infra/dom/page-language", () => ({ detectPageLanguage: deps.detectPageLanguage }));
+vi.mock("@/infra/dom/navigation", () => ({ isReload: deps.isReload }));
 vi.mock("@/infra/messaging/background-client", () => ({ callBackground: deps.callBackground }));
 
 function setup({
 	signedIn = true,
 	active = false,
 	dismissed = false,
-}: { signedIn?: boolean; active?: boolean; dismissed?: boolean } = {}) {
+	translating = false,
+}: { signedIn?: boolean; active?: boolean; dismissed?: boolean; translating?: boolean } = {}) {
 	deps.callBackground.mockImplementation((method: string) => {
 		switch (method) {
 			case "auth:getState":
 				return Promise.resolve({ signedIn, email: null });
-			case "offer:isDismissed":
-				return Promise.resolve(dismissed);
+			case "tab:enterPage":
+				return Promise.resolve({ offerDismissed: dismissed, translating });
 			default:
 				return Promise.resolve();
 		}
@@ -56,6 +59,7 @@ beforeEach(() => {
 	fakeBrowser.reset();
 	vi.stubGlobal("location", { hostname: "example.com" });
 	deps.detectPageLanguage.mockResolvedValue("en-US");
+	deps.isReload.mockReturnValue(false);
 });
 
 describe("offerPageTranslation", () => {
@@ -83,6 +87,33 @@ describe("offerPageTranslation", () => {
 		await ctx.run();
 
 		expect(ctx.page.start).toHaveBeenCalled();
+	});
+
+	it("リロードしたかどうかをタブの記録に伝える", async () => {
+		deps.isReload.mockReturnValue(true);
+		const ctx = setup();
+
+		await ctx.run();
+
+		expect(deps.callBackground).toHaveBeenCalledWith("tab:enterPage", { reloaded: true });
+	});
+
+	it("このタブで翻訳を続けているなら、提案せずに翻訳を始める", async () => {
+		const ctx = setup({ translating: true, dismissed: true });
+
+		await ctx.run();
+
+		expect(ctx.page.start).toHaveBeenCalled();
+		expect(ctx.overlay.showOffer).not.toHaveBeenCalled();
+	});
+
+	it("このタブで翻訳を続けていても、翻訳先と同じ言語のページは翻訳しない", async () => {
+		deps.detectPageLanguage.mockResolvedValue("ja");
+		const ctx = setup({ translating: true });
+
+		await ctx.run();
+
+		expect(ctx.page.start).not.toHaveBeenCalled();
 	});
 
 	it("提案を閉じるとタブに記録する", async () => {

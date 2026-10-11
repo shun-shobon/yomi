@@ -1,3 +1,4 @@
+import type { Page } from "playwright-core";
 import { beforeAll, expect, test } from "vitest";
 
 import { launchExtension, screenshot } from "./fixtures";
@@ -9,6 +10,9 @@ beforeAll(async () => {
 	ext = await launchExtension();
 	return () => ext.context.close();
 });
+
+// カードを出すまでオーバーレイの host 要素は作られない
+const hasOverlay = (page: Page) => page.evaluate(() => document.querySelector("yomi-ui") != null);
 
 // 提案カードは closed shadow DOM なので、操作は座標で行い表示はスクリーンショットで確認する
 test("翻訳先と違う言語のページで提案し、「翻訳する」で翻訳を始める", async () => {
@@ -40,14 +44,58 @@ test("提案を閉じたタブでは、ページを移っても提案しない",
 	await page.mouse.click(100, 400);
 	await page.goto("https://test.example/second");
 
-	// カードを出すまでオーバーレイの host 要素は作られない
-	const hasOverlay = (p: typeof page) =>
-		p.evaluate(() => document.querySelector("yomi-ui") != null);
 	const other = await ext.openTestPage("https://test.example/other-tab");
 	await expect.poll(() => hasOverlay(other)).toBe(true);
 	expect(await hasOverlay(page)).toBe(false);
 	await page.close();
 	await other.close();
+});
+
+test("提案を閉じたタブでも、リロードすれば再び提案する", async () => {
+	const page = await ext.openTestPage();
+	await page.mouse.click(100, 400);
+	await page.reload();
+
+	await expect.poll(() => hasOverlay(page)).toBe(true);
+	await page.close();
+});
+
+test("翻訳したタブでページを移ると次のページも翻訳し、新しいタブでは翻訳しない", async () => {
+	const page = await ext.openTestPage("https://test.example/first");
+	await ext.sendToTab({ type: "page:translate" });
+	await expect.poll(() => page.textContent("#h1"), { timeout: 10_000 }).toMatch(/^JA:/u);
+
+	await page.goto("https://test.example/second");
+	await expect.poll(() => page.textContent("#h1"), { timeout: 10_000 }).toMatch(/^JA:/u);
+
+	const other = await ext.openTestPage("https://test.example/other-tab");
+	await expect.poll(() => hasOverlay(other)).toBe(true);
+	expect(await ext.sendToTab({ type: "page:getState" })).toMatchObject({ active: false });
+	await page.close();
+	await other.close();
+});
+
+test("翻訳したタブでもリロードすれば翻訳せずに提案する", async () => {
+	const page = await ext.openTestPage();
+	await ext.sendToTab({ type: "page:translate" });
+	await expect.poll(() => page.textContent("#h1"), { timeout: 10_000 }).toMatch(/^JA:/u);
+
+	await page.reload();
+	await expect.poll(() => hasOverlay(page)).toBe(true);
+	expect(await ext.sendToTab({ type: "page:getState" })).toMatchObject({ active: false });
+	await page.close();
+});
+
+test("翻訳を止めたタブでは、ページを移っても翻訳しない", async () => {
+	const page = await ext.openTestPage("https://test.example/first");
+	await ext.sendToTab({ type: "page:translate" });
+	await expect.poll(() => page.textContent("#h1"), { timeout: 10_000 }).toMatch(/^JA:/u);
+	await ext.sendToTab({ type: "page:stop" });
+
+	await page.goto("https://test.example/second");
+	await expect.poll(() => hasOverlay(page)).toBe(true);
+	expect(await ext.sendToTab({ type: "page:getState" })).toMatchObject({ active: false });
+	await page.close();
 });
 
 test("常に翻訳するサイトは開いただけで翻訳する", async () => {

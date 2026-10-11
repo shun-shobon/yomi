@@ -64,10 +64,12 @@ export function decidePageOffer(input: {
 	pageLang: string | null;
 	targetLang: LanguageCode;
 	offerEnabled: boolean;
+	/** このタブで直前のページを翻訳していた */
+	continuing: boolean;
 }): PageOffer {
 	const { rules, host, pageLang, targetLang } = input;
 	if (pageLang === targetLang) return "none";
-	if (rules.alwaysTranslate.includes(host)) return "translate";
+	if (input.continuing || rules.alwaysTranslate.includes(host)) return "translate";
 	if (pageLang == null || !input.offerEnabled) return "none";
 	if (rules.neverOffer.includes(host) || rules.neverOfferLangs.includes(pageLang)) return "none";
 	return "offer";
