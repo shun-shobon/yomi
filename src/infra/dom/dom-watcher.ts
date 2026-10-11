@@ -11,6 +11,8 @@ export interface DomWatcherHandlers {
 
 export class DomWatcher {
 	private mo: MutationObserver | null = null;
+	private rootMo: MutationObserver | null = null;
+	private body: HTMLElement | null = null;
 	private readonly dirty = new Set<Element>();
 	private readonly hidden = new Set<Element>();
 	private visibilityChanged = false;
@@ -20,21 +22,38 @@ export class DomWatcher {
 
 	start() {
 		this.mo = new MutationObserver((records) => this.onMutations(records));
-		this.mo.observe(document.body, {
+		this.observeBody(document.body);
+		// Turbo などの SPA は遷移のたびに body 要素ごと差し替えるため、外れた body を見続けないよう付け替える。
+		// <html> 全体を subtree で監視すると <head> の変化まで拾ってしまう
+		this.rootMo = new MutationObserver(() => {
+			if (document.body === this.body) return;
+			this.mo?.disconnect();
+			this.observeBody(document.body);
+			this.markDirty(document.body);
+		});
+		this.rootMo.observe(document.documentElement, { childList: true });
+	}
+
+	stop() {
+		this.rootMo?.disconnect();
+		this.rootMo = null;
+		this.mo?.disconnect();
+		this.mo = null;
+		this.body = null;
+		this.dirty.clear();
+		if (this.timer) clearTimeout(this.timer);
+		this.timer = null;
+	}
+
+	private observeBody(body: HTMLElement) {
+		this.body = body;
+		this.mo?.observe(body, {
 			childList: true,
 			characterData: true,
 			subtree: true,
 			attributes: true,
 			attributeFilter: VISIBILITY_ATTRIBUTES,
 		});
-	}
-
-	stop() {
-		this.mo?.disconnect();
-		this.mo = null;
-		this.dirty.clear();
-		if (this.timer) clearTimeout(this.timer);
-		this.timer = null;
 	}
 
 	trackHidden(el: Element) {
