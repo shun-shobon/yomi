@@ -9,7 +9,7 @@ import type { Browser } from "wxt/browser";
 // sw.evaluate に渡す関数は service worker 内で実行されるので、そこにある chrome を参照する
 declare const chrome: typeof Browser;
 
-export type ResponsesRequest = {
+type ResponsesRequest = {
 	store: boolean;
 	stream: boolean;
 	reasoning?: { effort: string };
@@ -19,7 +19,7 @@ export type ResponsesRequest = {
 
 type MockedGlobal = typeof globalThis & { __requests: ResponsesRequest[] };
 
-export const TEST_PAGE = `<!doctype html><html lang="en"><head><title>Test page</title></head><body style="font:16px/1.5 sans-serif;max-width:720px;margin:24px auto">
+const TEST_PAGE = `<!doctype html><html lang="en"><head><title>Test page</title></head><body style="font:16px/1.5 sans-serif;max-width:720px;margin:24px auto">
 <h1 id="h1">Getting started with the extension</h1>
 <p id="p1">Read the <a id="link" href="https://example.com/docs">official documentation</a> and run <code id="code">npm run build</code> to build the <b>whole</b> project.</p>
 <ul><li id="li1">First item</li><li id="li2">Second item with <em>emphasis</em></li></ul>

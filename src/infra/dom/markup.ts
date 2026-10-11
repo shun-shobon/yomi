@@ -15,7 +15,7 @@ import type { Run } from "./segmenter";
 
 /** モデル出力は HTML として解釈せず、テキストノードの生成と既存要素の複製だけで組み立てるので XSS にならない */
 
-export interface Slot {
+interface Slot {
 	texts: Text[];
 	parent: Node;
 	before: Node | null;
