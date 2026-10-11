@@ -204,16 +204,6 @@ kbd {
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
-.account-name::before {
-	content: "";
-	display: inline-block;
-	margin-right: 6px;
-	vertical-align: 1px;
-	width: 8px;
-	height: 8px;
-	border-radius: 50%;
-	background: var(--ok);
-}
 .account-status .btn {
 	flex: none;
 	white-space: nowrap;
