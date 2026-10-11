@@ -20,7 +20,7 @@ export class DomWatcher {
 
 	start() {
 		this.mo = new MutationObserver((records) => this.onMutations(records));
-		this.mo.observe(document.body, {
+		this.mo.observe(document.documentElement, {
 			childList: true,
 			characterData: true,
 			subtree: true,

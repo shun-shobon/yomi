@@ -105,3 +105,32 @@ test("常に翻訳するサイトは開いただけで翻訳する", async () =>
 	await expect.poll(() => page.textContent("#h1"), { timeout: 10_000 }).toMatch(/^JA:/u);
 	await page.close();
 });
+
+test.each([
+	[
+		"本文を書き換える",
+		() => {
+			history.pushState(null, "", "/spa-next");
+			document.querySelector("#h1")!.textContent = "Next page heading";
+		},
+	],
+	[
+		"body を差し替える",
+		() => {
+			history.pushState(null, "", "/spa-next");
+			const body = document.createElement("body");
+			body.innerHTML = '<h1 id="h1">Next page heading</h1>';
+			document.documentElement.replaceChild(body, document.body);
+		},
+	],
+])("翻訳中のタブで SPA が%s遷移をしても、移った先を翻訳する", async (_, navigate) => {
+	const page = await ext.openTestPage();
+	await ext.sendToTab({ type: "page:translate" });
+	await expect.poll(() => page.textContent("#h1"), { timeout: 10_000 }).toMatch(/^JA:/u);
+
+	await page.evaluate(navigate);
+	await expect
+		.poll(() => page.textContent("#h1"), { timeout: 10_000 })
+		.toBe("JA:NEXT PAGE HEADING");
+	await page.close();
+});
