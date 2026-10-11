@@ -15,6 +15,7 @@ pnpm typecheck
 pnpm test       # vitest
 pnpm lint       # oxlint（type-aware）。レイヤーの依存方向も検査する
 pnpm format     # oxfmt。CI 向けの検査は pnpm format:check
+pnpm knip       # 未使用のファイル・export・依存を検出する
 ```
 
 アイコンは `src/assets/icon.svg` を編集し、`public/icon/` の PNG を書き出し直す（Chromium は E2E と同じく `CHROMIUM_PATH` で指定する）。
@@ -70,7 +71,7 @@ entrypoints → ui → usecases → infra → domain
 - ユニットテストは対象ファイルと同じ場所に `*.test.ts` で置く（`pnpm test`）。
 - E2E は `e2e/` に置き、Vitest の `e2e` プロジェクトで動かす。Vitest の設定は `vitest.config.ts` の `test.projects` に集約し、設定ファイルを増やさない。非同期の結果は固定時間待たず `expect.poll` で待つ。
 - バグを直すときは、修正前に失敗するテストを先に足す。
-- 変更後は `pnpm format`、`pnpm lint`、`pnpm typecheck`、`pnpm test` を通す。翻訳の流れやページ上の UI に触れた場合は E2E も実行する。
+- 変更後は `pnpm format`、`pnpm lint`、`pnpm typecheck`、`pnpm knip`、`pnpm test` を通す。翻訳の流れやページ上の UI に触れた場合は E2E も実行する。
 
 ### E2E テスト
 

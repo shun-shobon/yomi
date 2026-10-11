@@ -11,7 +11,7 @@ export interface Overlay {
 	hideOffer(): void;
 }
 
-export interface OverlayAction {
+interface OverlayAction {
 	label: string;
 	onClick: () => void;
 }

@@ -50,6 +50,19 @@ jobs:
       - name: Run | Typecheck
         run: pnpm run typecheck
 
+  knip:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Setup | Checkout
+        uses: actions/checkout@v7.0.1
+
+      - name: Setup | Development environment
+        uses: $/.github/actions/setup
+
+      - name: Run | Knip
+        run: pnpm run knip
+
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -93,7 +106,7 @@ jobs:
           if-no-files-found: ignore
 
   status-check:
-    needs: [format, lint, typecheck, test, e2e]
+    needs: [format, lint, typecheck, knip, test, e2e]
     if: ${{ always() }}
     runs-on: ubuntu-slim
     timeout-minutes: 5
