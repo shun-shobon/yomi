@@ -1,9 +1,9 @@
 {
-  "extends": ["./.wxt/tsconfig.json", "@tsconfig/strictest/tsconfig.json"],
-  "compilerOptions": {
-    "jsx": "preserve",
-    "jsxImportSource": "solid-js",
-    "exactOptionalPropertyTypes": false,
-    "verbatimModuleSyntax": true
-  }
+	"extends": ["./.wxt/tsconfig.json", "@tsconfig/strictest/tsconfig.json"],
+	"compilerOptions": {
+		"jsx": "preserve",
+		"jsxImportSource": "solid-js",
+		"exactOptionalPropertyTypes": false,
+		"verbatimModuleSyntax": true
+	}
 }

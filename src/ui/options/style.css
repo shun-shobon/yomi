@@ -1,74 +1,74 @@
 html,
 body {
-  background: var(--bg);
+	background: var(--bg);
 }
 .page {
-  max-width: 680px;
-  margin: 0 auto;
-  padding: 40px 20px 64px;
+	max-width: 680px;
+	margin: 0 auto;
+	padding: 40px 20px 64px;
 }
 h1 {
-  margin: 0 0 24px;
-  font-size: 26px;
-  letter-spacing: 0.02em;
-  color: var(--accent);
+	margin: 0 0 24px;
+	font-size: 26px;
+	letter-spacing: 0.02em;
+	color: var(--accent);
 }
 .section {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px 20px;
-  margin-bottom: 16px;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	padding: 18px 20px;
+	margin-bottom: 16px;
 }
 .section h2 {
-  margin: 0 0 12px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  color: var(--muted);
+	margin: 0 0 12px;
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	color: var(--muted);
 }
 .section p {
-  margin: 0;
+	margin: 0;
 }
 .row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
 }
 .grow {
-  flex: 1;
-  min-width: 180px;
+	flex: 1;
+	min-width: 180px;
 }
 .stack {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
 }
 .field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
 }
 .field select {
-  max-width: 360px;
+	max-width: 360px;
 }
 .usage {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 12px;
-  font-size: 13px;
+	width: 100%;
+	border-collapse: collapse;
+	margin-bottom: 12px;
+	font-size: 13px;
 }
 .usage th {
-  text-align: left;
-  font-weight: 600;
-  white-space: nowrap;
-  padding: 6px 16px 6px 0;
-  vertical-align: top;
+	text-align: left;
+	font-weight: 600;
+	white-space: nowrap;
+	padding: 6px 16px 6px 0;
+	vertical-align: top;
 }
 .usage td {
-  padding: 6px 0;
+	padding: 6px 0;
 }
 .usage tr + tr {
-  border-top: 1px solid var(--border);
+	border-top: 1px solid var(--border);
 }
