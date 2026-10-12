@@ -3,6 +3,7 @@
 	"version": "0.2.3",
 	"private": true,
 	"description": "ChatGPT サブスクリプションで Web ページ全体や選択テキストを翻訳する Chrome 拡張",
+	"license": "MIT",
 	"type": "module",
 	"scripts": {
 		"build": "wxt build",
