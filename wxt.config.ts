@@ -8,7 +8,7 @@ export default defineConfig({
 		name: "Yomi",
 		description: "ChatGPT サブスクリプションで Web ページ全体や選択テキストを翻訳します。",
 		minimum_chrome_version: "140",
-		permissions: ["storage", "contextMenus"],
+		permissions: ["storage", "contextMenus", "webNavigation"],
 		host_permissions: [
 			"https://auth.openai.com/*",
 			"https://api.openai.com/*",

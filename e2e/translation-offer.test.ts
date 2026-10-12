@@ -14,6 +14,17 @@ beforeAll(async () => {
 // カードを出すまでオーバーレイの host 要素は作られない
 const hasOverlay = (page: Page) => page.evaluate(() => document.querySelector("yomi-ui") != null);
 
+// page.goto はアドレスバーへの入力と同じ扱いになるので、リンクをたどる遷移はページ内からリンクを押して起こす
+async function followLink(page: Page, url: string) {
+	await page.evaluate((href) => {
+		const a = document.createElement("a");
+		a.href = href;
+		document.body.append(a);
+		a.click();
+	}, url);
+	await page.waitForURL(url);
+}
+
 // 提案カードは closed shadow DOM なので、操作は座標で行い表示はスクリーンショットで確認する
 test("翻訳先と違う言語のページで提案し、「翻訳する」で翻訳を始める", async () => {
 	const page = await ext.openTestPage();
@@ -65,7 +76,7 @@ test("翻訳したタブでページを移ると次のページも翻訳し、�
 	await ext.sendToTab({ type: "page:translate" });
 	await expect.poll(() => page.textContent("#h1"), { timeout: 10_000 }).toMatch(/^JA:/u);
 
-	await page.goto("https://test.example/second");
+	await followLink(page, "https://test.example/second");
 	await expect.poll(() => page.textContent("#h1"), { timeout: 10_000 }).toMatch(/^JA:/u);
 
 	const other = await ext.openTestPage("https://test.example/other-tab");
@@ -73,6 +84,17 @@ test("翻訳したタブでページを移ると次のページも翻訳し、�
 	expect(await ext.sendToTab({ type: "page:getState" })).toMatchObject({ active: false });
 	await page.close();
 	await other.close();
+});
+
+test("翻訳したタブでも、アドレスバーから移った先は翻訳せずに提案する", async () => {
+	const page = await ext.openTestPage("https://test.example/first");
+	await ext.sendToTab({ type: "page:translate" });
+	await expect.poll(() => page.textContent("#h1"), { timeout: 10_000 }).toMatch(/^JA:/u);
+
+	await page.goto("https://test.example/second");
+	await expect.poll(() => hasOverlay(page)).toBe(true);
+	expect(await ext.sendToTab({ type: "page:getState" })).toMatchObject({ active: false });
+	await page.close();
 });
 
 test("翻訳したタブでもリロードすれば翻訳せずに提案する", async () => {
@@ -92,7 +114,7 @@ test("翻訳を止めたタブでは、ページを移っても翻訳しない",
 	await expect.poll(() => page.textContent("#h1"), { timeout: 10_000 }).toMatch(/^JA:/u);
 	await ext.sendToTab({ type: "page:stop" });
 
-	await page.goto("https://test.example/second");
+	await followLink(page, "https://test.example/second");
 	await expect.poll(() => hasOverlay(page)).toBe(true);
 	expect(await ext.sendToTab({ type: "page:getState" })).toMatchObject({ active: false });
 	await page.close();

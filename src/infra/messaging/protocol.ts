@@ -53,8 +53,8 @@ export const BACKGROUND_API = {
 		}),
 		v.void(),
 	),
-	"tab:enterPage": endpoint(
-		v.object({ reloaded: v.boolean() }),
+	"tab:getState": endpoint(
+		v.void(),
 		v.object({ offerDismissed: v.boolean(), translating: v.boolean() }),
 	),
 	"tab:setTranslating": endpoint(v.object({ translating: v.boolean() }), v.void()),
