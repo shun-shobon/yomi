@@ -11,10 +11,8 @@ import type { PageTranslator } from "./page-translator";
 const deps = vi.hoisted(() => ({
 	detectPageLanguage: vi.fn<() => Promise<string | null>>(),
 	callBackground: vi.fn(),
-	isReload: vi.fn<() => boolean>(),
 }));
 vi.mock("@/infra/dom/page-language", () => ({ detectPageLanguage: deps.detectPageLanguage }));
-vi.mock("@/infra/dom/navigation", () => ({ isReload: deps.isReload }));
 vi.mock("@/infra/messaging/background-client", () => ({ callBackground: deps.callBackground }));
 
 function setup({
@@ -27,7 +25,7 @@ function setup({
 		switch (method) {
 			case "auth:getState":
 				return Promise.resolve({ signedIn, email: null });
-			case "tab:enterPage":
+			case "tab:getState":
 				return Promise.resolve({ offerDismissed: dismissed, translating });
 			default:
 				return Promise.resolve();
@@ -63,7 +61,6 @@ beforeEach(() => {
 	fakeBrowser.reset();
 	vi.stubGlobal("location", { hostname: "example.com" });
 	deps.detectPageLanguage.mockResolvedValue("en-US");
-	deps.isReload.mockReturnValue(false);
 });
 
 describe("offerPageTranslation", () => {
@@ -104,15 +101,6 @@ describe("offerPageTranslation", () => {
 		await ctx.run();
 
 		expect(ctx.page.start).toHaveBeenCalled();
-	});
-
-	it("リロードしたかどうかをタブの記録に伝える", async () => {
-		deps.isReload.mockReturnValue(true);
-		const ctx = setup();
-
-		await ctx.run();
-
-		expect(deps.callBackground).toHaveBeenCalledWith("tab:enterPage", { reloaded: true });
 	});
 
 	it("このタブで翻訳を続けているなら、提案せずに翻訳を始める", async () => {

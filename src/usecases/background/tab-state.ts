@@ -1,3 +1,5 @@
+import { continuesTranslation } from "@/domain/navigation";
+import type { Navigation } from "@/domain/navigation";
 import type { StorageItem } from "@/infra/storage/item";
 import { offerDismissedTabsItem, translatingTabsItem } from "@/infra/storage/tab-state";
 
@@ -21,17 +23,21 @@ async function setIncluded(item: StorageItem<number[]>, tabId: number, included:
 	await item.setValue(included ? [...tabs, tabId] : tabs.filter((id) => id !== tabId));
 }
 
-export function enterPage(tabId: number, { reloaded }: { reloaded: boolean }) {
+export function getTabPageState(tabId: number) {
 	return serialize(async (): Promise<TabPageState> => {
-		if (reloaded) {
-			await setIncluded(offerDismissedTabsItem, tabId, false);
-			await setIncluded(translatingTabsItem, tabId, false);
-		}
 		const [dismissed, translating] = await Promise.all([
 			offerDismissedTabsItem.getValue(),
 			translatingTabsItem.getValue(),
 		]);
 		return { offerDismissed: dismissed.includes(tabId), translating: translating.includes(tabId) };
+	});
+}
+
+/** content script が状態を読むより先に届くので、ここで遷移の種類に応じて記録を消しておく */
+export function commitNavigation(tabId: number, nav: Navigation) {
+	return serialize(async () => {
+		if (nav.transitionType === "reload") await setIncluded(offerDismissedTabsItem, tabId, false);
+		if (!continuesTranslation(nav)) await setIncluded(translatingTabsItem, tabId, false);
 	});
 }
 

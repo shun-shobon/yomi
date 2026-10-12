@@ -6,7 +6,6 @@ import {
 	withAlwaysTranslate,
 	withRule,
 } from "@/domain/site-rules";
-import { isReload } from "@/infra/dom/navigation";
 import { detectPageLanguage } from "@/infra/dom/page-language";
 import { callBackground } from "@/infra/messaging/background-client";
 import { getSiteRules, updateSiteRules } from "@/infra/storage/site-rules";
@@ -39,7 +38,7 @@ export async function offerPageTranslation(deps: {
 		canTranslate(),
 		getSiteRules(),
 		detectPageLanguage(),
-		callBackground("tab:enterPage", { reloaded: isReload() }).catch(() => ({
+		callBackground("tab:getState").catch(() => ({
 			offerDismissed: false,
 			translating: false,
 		})),

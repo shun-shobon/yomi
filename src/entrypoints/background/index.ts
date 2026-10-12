@@ -22,9 +22,10 @@ import {
 	startSignIn,
 } from "@/usecases/background/auth";
 import {
+	commitNavigation,
 	dismissOffer,
-	enterPage,
 	forgetTab,
+	getTabPageState,
 	setTranslating,
 } from "@/usecases/background/tab-state";
 import { listModels, translate } from "@/usecases/background/translate";
@@ -51,6 +52,10 @@ export default defineBackground(() => {
 	browser.tabs.onRemoved.addListener((tabId) => {
 		void handleTabRemoved(tabId);
 		void forgetTab(tabId);
+	});
+
+	browser.webNavigation.onCommitted.addListener((details) => {
+		if (details.frameId === 0) void commitNavigation(details.tabId, details);
 	});
 
 	browser.runtime.onInstalled.addListener(({ reason }) => {
@@ -85,10 +90,10 @@ export default defineBackground(() => {
 			"open:shortcuts": openShortcutsPage,
 			"cache:lookup": lookupPageTranslations,
 			"cache:store": storePageTranslations,
-			"tab:enterPage": async (params, { tabId }) =>
+			"tab:getState": async (_, { tabId }) =>
 				tabId == null
 					? { offerDismissed: false, translating: false }
-					: await enterPage(tabId, params),
+					: await getTabPageState(tabId),
 			"tab:setTranslating": async ({ translating }, { tabId }) => {
 				if (tabId != null) await setTranslating(tabId, translating);
 			},
