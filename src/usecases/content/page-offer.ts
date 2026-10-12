@@ -13,6 +13,7 @@ import { getSiteRules, updateSiteRules } from "@/infra/storage/site-rules";
 
 import type { Overlay } from "./overlay";
 import type { PageTranslator } from "./page-translator";
+import { startPageTranslation } from "./start-page";
 
 /** サインイン前に翻訳を始めると、ページを開くたびにエラーを出してしまうので何もしない */
 async function canTranslate(): Promise<boolean> {
@@ -54,8 +55,9 @@ export async function offerPageTranslation(deps: {
 		offerEnabled: settings.offerTranslation,
 		continuing: tab.translating,
 	});
+	const start = () => startPageTranslation(overlay, page);
 	if (decision === "translate") {
-		page.start();
+		start();
 		return;
 	}
 	if (decision === "none" || pageLang == null || tab.offerDismissed) return;
@@ -64,12 +66,12 @@ export async function offerPageTranslation(deps: {
 	overlay.showOffer({
 		message: `このページは${label}です。翻訳しますか？`,
 		actions: [
-			{ label: "翻訳する", onClick: () => page.start() },
+			{ label: "翻訳する", onClick: start },
 			{
 				label: "このサイトは常に翻訳",
 				onClick: () => {
 					void updateSiteRules((r) => withAlwaysTranslate(r, host, true));
-					page.start();
+					start();
 				},
 			},
 		],

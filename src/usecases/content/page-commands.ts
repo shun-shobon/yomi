@@ -4,6 +4,7 @@ import type { ContentMessage } from "@/infra/messaging/protocol";
 import type { Overlay } from "./overlay";
 import type { PageTranslator } from "./page-translator";
 import type { SelectionTranslator } from "./selection-translator";
+import { startPageTranslation } from "./start-page";
 
 export function createPageCommands(deps: {
 	overlay: Overlay;
@@ -12,12 +13,7 @@ export function createPageCommands(deps: {
 }): (message: ContentMessage) => PageState {
 	const { overlay, page, selection } = deps;
 
-	const startPage = () => {
-		overlay.hideOffer();
-		const wasActive = page.isActive;
-		page.start();
-		if (!wasActive) overlay.toast("ページの翻訳を開始しました");
-	};
+	const startPage = () => startPageTranslation(overlay, page);
 
 	const run = (message: ContentMessage): void => {
 		switch (message.type) {

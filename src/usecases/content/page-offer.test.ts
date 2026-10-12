@@ -34,7 +34,11 @@ function setup({
 		}
 	});
 	const page = { isActive: active, start: vi.fn() };
-	const overlay = { showOffer: vi.fn<(offer: OfferOptions) => void>() };
+	const overlay = {
+		showOffer: vi.fn<(offer: OfferOptions) => void>(),
+		hideOffer: vi.fn(),
+		toast: vi.fn(),
+	};
 	const settings = withDefaults({ targetLang: "ja" });
 	const run = () =>
 		offerPageTranslation({
@@ -72,6 +76,19 @@ describe("offerPageTranslation", () => {
 		expect(ctx.page.start).not.toHaveBeenCalled();
 	});
 
+	it.each(["翻訳する", "このサイトは常に翻訳"])(
+		"提案の「%s」で翻訳を始めるとトーストを出す",
+		async (label) => {
+			const ctx = setup();
+			await ctx.run();
+
+			ctx.click(ctx.offer().actions, label);
+
+			expect(ctx.page.start).toHaveBeenCalled();
+			expect(ctx.overlay.toast).toHaveBeenCalledWith("ページの翻訳を開始しました");
+		},
+	);
+
 	it("このタブで提案を閉じたことがあれば提案しない", async () => {
 		const ctx = setup({ dismissed: true });
 
@@ -104,6 +121,7 @@ describe("offerPageTranslation", () => {
 		await ctx.run();
 
 		expect(ctx.page.start).toHaveBeenCalled();
+		expect(ctx.overlay.toast).toHaveBeenCalledWith("ページの翻訳を開始しました");
 		expect(ctx.overlay.showOffer).not.toHaveBeenCalled();
 	});
 
@@ -141,6 +159,7 @@ describe("offerPageTranslation", () => {
 		await ctx.run();
 
 		expect(ctx.page.start).toHaveBeenCalled();
+		expect(ctx.overlay.toast).toHaveBeenCalledWith("ページの翻訳を開始しました");
 		expect(ctx.overlay.showOffer).not.toHaveBeenCalled();
 	});
 
