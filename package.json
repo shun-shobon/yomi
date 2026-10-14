@@ -29,7 +29,7 @@
 		"valibot": "1.5.0"
 	},
 	"devDependencies": {
-		"@shun-shobon/oxfmt-config": "7.0.0",
+		"@shun-shobon/oxfmt-config": "7.1.0",
 		"@shun-shobon/oxlint-config": "7.0.0",
 		"@tsconfig/strictest": "2.0.8",
 		"happy-dom": "20.14.6",
