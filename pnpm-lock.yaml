@@ -183,8 +183,8 @@ importers:
         version: 1.5.0(typescript@7.0.2)
     devDependencies:
       '@shun-shobon/oxfmt-config':
-        specifier: 7.0.0
-        version: 7.0.0(oxfmt@0.72.0)
+        specifier: 7.1.0
+        version: 7.1.0(oxfmt@0.72.0)
       '@shun-shobon/oxlint-config':
         specifier: 7.0.0
         version: 7.0.0(oxlint-tsgolint@7.0.2003)(oxlint@1.87.0(oxlint-tsgolint@7.0.2003))
@@ -957,8 +957,8 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
-  '@shun-shobon/oxfmt-config@7.0.0':
-    resolution: {integrity: sha512-2v5P42MQ8j6/7v6oZf+xtTQhpKbKl2EKSbLdn4AeVT0frdQyzjQVac7M7xAqNx/0yQYfuZ52dc72v7QjR1jwng==}
+  '@shun-shobon/oxfmt-config@7.1.0':
+    resolution: {integrity: sha512-er7Is2EzERWW7PwQE4RC4OE5+2IHFfOpiSt+2iHEG4VEBvRLm0acxGJAHBV0Wx06BQ6t+eHaV2L++tGbqFq/nw==}
     peerDependencies:
       oxfmt: ^0.72.0
 
@@ -2573,7 +2573,7 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
-  '@shun-shobon/oxfmt-config@7.0.0(oxfmt@0.72.0)':
+  '@shun-shobon/oxfmt-config@7.1.0(oxfmt@0.72.0)':
     dependencies:
       local-pkg: 1.2.1
       oxfmt: 0.72.0
