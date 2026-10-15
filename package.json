@@ -32,7 +32,7 @@
 		"@shun-shobon/oxfmt-config": "7.1.0",
 		"@shun-shobon/oxlint-config": "7.1.0",
 		"@tsconfig/strictest": "2.0.8",
-		"happy-dom": "20.14.6",
+		"happy-dom": "21.0.1",
 		"knip": "6.41.0",
 		"oxfmt": "0.72.0",
 		"oxlint": "1.87.0",
