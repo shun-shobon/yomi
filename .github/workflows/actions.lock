@@ -12,7 +12,7 @@ workflows:
         - 'actions/cache@v6.1.0'
         - 'actions/checkout@v7.0.1'
         - 'jdx/mise-action@v5.1.2'
-        - 'shun-shobon/easy-release@v0.2.0'
+        - 'shun-shobon/easy-release@v0.3.0'
 dependencies:
     'actions/cache@v6.1.0':
         ref: 'v6.1.0'
@@ -34,8 +34,8 @@ dependencies:
         commit: 'sha1-08ae2a091c038e1e05ec6f5115dc5c69d5a2a6b8'
         owner_id: 216188
         repo_id: 738284564
-    'shun-shobon/easy-release@v0.2.0':
-        ref: 'v0.2.0'
-        commit: 'sha1-6fb967fe0de66ae629160ba29b180e7a424f549d'
+    'shun-shobon/easy-release@v0.3.0':
+        ref: 'v0.3.0'
+        commit: 'sha1-4dd5d025b5fb6d04d5399bbcf61d7d691bda539c'
         owner_id: 37236438
         repo_id: 1403913954
