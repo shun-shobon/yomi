@@ -43,7 +43,7 @@ jobs:
         uses: $/.github/actions/setup
 
       - name: Run | Create Release Pull Request
-        uses: shun-shobon/easy-release@v0.2.0
+        uses: shun-shobon/easy-release@v0.3.0
         with:
           mode: prepare
           release-type: ${{ inputs.release_type }}
@@ -67,7 +67,7 @@ jobs:
 
       - name: Run | Create Draft Release
         id: draft
-        uses: shun-shobon/easy-release@v0.2.0
+        uses: shun-shobon/easy-release@v0.3.0
         with:
           mode: draft
 
@@ -111,7 +111,7 @@ jobs:
           ref: ${{ needs.draft.outputs.commit }}
 
       - name: Run | Publish Release
-        uses: shun-shobon/easy-release@v0.2.0
+        uses: shun-shobon/easy-release@v0.3.0
         with:
           mode: publish
           release-id: ${{ needs.draft.outputs.release-id }}
