@@ -34,7 +34,7 @@
 		"@tsconfig/strictest": "2.0.8",
 		"happy-dom": "20.14.6",
 		"knip": "6.41.0",
-		"oxfmt": "0.72.0",
+		"oxfmt": "0.73.0",
 		"oxlint": "1.87.0",
 		"oxlint-tsgolint": "7.0.2004",
 		"playwright-core": "1.64.0",
