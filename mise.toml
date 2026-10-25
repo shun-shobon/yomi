@@ -1,5 +1,5 @@
 [tools]
-"github:github/gh-actions-lock" = { version = "v0.2.0", bin = "gh-actions-lock" }
+"github:github/gh-actions-lock" = { version = "v0.3.0", bin = "gh-actions-lock" }
 node = "26.11.1"
 pnpm = "12.15.0"
 
