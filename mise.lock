@@ -3,50 +3,50 @@
 lockfile_version = 3
 
 [[tools."github:github/gh-actions-lock"]]
-version = "0.3.0"
+version = "0.4.0"
 backend = "github:github/gh-actions-lock"
-specifiers = ["v0.3.0"]
+specifiers = ["v0.4.0"]
 
 [tools."github:github/gh-actions-lock"."platforms.linux-arm64"]
-checksum = "sha256:ad978d58be9d3570c6f556c5c86e84248e922f3adf022e153073bbfea8d1bbef"
-url = "https://github.com/github/gh-actions-lock/releases/download/v0.3.0/linux-arm64"
-url_api = "https://api.github.com/repos/github/gh-actions-lock/releases/assets/666364946"
+checksum = "sha256:7de0e440274688b8ddcbb6f44ce686aaebbe17a54a3052ebc11d4bae9f641fa2"
+url = "https://github.com/github/gh-actions-lock/releases/download/v0.4.0/linux-arm64"
+url_api = "https://api.github.com/repos/github/gh-actions-lock/releases/assets/670717950"
 provenance = "github-attestations"
 
 [tools."github:github/gh-actions-lock"."platforms.linux-arm64-musl"]
-checksum = "sha256:ad978d58be9d3570c6f556c5c86e84248e922f3adf022e153073bbfea8d1bbef"
-url = "https://github.com/github/gh-actions-lock/releases/download/v0.3.0/linux-arm64"
-url_api = "https://api.github.com/repos/github/gh-actions-lock/releases/assets/666364946"
+checksum = "sha256:7de0e440274688b8ddcbb6f44ce686aaebbe17a54a3052ebc11d4bae9f641fa2"
+url = "https://github.com/github/gh-actions-lock/releases/download/v0.4.0/linux-arm64"
+url_api = "https://api.github.com/repos/github/gh-actions-lock/releases/assets/670717950"
 provenance = "github-attestations"
 
 [tools."github:github/gh-actions-lock"."platforms.linux-x64"]
-checksum = "sha256:15810767a8cd28d389f0942e3ce515ac0008c3f65301c3834fd4c046d4bda497"
-url = "https://github.com/github/gh-actions-lock/releases/download/v0.3.0/linux-amd64"
-url_api = "https://api.github.com/repos/github/gh-actions-lock/releases/assets/666364939"
+checksum = "sha256:f9da98f2a6e9e0ae77deadf9a2319a8a86bb002b541cc3203b247cc59fb04842"
+url = "https://github.com/github/gh-actions-lock/releases/download/v0.4.0/linux-amd64"
+url_api = "https://api.github.com/repos/github/gh-actions-lock/releases/assets/670717949"
 provenance = "github-attestations"
 
 [tools."github:github/gh-actions-lock"."platforms.linux-x64-musl"]
-checksum = "sha256:15810767a8cd28d389f0942e3ce515ac0008c3f65301c3834fd4c046d4bda497"
-url = "https://github.com/github/gh-actions-lock/releases/download/v0.3.0/linux-amd64"
-url_api = "https://api.github.com/repos/github/gh-actions-lock/releases/assets/666364939"
+checksum = "sha256:f9da98f2a6e9e0ae77deadf9a2319a8a86bb002b541cc3203b247cc59fb04842"
+url = "https://github.com/github/gh-actions-lock/releases/download/v0.4.0/linux-amd64"
+url_api = "https://api.github.com/repos/github/gh-actions-lock/releases/assets/670717949"
 provenance = "github-attestations"
 
 [tools."github:github/gh-actions-lock"."platforms.macos-arm64"]
-checksum = "sha256:74042c332e2396b6b3d9011fd103f164658e2108f5f25fc5e4b4207d832e3158"
-url = "https://github.com/github/gh-actions-lock/releases/download/v0.3.0/darwin-arm64"
-url_api = "https://api.github.com/repos/github/gh-actions-lock/releases/assets/666364905"
+checksum = "sha256:5934d40f8cc78ed3e9be15ba43fc82c2432cbf3aa088107f923878df07099bec"
+url = "https://github.com/github/gh-actions-lock/releases/download/v0.4.0/darwin-arm64"
+url_api = "https://api.github.com/repos/github/gh-actions-lock/releases/assets/670717906"
 provenance = "github-attestations"
 
 [tools."github:github/gh-actions-lock"."platforms.macos-x64"]
-checksum = "sha256:9282f9df71d27b33a3ee4717a74b3cfab67232bd8431b68368dbc77abab88679"
-url = "https://github.com/github/gh-actions-lock/releases/download/v0.3.0/darwin-amd64"
-url_api = "https://api.github.com/repos/github/gh-actions-lock/releases/assets/666364899"
+checksum = "sha256:6b81e2050e0fcd1953649886231b2d19f8861428272d86067a59c22bd4b75c76"
+url = "https://github.com/github/gh-actions-lock/releases/download/v0.4.0/darwin-amd64"
+url_api = "https://api.github.com/repos/github/gh-actions-lock/releases/assets/670717905"
 provenance = "github-attestations"
 
 [tools."github:github/gh-actions-lock"."platforms.windows-x64"]
-checksum = "sha256:4f79ecedcec75c3d916c230605867ff2d6598d0abaf621f5c5facdc3fc6b2f2d"
-url = "https://github.com/github/gh-actions-lock/releases/download/v0.3.0/windows-amd64.exe"
-url_api = "https://api.github.com/repos/github/gh-actions-lock/releases/assets/666364973"
+checksum = "sha256:a64179817d7605d705e805475a09b5ef0be12a3469477d8607350f1f3cc26d8b"
+url = "https://github.com/github/gh-actions-lock/releases/download/v0.4.0/windows-amd64.exe"
+url_api = "https://api.github.com/repos/github/gh-actions-lock/releases/assets/670717964"
 provenance = "github-attestations"
 
 [[tools.node]]
