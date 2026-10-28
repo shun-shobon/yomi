@@ -173,8 +173,8 @@ importers:
         specifier: 8.0.4
         version: 8.0.4
       openai:
-        specifier: 7.42.0
-        version: 7.42.0(ws@8.22.0)(zod@4.6.5)
+        specifier: 7.43.0
+        version: 7.43.0(ws@8.22.0)(zod@4.6.5)
       solid-js:
         specifier: 1.9.17
         version: 1.9.17
@@ -1635,8 +1635,8 @@ packages:
     resolution: {integrity: sha512-7x81NCL719oNbsq/3mh+hVrAWmFuEYUqrq/Iw3kUzH8ReypT9QQ0BLoJS7/G9k6N81XjW4qHWtjWwe/9eLy1EQ==}
     engines: {node: '>=12'}
 
-  openai@7.42.0:
-    resolution: {integrity: sha512-RziM2bxp1k24mTLtunije+OOCGRC+qtK0YNYPWkrTdKJLJ65WYW+rPYxlLbnBzU4WwINFCFa0OjCgbsX+fif/w==}
+  openai@7.43.0:
+    resolution: {integrity: sha512-fBjKaDFG8AVfkGYoIo/E+xNRlNk7nx2nQ9GoQtXfePzPjg4QcT6nejkhXayJnEwSpFGfthOrAPI2KXj5yAqg9A==}
     engines: {node: '>=22.0.0'}
     peerDependencies:
       '@aws-sdk/credential-provider-node': '>=3.972.0 <4'
@@ -3138,7 +3138,7 @@ snapshots:
       is-docker: 2.2.1
       is-wsl: 2.2.0
 
-  openai@7.42.0(ws@8.22.0)(zod@4.6.5):
+  openai@7.43.0(ws@8.22.0)(zod@4.6.5):
     optionalDependencies:
       ws: 8.22.0
       zod: 4.6.5
