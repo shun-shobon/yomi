@@ -5,7 +5,7 @@ runs:
   using: composite
   steps:
     - name: Setup | mise
-      uses: jdx/mise-action@v5.2.3
+      uses: jdx/mise-action@v5.2.4
 
     - name: Setup | Resolve pnpm store
       id: pnpm-store
