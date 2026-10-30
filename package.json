@@ -24,7 +24,7 @@
 	"dependencies": {
 		"entities": "8.1.0",
 		"idb": "8.0.4",
-		"openai": "7.44.0",
+		"openai": "7.45.1",
 		"solid-js": "1.9.17",
 		"valibot": "1.5.0"
 	},
