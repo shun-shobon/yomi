@@ -1,7 +1,7 @@
 [tools]
 "github:github/gh-actions-lock" = { version = "v0.4.0", bin = "gh-actions-lock" }
 node = "26.11.1"
-pnpm = "12.15.0"
+pnpm = "12.16.1"
 
 [settings]
 lockfile = true
