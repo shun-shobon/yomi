@@ -43,5 +43,5 @@
 		"vitest": "5.1.0",
 		"wxt": "0.21.5"
 	},
-	"packageManager": "pnpm@12.17.0"
+	"packageManager": "pnpm@12.18.0"
 }
