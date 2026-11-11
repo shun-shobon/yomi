@@ -22,7 +22,7 @@
 		"zip": "wxt zip"
 	},
 	"dependencies": {
-		"entities": "8.1.0",
+		"entities": "9.0.0",
 		"idb": "8.0.4",
 		"openai": "7.51.0",
 		"solid-js": "1.9.18",
