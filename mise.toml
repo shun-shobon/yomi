@@ -1,6 +1,6 @@
 [tools]
 "github:github/gh-actions-lock" = { version = "v0.4.1", bin = "gh-actions-lock" }
-node = "26.13.0"
+node = "26.13.1"
 pnpm = "12.18.0"
 
 [settings]
