@@ -189,8 +189,8 @@ importers:
         specifier: 7.1.0
         version: 7.1.0(oxlint-tsgolint@7.0.2006)(oxlint@1.93.0(oxlint-tsgolint@7.0.2006))
       '@tsconfig/strictest':
-        specifier: 2.0.8
-        version: 2.0.8
+        specifier: 2.0.9
+        version: 2.0.9
       happy-dom:
         specifier: 20.14.6
         version: 20.14.6
@@ -975,8 +975,8 @@ packages:
     resolution: {integrity: sha512-kkKYPb4k/6kRdnESt77B5vJrrYnYHIYczwv0P1c+tfN/IWEx3KZeKEHoUq7sImIyBEXWdA2uakIroD9pmRJziQ==}
     engines: {node: '>=22.0.0'}
 
-  '@tsconfig/strictest@2.0.8':
-    resolution: {integrity: sha512-XnQ7vNz5HRN0r88GYf1J9JJjqtZPiHt2woGJOo2dYqyHGGcd6OLGqSlBB6p1j9mpzja6Oe5BoPqWmeDx6X9rLw==}
+  '@tsconfig/strictest@2.0.9':
+    resolution: {integrity: sha512-CbwIySRXoGapLZYXqQHF15cg0wQImJa25Ynmubb7816vnHqTdQrmQlSbZxkJrrBusHLbF1kFbNVn8XtxmQ3EpQ==}
 
   '@tybys/wasm-util@0.10.4':
     resolution: {integrity: sha512-W3c4gRigFS0T/Ma4qIYF3GDAc5AQdHb1yL5znJT1Zv1YaD9Kitx656wBjvr19qbiosmZT8lWDM5BEMynUqX65A==}
@@ -2589,7 +2589,7 @@ snapshots:
 
   '@topcli/prompts@4.0.0': {}
 
-  '@tsconfig/strictest@2.0.8': {}
+  '@tsconfig/strictest@2.0.9': {}
 
   '@tybys/wasm-util@0.10.4':
     dependencies:
