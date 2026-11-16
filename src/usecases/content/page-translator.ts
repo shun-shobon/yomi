@@ -74,6 +74,7 @@ export class PageTranslator {
 		this.watcher = new DomWatcher({
 			isOwn: (node) => this.owner.has(node),
 			onTextChanged: (node) => this.onTextChanged(node),
+			onRevealed: (el) => this.onRevealed(el),
 			rescan: (roots) => {
 				for (const root of roots) this.scan(root);
 				this.prune();
@@ -234,6 +235,18 @@ export class PageTranslator {
 		const seg = this.owner.get(node);
 		if (!seg) this.watcher.markDirty(node);
 		else if (seg.classifyTextChange(node, this.showing) === "changed") this.discard(seg);
+	}
+
+	/** 隠れていたインラインは中身を伏せて訳しているので、中身だけ別に訳さず段落ごと訳し直す */
+	private onRevealed(el: Element) {
+		for (let node: Element | null = el; node; node = node.parentElement) {
+			const seg = this.owner.get(node);
+			if (seg) {
+				this.discard(seg);
+				return;
+			}
+		}
+		this.watcher.markDirty(el);
 	}
 
 	private enqueue(seg: Segment) {

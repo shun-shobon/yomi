@@ -93,26 +93,64 @@ function hasSkippedAncestor(el: Element): boolean {
 	return false;
 }
 
-export function isAtomic(el: Element): boolean {
+/** 表示状態は後から変わるので、キャッシュする isInline の判定には非表示のインラインを含めない */
+function isOpaque(el: Element): boolean {
 	return ATOMIC_TAGS.has(el.tagName) || isExcluded(el);
 }
 
-const inlineCache = new WeakMap<Element, boolean>();
+export function isAtomic(el: Element): boolean {
+	return isOpaque(el) || isHiddenInline(el);
+}
 
-function isInline(el: Element): boolean {
-	const cached = inlineCache.get(el);
-	if (cached != null) return cached;
-	const display = INLINE_TAGS.has(el.tagName) ? getComputedStyle(el).display : null;
+// getComputedStyle の戻り値は生きたオブジェクトなので、保持しておけば表示状態が変わっても今の値を読める
+const inlineStyles = new WeakMap<Element, CSSStyleDeclaration | null>();
+
+function inlineStyle(el: Element): CSSStyleDeclaration | null {
+	const cached = inlineStyles.get(el);
+	if (cached !== undefined) return cached;
+	const style = INLINE_TAGS.has(el.tagName) ? getComputedStyle(el) : null;
 	const result =
-		(display === "inline" || display === "contents") &&
-		Array.from(el.children).every((child) => isAtomic(child) || isInline(child));
-	inlineCache.set(el, result);
+		(style?.display === "inline" || style?.display === "contents") &&
+		Array.from(el.children).every((child) => isOpaque(child) || isInline(child))
+			? style
+			: null;
+	inlineStyles.set(el, result);
 	return result;
 }
 
-/** display: contents の要素は自身のボックスを持たず checkVisibility() が false になるが、子は表示されている */
+function isInline(el: Element): boolean {
+	return inlineStyle(el) != null;
+}
+
+/** 祖先のブロックは走査で表示を確かめ、隠れたインラインの中には立ち入らないので、自身の指定だけ見れば足りる */
+function isHiddenInline(el: Element): boolean {
+	const style = inlineStyle(el);
+	return (
+		style != null &&
+		(style.visibility === "hidden" || style.visibility === "collapse" || style.opacity === "0")
+	);
+}
+
+/** visibility は子孫で visible に戻せるので、子孫まで隠れる "hidden" と自身の文章だけ隠れる "ownText" を分ける */
+type Hiding = "none" | "ownText" | "hidden";
+
+function hidingOf(el: Element): Hiding {
+	if (el.checkVisibility({ visibilityProperty: true, opacityProperty: true })) {
+		// 閉じた details が隠す直下のテキストは、details 自身の表示状態には現れない
+		return el instanceof HTMLDetailsElement && !el.open ? "ownText" : "none";
+	}
+	const style = getComputedStyle(el);
+	if (style.display === "contents") {
+		// 自身のボックスを持たず checkVisibility() が常に false になるので、直下のテキストは親の状態に従う
+		const parent = el.parentElement ? hidingOf(el.parentElement) : "none";
+		if (parent === "hidden") return "hidden";
+		return parent === "none" && style.visibility === "visible" ? "none" : "ownText";
+	}
+	return el.checkVisibility({ opacityProperty: true }) ? "ownText" : "hidden";
+}
+
 export function isHidden(el: Element): boolean {
-	return !el.checkVisibility() && getComputedStyle(el).display !== "contents";
+	return hidingOf(el) !== "none";
 }
 
 // white-space-collapse と text-wrap-mode の組み合わせによっては "preserve-breaks nowrap" のような値になる
@@ -143,9 +181,16 @@ export function collectRuns(
 ): Run[] {
 	const runs: Run[] = [];
 
+	const watchHiddenInlines = (el: Element) => {
+		if (isOpaque(el)) return;
+		if (isHiddenInline(el)) onHidden(el);
+		else for (const child of el.children) watchHiddenInlines(child);
+	};
+
 	const visit = (el: Element) => {
 		if (SKIP_TAGS.has(el.tagName) || isExcluded(el)) return;
-		if (el !== document.body && isHidden(el)) {
+		const hiding = el === document.body ? "none" : hidingOf(el);
+		if (hiding === "hidden") {
 			onHidden(el);
 			return;
 		}
@@ -156,7 +201,8 @@ export function collectRuns(
 			const end = run.findLastIndex((n) => !isBlank(n));
 			const [first, ...rest] = run.slice(start, end + 1);
 			if (start !== -1 && first && hasTranslatableText(run)) {
-				runs.push({ parent: el, nodes: [first, ...rest] });
+				if (hiding === "none") runs.push({ parent: el, nodes: [first, ...rest] });
+				else onHidden(el);
 			}
 			run = [];
 		};
@@ -169,6 +215,7 @@ export function collectRuns(
 			} else if (child instanceof Element) {
 				if (isAtomic(child) || isInline(child)) {
 					run.push(child);
+					if (hiding === "none") watchHiddenInlines(child);
 				} else {
 					flush();
 					visit(child);
