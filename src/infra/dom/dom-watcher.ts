@@ -2,10 +2,12 @@ import { blockAncestor, isHidden } from "./segmenter";
 
 const RESCAN_THROTTLE_MS = 400;
 const VISIBILITY_ATTRIBUTES = ["class", "style", "hidden", "open", "aria-hidden"];
+const STYLE_SETTLED_EVENTS = ["animationend", "transitionend"];
 
 export interface DomWatcherHandlers {
 	isOwn: (node: Node) => boolean;
 	onTextChanged: (node: Text) => void;
+	onRevealed: (el: Element) => void;
 	rescan: (roots: Element[]) => void;
 }
 
@@ -27,11 +29,16 @@ export class DomWatcher {
 			attributes: true,
 			attributeFilter: VISIBILITY_ATTRIBUTES,
 		});
+		// CSS のアニメーションやトランジションで表示されたときは属性が変わらず、MutationObserver では気づけない
+		for (const type of STYLE_SETTLED_EVENTS)
+			document.addEventListener(type, this.recheckHidden, true);
 	}
 
 	stop() {
 		this.mo?.disconnect();
 		this.mo = null;
+		for (const type of STYLE_SETTLED_EVENTS)
+			document.removeEventListener(type, this.recheckHidden, true);
 		this.dirty.clear();
 		if (this.timer) clearTimeout(this.timer);
 		this.timer = null;
@@ -56,10 +63,7 @@ export class DomWatcher {
 		for (const record of records) {
 			switch (record.type) {
 				case "attributes":
-					if (this.hidden.size > 0) {
-						this.visibilityChanged = true;
-						this.scheduleRescan();
-					}
+					this.recheckHidden();
 					break;
 				case "characterData":
 					if (record.target instanceof Text) this.handlers.onTextChanged(record.target);
@@ -74,6 +78,12 @@ export class DomWatcher {
 			}
 		}
 	}
+
+	private readonly recheckHidden = () => {
+		if (this.hidden.size === 0) return;
+		this.visibilityChanged = true;
+		this.scheduleRescan();
+	};
 
 	private scheduleRescan() {
 		// 絶えず DOM が変わるページでも再スキャンが止まらないよう、タイマーは延長しない
@@ -92,7 +102,7 @@ export class DomWatcher {
 					this.hidden.delete(el);
 				} else if (!isHidden(el)) {
 					this.hidden.delete(el);
-					this.dirty.add(el);
+					this.handlers.onRevealed(el);
 				}
 			}
 		}
