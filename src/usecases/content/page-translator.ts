@@ -118,8 +118,18 @@ export class PageTranslator {
 
 	stop() {
 		if (!this.active) return;
-		this.active = false;
+		this.halt();
 		this.hooks.onActiveChange(false);
+	}
+
+	/** ページを離れるときに使う。stop() のように onActiveChange を呼ぶと、同じタブで次に開くページが翻訳を続けなくなる */
+	suspend() {
+		if (!this.active) return;
+		this.halt();
+	}
+
+	private halt() {
+		this.active = false;
 		this.watcher.stop();
 		for (const handle of this.inflight) handle.cancel();
 		this.inflight.clear();

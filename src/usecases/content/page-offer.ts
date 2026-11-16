@@ -23,27 +23,42 @@ async function canTranslate(): Promise<boolean> {
 	}
 }
 
-export async function offerPageTranslation(deps: {
+interface PageOfferDeps {
 	overlay: Overlay;
 	page: PageTranslator;
 	getSettings: () => Settings;
-}): Promise<void> {
-	const { overlay, page } = deps;
-	const host = location.hostname;
-	// file:// などホストのないページにはサイト単位のルールを当てられない
-	if (host === "") return;
+}
 
+/** 返す関数は BFCache から戻ったときにも呼び、ページをそのときのタブの状態に合わせ直す */
+export function createPageOffer(deps: PageOfferDeps): () => Promise<void> {
+	// BFCache から戻ったページの本文は訳文になっているので、検出し直すと翻訳先の言語と判定してしまう
+	let pageLanguage: Promise<string | null> | undefined;
+	return async () => {
+		const host = location.hostname;
+		// file:// などホストのないページにはサイト単位のルールを当てられない
+		if (host === "") return;
+		pageLanguage ??= detectPageLanguage();
+		await offerPageTranslation(deps, host, pageLanguage);
+	};
+}
+
+async function offerPageTranslation(
+	deps: PageOfferDeps,
+	host: string,
+	pageLanguage: Promise<string | null>,
+): Promise<void> {
+	const { overlay, page } = deps;
 	const settings = deps.getSettings();
 	const [allowed, rules, detected, tab] = await Promise.all([
 		canTranslate(),
 		getSiteRules(),
-		detectPageLanguage(),
+		pageLanguage,
 		callBackground("tab:getState").catch(() => ({
 			offerDismissed: false,
 			translating: false,
 		})),
 	]);
-	if (!allowed || page.isActive) return;
+	if (page.isActive) return;
 
 	const pageLang = detected == null ? null : pageLanguageKey(detected);
 	const decision = decidePageOffer({
@@ -55,11 +70,13 @@ export async function offerPageTranslation(deps: {
 		continuing: tab.translating,
 	});
 	const start = () => startPageTranslation(overlay, page);
-	if (decision === "translate") {
+	if (allowed && decision === "translate") {
 		start();
 		return;
 	}
-	if (decision === "none" || pageLang == null || tab.offerDismissed) return;
+	// 訳文を残すと、翻訳を止めたタブで戻ったページだけが訳されたままになる
+	if (page.hasTranslations()) page.showOriginal();
+	if (!allowed || decision === "none" || pageLang == null || tab.offerDismissed) return;
 
 	const label = languageLabel(pageLang);
 	overlay.showOffer({

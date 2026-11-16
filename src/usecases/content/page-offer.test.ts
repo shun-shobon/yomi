@@ -5,7 +5,7 @@ import { withDefaults } from "@/domain/settings";
 import { getSiteRules, updateSiteRules } from "@/infra/storage/site-rules";
 import type { OfferOptions, Overlay } from "@/usecases/content/overlay";
 
-import { offerPageTranslation } from "./page-offer";
+import { createPageOffer } from "./page-offer";
 import type { PageTranslator } from "./page-translator";
 
 const deps = vi.hoisted(() => ({
@@ -20,7 +20,14 @@ function setup({
 	active = false,
 	dismissed = false,
 	translating = false,
-}: { signedIn?: boolean; active?: boolean; dismissed?: boolean; translating?: boolean } = {}) {
+	translated = false,
+}: {
+	signedIn?: boolean;
+	active?: boolean;
+	dismissed?: boolean;
+	translating?: boolean;
+	translated?: boolean;
+} = {}) {
 	deps.callBackground.mockImplementation((method: string) => {
 		switch (method) {
 			case "auth:getState":
@@ -31,19 +38,23 @@ function setup({
 				return Promise.resolve();
 		}
 	});
-	const page = { isActive: active, start: vi.fn() };
+	const page = {
+		isActive: active,
+		start: vi.fn(),
+		hasTranslations: () => translated,
+		showOriginal: vi.fn(),
+	};
 	const overlay = {
 		showOffer: vi.fn<(offer: OfferOptions) => void>(),
 		hideOffer: vi.fn(),
 		toast: vi.fn(),
 	};
 	const settings = withDefaults({ targetLang: "ja" });
-	const run = () =>
-		offerPageTranslation({
-			page: page as unknown as PageTranslator,
-			overlay: overlay as unknown as Overlay,
-			getSettings: () => settings,
-		});
+	const run = createPageOffer({
+		page: page as unknown as PageTranslator,
+		overlay: overlay as unknown as Overlay,
+		getSettings: () => settings,
+	});
 	const offer = () => {
 		const [call] = overlay.showOffer.mock.calls;
 		if (call == null) throw new Error("提案が表示されていない");
@@ -63,7 +74,7 @@ beforeEach(() => {
 	deps.detectPageLanguage.mockResolvedValue("en-US");
 });
 
-describe("offerPageTranslation", () => {
+describe("createPageOffer", () => {
 	it("翻訳先と違う言語のページでは言語名を添えて提案する", async () => {
 		const ctx = setup();
 
@@ -120,6 +131,36 @@ describe("offerPageTranslation", () => {
 		await ctx.run();
 
 		expect(ctx.page.start).not.toHaveBeenCalled();
+	});
+
+	it("BFCache から戻ったときは、訳文から言語を検出し直さず最初の結果で判断する", async () => {
+		const ctx = setup({ translating: true });
+		await ctx.run();
+		ctx.page.start.mockClear();
+		deps.detectPageLanguage.mockResolvedValue("ja");
+
+		await ctx.run();
+
+		expect(ctx.page.start).toHaveBeenCalled();
+		expect(deps.detectPageLanguage).toHaveBeenCalledOnce();
+	});
+
+	it("このタブで翻訳を続けていないなら、訳文の残ったページを原文に戻して提案する", async () => {
+		const ctx = setup({ translated: true });
+
+		await ctx.run();
+
+		expect(ctx.page.showOriginal).toHaveBeenCalled();
+		expect(ctx.overlay.showOffer).toHaveBeenCalled();
+	});
+
+	it("このタブで翻訳を続けているなら、訳文の残ったページの翻訳を再開する", async () => {
+		const ctx = setup({ translating: true, translated: true });
+
+		await ctx.run();
+
+		expect(ctx.page.start).toHaveBeenCalled();
+		expect(ctx.page.showOriginal).not.toHaveBeenCalled();
 	});
 
 	it("提案を閉じるとタブに記録する", async () => {
