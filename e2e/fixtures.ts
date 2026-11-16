@@ -17,7 +17,10 @@ type ResponsesRequest = {
 	input: { role: string; content: string }[];
 };
 
-type MockedGlobal = typeof globalThis & { __requests: ResponsesRequest[] };
+type MockedGlobal = typeof globalThis & {
+	__requests: ResponsesRequest[];
+	__fixedTranslation: string | null;
+};
 
 const TEST_PAGE = `<!doctype html><html lang="en"><head><title>Test page</title></head><body style="font:16px/1.5 sans-serif;max-width:720px;margin:24px auto">
 <h1 id="h1">Getting started with the extension</h1>
@@ -45,7 +48,7 @@ export async function screenshot(page: Page, name: string, options?: { fullPage?
 
 export type Extension = Awaited<ReturnType<typeof launchExtension>>;
 
-export async function launchExtension() {
+export async function launchExtension({ bfcache = false }: { bfcache?: boolean } = {}) {
 	const executablePath = process.env["CHROMIUM_PATH"];
 	if (executablePath == null || executablePath === "")
 		throw new Error("CHROMIUM_PATH を指定してください");
@@ -55,6 +58,7 @@ export async function launchExtension() {
 		executablePath,
 		headless: true,
 		args: [`--disable-extensions-except=${extensionPath}`, `--load-extension=${extensionPath}`],
+		ignoreDefaultArgs: bfcache ? ["--disable-back-forward-cache"] : [],
 		viewport: { width: 1000, height: 800 },
 	});
 	const sw = context.serviceWorkers()[0] ?? (await context.waitForEvent("serviceworker"));
@@ -71,6 +75,11 @@ export async function launchExtension() {
 		requests: () => sw.evaluate(() => (globalThis as MockedGlobal).__requests),
 		setSettings: (settings: Record<string, unknown>) =>
 			sw.evaluate((s) => chrome.storage.sync.set({ settings: s }), settings),
+		/** null に戻すまで、すべての段落の訳文を text にする */
+		fixTranslation: (text: string | null) =>
+			sw.evaluate((t) => {
+				(globalThis as MockedGlobal).__fixedTranslation = t;
+			}, text),
 		setSiteRules: (rules: Record<string, string[]>) =>
 			sw.evaluate((r) => chrome.storage.sync.set({ siteRules: r }), rules),
 		openTestPage: async (url = "https://test.example/page") => {
@@ -98,15 +107,19 @@ async function installMocks() {
 	});
 	await chrome.storage.sync.set({ settings: { targetLang: "ja" } });
 
+	const mocked = globalThis as MockedGlobal;
+	mocked.__requests = [];
+	mocked.__fixedTranslation = null;
 	const fakeTranslate = (markup: string) =>
-		markup.startsWith("Click ")
+		mocked.__fixedTranslation ??
+		(markup.startsWith("Click ")
 			? // 語順が変わりタグ構造が原文と一致しないケース
 				markup.replace(/^Click (<g(\d+)>)here(<\/g\2>) now$/u, "$1HERE$3 CLICK NOW")
 			: "JA:" +
 				markup.replaceAll(
 					/(^|>)([^<]*)/gu,
 					(_, gt: string, text: string) => gt + text.toUpperCase(),
-				);
+				));
 	const sse = (events: ({ type: string } & Record<string, unknown>)[]) => {
 		const encoder = new TextEncoder();
 		return new ReadableStream({
@@ -121,8 +134,6 @@ async function installMocks() {
 			},
 		});
 	};
-	const mocked = globalThis as MockedGlobal;
-	mocked.__requests = [];
 	const realFetch = globalThis.fetch;
 	globalThis.fetch = async (url, init) => {
 		const u = url instanceof Request ? url.url : String(url);

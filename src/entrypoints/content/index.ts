@@ -9,7 +9,7 @@ import { createOverlay } from "@/ui/content/Overlay";
 import { watchHoverOriginal } from "@/usecases/content/hover-original";
 import { notifyFailure } from "@/usecases/content/notify-failure";
 import { createPageCommands } from "@/usecases/content/page-commands";
-import { offerPageTranslation, rememberPageTranslating } from "@/usecases/content/page-offer";
+import { createPageOffer, rememberPageTranslating } from "@/usecases/content/page-offer";
 import { PageTranslator } from "@/usecases/content/page-translator";
 import { SelectionTranslator } from "@/usecases/content/selection-translator";
 
@@ -50,6 +50,15 @@ export default defineContentScript({
 				sendResponse(runCommand(message));
 			},
 		);
-		void offerPageTranslation({ overlay, page, getSettings: () => settings });
+		const offer = createPageOffer({ overlay, page, getSettings: () => settings });
+		// BFCache から戻っても main() は実行し直されないので、離れる・戻るの度に状態を合わせる
+		ctx.addEventListener(window, "pagehide", () => {
+			page.suspend();
+			overlay.hideOffer();
+		});
+		ctx.addEventListener(window, "pageshow", (e) => {
+			if (e.persisted) void offer();
+		});
+		void offer();
 	},
 });
