@@ -192,8 +192,8 @@ importers:
         version: 1.5.0(typescript@7.0.2)
     devDependencies:
       '@shun-shobon/oxfmt-config':
-        specifier: 7.1.0
-        version: 7.1.0(oxfmt@0.78.0)
+        specifier: 7.1.1
+        version: 7.1.1(oxfmt@0.78.0)
       '@shun-shobon/oxlint-config':
         specifier: 7.1.0
         version: 7.1.0(oxlint-tsgolint@7.0.2007)(oxlint@1.93.0(oxlint-tsgolint@7.0.2007))
@@ -966,10 +966,10 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
-  '@shun-shobon/oxfmt-config@7.1.0':
-    resolution: {integrity: sha512-er7Is2EzERWW7PwQE4RC4OE5+2IHFfOpiSt+2iHEG4VEBvRLm0acxGJAHBV0Wx06BQ6t+eHaV2L++tGbqFq/nw==}
+  '@shun-shobon/oxfmt-config@7.1.1':
+    resolution: {integrity: sha512-oUpvVceWYioJoJNaMoKFy54rypqL4qMqeIGtBBIXERWykVDyW7vNqSWgEZSOE0MtN/y1VIOBwWCjGqnCRKpwlA==}
     peerDependencies:
-      oxfmt: ^0.72.0
+      oxfmt: ^0.72.0 || ^0.73.0 || ^0.74.0 || ^0.75.0 || ^0.76.0 || ^0.77.0 || ^0.78.0
 
   '@shun-shobon/oxlint-config@7.1.0':
     resolution: {integrity: sha512-qTF1fswJykBOt9wLQDFLPc92yjU/mH0PIkBrFNJ2JYhvi7wROgwNnkoEhaSQFNucQUW44Ml2qjDj4JR6oPCJNw==}
@@ -1589,6 +1589,10 @@ packages:
     resolution: {integrity: sha512-++gUqRDEvcnN6Zhqrr+y/CkVEHhlrR96vZn3nZZPYzMcBUyBtTKzB9NadClFIsIVSsu+3i9tfk/erqy9kAmt7Q==}
     engines: {node: '>=14'}
 
+  local-pkg@2.0.0:
+    resolution: {integrity: sha512-xvTNwM27EpU+fkLSpo33Pq/nm8m5zNf0aU/hF4W4ZM9RHQjVZa5KTmmXIzEzVsdI09NOUqj0djHhTv96sUowSQ==}
+    engines: {node: '>=20.19.0'}
+
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
 
@@ -1756,6 +1760,9 @@ packages:
 
   quansync@0.2.11:
     resolution: {integrity: sha512-AifT7QEbW9Nri4tAwR5M/uzpBuqfZf+zwaEM/QkzEjj7NBuFD2rBuy0K3dE+8wltbezDV7JMA0WfnCPYRSYbXA==}
+
+  quansync@1.0.0:
+    resolution: {integrity: sha512-5xZacEEufv3HSTPQuchrvV6soaiACMFnq1H8wkVioctoH3TRha9Sz66lOxRwPK/qZj7HPiSveih9yAyh98gvqA==}
 
   rc9@3.1.0:
     resolution: {integrity: sha512-ufjkNVzbRHKcCOmTahZkmVsyc3W+MSk3jY03m+a7tGHkIsdVMG9l10/3HvFbWkkKzY5VFp3pkRsIo/UYgmFL7Q==}
@@ -2588,9 +2595,9 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
-  '@shun-shobon/oxfmt-config@7.1.0(oxfmt@0.78.0)':
+  '@shun-shobon/oxfmt-config@7.1.1(oxfmt@0.78.0)':
     dependencies:
-      local-pkg: 1.2.1
+      local-pkg: 2.0.0
       oxfmt: 0.78.0
 
   '@shun-shobon/oxlint-config@7.1.0(oxlint-tsgolint@7.0.2007)(oxlint@1.93.0(oxlint-tsgolint@7.0.2007))':
@@ -3089,6 +3096,12 @@ snapshots:
       pkg-types: 2.3.3
       quansync: 0.2.11
 
+  local-pkg@2.0.0:
+    dependencies:
+      mlly: 1.8.2
+      pkg-types: 2.3.3
+      quansync: 1.0.0
+
   lodash.merge@4.6.2: {}
 
   lru-cache@5.1.1:
@@ -3294,6 +3307,8 @@ snapshots:
       tasuku: 2.3.0
 
   quansync@0.2.11: {}
+
+  quansync@1.0.0: {}
 
   rc9@3.1.0:
     dependencies:
