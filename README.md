@@ -22,3 +22,9 @@ ChatGPT サブスクリプション（[Sign in with ChatGPT](https://developers.
 4. 拡張のポップアップから「ChatGPT でサインイン」を押し、開いたタブでアクセスを許可する。
 
 更新するときは新しい zip を同じフォルダに展開し直し、`chrome://extensions` で再読み込みする。
+
+## プライバシー
+
+翻訳するテキストは、サインインした ChatGPT アカウントで OpenAI に送信される。開発者のサーバーは経由しない。詳しくは [プライバシーポリシー](PRIVACY.md) を参照。
+
+Yomi は OpenAI とは関係のない非公式の拡張。
