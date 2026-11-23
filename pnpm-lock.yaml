@@ -195,8 +195,8 @@ importers:
         specifier: 7.1.2
         version: 7.1.2(oxfmt@0.79.0)
       '@shun-shobon/oxlint-config':
-        specifier: 7.1.1
-        version: 7.1.1(oxlint-tsgolint@7.0.2007)(oxlint@1.94.0(oxlint-tsgolint@7.0.2007))
+        specifier: 7.1.2
+        version: 7.1.2(oxlint-tsgolint@7.0.2007)(oxlint@1.94.0(oxlint-tsgolint@7.0.2007))
       '@tsconfig/strictest':
         specifier: 2.0.9
         version: 2.0.9
@@ -971,8 +971,8 @@ packages:
     peerDependencies:
       oxfmt: '>=0.72.0 <1.0.0'
 
-  '@shun-shobon/oxlint-config@7.1.1':
-    resolution: {integrity: sha512-ckEDoU2iedCmjsnp3JYFguzcw1e+7CcBU8pG/8SQ+B8sC2q3mr+NEJutSUEMTezm280Ry+/2BBQ/KkBM6qCvcQ==}
+  '@shun-shobon/oxlint-config@7.1.2':
+    resolution: {integrity: sha512-jVZorq3JGgj1k1sF+fEnKRjuj+2axkclwLcCfqnNRavjFte7C79s+Mxtq+/q4Kt/3+dxFvx3g5qhG+cWbqne0A==}
     peerDependencies:
       oxlint: ^1.87.0
       oxlint-tsgolint: ^7.0.2003
@@ -2600,7 +2600,7 @@ snapshots:
       local-pkg: 2.0.0
       oxfmt: 0.79.0
 
-  '@shun-shobon/oxlint-config@7.1.1(oxlint-tsgolint@7.0.2007)(oxlint@1.94.0(oxlint-tsgolint@7.0.2007))':
+  '@shun-shobon/oxlint-config@7.1.2(oxlint-tsgolint@7.0.2007)(oxlint@1.94.0(oxlint-tsgolint@7.0.2007))':
     dependencies:
       local-pkg: 2.0.0
       oxlint: 1.94.0(oxlint-tsgolint@7.0.2007)
