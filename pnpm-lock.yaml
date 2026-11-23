@@ -192,8 +192,8 @@ importers:
         version: 1.5.0(typescript@7.0.2)
     devDependencies:
       '@shun-shobon/oxfmt-config':
-        specifier: 7.1.1
-        version: 7.1.1(oxfmt@0.79.0)
+        specifier: 7.1.2
+        version: 7.1.2(oxfmt@0.79.0)
       '@shun-shobon/oxlint-config':
         specifier: 7.1.1
         version: 7.1.1(oxlint-tsgolint@7.0.2007)(oxlint@1.94.0(oxlint-tsgolint@7.0.2007))
@@ -966,10 +966,10 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
-  '@shun-shobon/oxfmt-config@7.1.1':
-    resolution: {integrity: sha512-oUpvVceWYioJoJNaMoKFy54rypqL4qMqeIGtBBIXERWykVDyW7vNqSWgEZSOE0MtN/y1VIOBwWCjGqnCRKpwlA==}
+  '@shun-shobon/oxfmt-config@7.1.2':
+    resolution: {integrity: sha512-xnx5GwATUaAb/0xPLnjLDmXl+J2JG8uE6d/PX2npcf2VFgtNcck1THqfwjRSe/i8z8ViGzADypVcRE1jhRd4sA==}
     peerDependencies:
-      oxfmt: ^0.72.0 || ^0.73.0 || ^0.74.0 || ^0.75.0 || ^0.76.0 || ^0.77.0 || ^0.78.0
+      oxfmt: '>=0.72.0 <1.0.0'
 
   '@shun-shobon/oxlint-config@7.1.1':
     resolution: {integrity: sha512-ckEDoU2iedCmjsnp3JYFguzcw1e+7CcBU8pG/8SQ+B8sC2q3mr+NEJutSUEMTezm280Ry+/2BBQ/KkBM6qCvcQ==}
@@ -2595,7 +2595,7 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
-  '@shun-shobon/oxfmt-config@7.1.1(oxfmt@0.79.0)':
+  '@shun-shobon/oxfmt-config@7.1.2(oxfmt@0.79.0)':
     dependencies:
       local-pkg: 2.0.0
       oxfmt: 0.79.0
