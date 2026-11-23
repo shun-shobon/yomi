@@ -30,7 +30,7 @@
 	},
 	"devDependencies": {
 		"@shun-shobon/oxfmt-config": "7.1.2",
-		"@shun-shobon/oxlint-config": "7.1.1",
+		"@shun-shobon/oxlint-config": "7.1.2",
 		"@tsconfig/strictest": "2.0.9",
 		"happy-dom": "21.0.4",
 		"knip": "6.45.1",
