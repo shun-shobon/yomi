@@ -39,7 +39,7 @@
 		"oxlint-tsgolint": "7.0.2008",
 		"playwright-core": "1.65.1",
 		"typescript": "7.0.2",
-		"vite-plugin-solid": "2.11.16",
+		"vite-plugin-solid": "2.11.17",
 		"vitest": "5.1.1",
 		"wxt": "0.21.5"
 	},
